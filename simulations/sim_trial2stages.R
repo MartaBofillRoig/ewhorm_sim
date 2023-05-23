@@ -37,14 +37,16 @@ sim_trial_disease <- function(ss_treat, ss_contr, ss_2, p_resp){
   r_hat2 <- c(sum(runif(ss_2/2)<p_resp[1]))
   r_hat2 <- c(r_hat2,sum(runif(ss_2/2)<p_resp[sel+1]))
   
-  prop.test(x, n = rep(m2, 2), alternative = "less")$p.value
-  # inverse normal combination test
-  pval = 1 - pnorm(qnorm(1 - p1) / sqrt(2) + qnorm(1 - p2) / sqrt(2))
+  pval2 <- prop.test(r_hat2, n = rep(ss_2/2, 2), alternative = "less")$p.value
   
+  # inverse normal combination test
+  pval = 1 - pnorm(qnorm(1 - pval1) / sqrt(2) + qnorm(1 - pval2) / sqrt(2))
+  
+  return(pval)
 }
 
 
 
-# sim_trial_disease(ss_treat=100,ss_contr=100,ss_2=100,p_resp=c(0.1,0.2,0.4,0.6))
+sim_trial_disease(ss_treat=100,ss_contr=100,ss_2=100,p_resp=c(0.1,0.2,0.4,0.6))
 
 
