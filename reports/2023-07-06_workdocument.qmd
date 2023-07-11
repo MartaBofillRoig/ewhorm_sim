@@ -1,0 +1,115 @@
+---
+title: "eWHORM -- Statistical considerations for the simulation study"
+author: Marta Bofill Roig, Martin Posch, Sonja Zehetmayer
+format: 
+  pdf:
+    documentclass: scrartcl  
+    toc: true
+      # toc-depth: 3
+      # toc-title: Contents
+editor: visual
+---
+
+```{r, echo=F, warning=F, message=F}
+library(lme4)
+```
+
+\newpage
+
+## Setting up the problem
+
+Consider the design of a randomized, placebo-controlled, double-blind, parallel-group phase-II study to investigate the efficacy and safety of oxfendazole (OXF) in subjects with onchocerciasis, loiasis, mansonellosis and/or soil-transmitted helminth (STH). Three doses of OXF are investigated compared to placebo: single low dose OXF treatment, single high dose OXF and 5-day high dose OXF.
+
+The goals of the trial are twofold: To demonstrate a positive dose-response relationship of OXF in the primary endpoint for each of the four indications (onchocerciasis, loiasis, mansonellosis, trichuriasis/STH infection); and, if so, to determine the efficacy of specific doses. Secondary goals include: to determine the safety and tolerability of OXF.
+
+The goal of this work is to investigate the key operating characteristics of the trial according to several designs and analyses strategies by means of a simulation study. We will consider multiple scenarios to assess the robustness of the designs with respect to deviations of the design assumptions.
+
+The trial includes two-stages.
+
+-   \textbf{Stage 1: Selection of dose and safety evaluation}. In the first stage, $N_1$ patients per indication will be included. After stage 1 ends, an interim analysis will be performed in all sub-studies. According to that, the trial may be adapted. In particular, efficacious doses will be selected for further evaluation, if safe, while others can be stopped for futility, also sample size will be reassessed.
+-   \textbf{Stage 2: Efficacy on selected doses}. Trial continues to the second stage where up to $N_2$ additional patients may be allocated to the selected doses and the placebo group.
+
+The simulation study aims, on the one hand, at optimizing different design elements (including interim analyses and stopping rules, dose selection at interim and sample size reassessment) and, on the other hand, helping in guaranteeing a prespecified statistical power, type 1 error rate control and ensuring the trial integrity and validity. Adaptive decision rules will be pre-specified and interim and final analysis will feed into the design. With specific statistical testing and estimation procedures accounting for adaptations, the type 1 error rate will be controlled and the sample size reassessed.
+
+<!-- ### Assumptions -->
+
+## Adaptations
+
+The main adaptations we plan to investigate concern the adaptive selection of doses, the early stopping and the sample size reassessment. In what follows, we describe the different design and testing strategies as well as the investigated operating characteristics.
+
+```{r,echo=F}
+# knitr::kable(head(mtcars[, 1:4]), "pipe")
+d=data.frame(
+  Strategy=c("Strategy 1","Strategy 1","Strategy 1"),
+  Method=c("Method 1","Method 1","Method 1")
+  )
+
+knitr::kable(d, "pipe")
+```
+
+<!-- | Default | Left | Right | Center | -->
+
+<!-- |---------|:-----|------:|:------:| -->
+
+<!-- | 12      | 12   |    12 |   12   | -->
+
+<!-- | 123     | 123  |   123 |  123   | -->
+
+<!-- | 1       | 1    |     1 |   1    | -->
+
+<!-- : Demonstration of pipe table syntax -->
+
+### Selection of efficacious doses and efficacy on selected doses
+
+On the one hand, to find the smallest dose with a discernible useful effect and a maximum dose beyond which no further beneficial effect is seen \[ICH E4\].
+
+- Step 1: Evaluate dose-response relationship   by means of Cochran-Armitage trend test. 
+
+- Step 2: Choose the most efficacious dose for further evaluation in stage 2.
+
+- Step 3: Perform closed test for the selected dose using the stage 1 data.
+
+
+### Safety and early stopping -- PENDING
+
+
+### Sample size reassessment -- PENDING
+
+We will consider designs
+
+-   With sample size reassessment: After stage 1 and using blinded data, the sample size will be reestimated.
+    -   Using a pooled estimate for the variance: at the interim stage, the proportion of events in the combined sample of all groups is estimated using the data from the selected dose and the placebo groups.
+    -   Using an unpooled estimate for the variance: at the interim stage, the proportion of events in each group is estimated using the data from all doses and placebo groups.
+-   Without sample size reassessment: The trial continues in stage 2 till reaches the total sample size that was defined at the beginning of the trial.
+
+### Key operating characteristics
+
+In order to evaluate different trial designs, we need to define the operating characteristics. To take into account the special features of the trial design, we consider operating characteristics based on the pair-wise comparisons and trial-level operating characteristics:
+
+-   Error control
+    -   Family-wise error rate (across all diseases)
+    -   Per-substudy Family-wise error rate (within disease)
+    -   Type 1 error (individual treatment-control comparison)
+-   Power
+    -   Overall power for the trend tests: the probability to find a trend in at least one of the sub-studies
+    -   Overall power: the probability to find all treatments that are better than control (within disease? or across all diseases?)
+    -   Disjunctive power: probability of finding at least one true dose effect (within disease? or across all diseases?)
+    -   Marginal power
+-   Properties on the estimates
+    -   Bias in the estimates
+-   Reduction in sample size (for designs with sample size reassessment)
+
+<!-- ## Designs and analysis strategies -->
+
+## Simulation settings
+
+-   $N_1=120$
+-   $N_2=80$
+
+## Open topics
+
+For the time being we have simplified the problem in some aspects, here is a non-exhaustive list of topics not included
+
+-   One of the diseases (STH) considers two OXF doses only (singe low dose and single high dose).
+-   One of the diseases (STH) considers shorter-term endpoints as compared to the rest of diseases.
+-   Co-infections, and patients co-infected with tuberculosis and HIV.
