@@ -15,7 +15,7 @@ set.seed(123)
 mu=c(0,1,2,5)
 N1 = 30*4
 
-# Function to simulate trial data
+# Function to simulate trial data (1-stage, multiple arms)
 sim_data <- function(n_arms, N, mu_6m, mu_12m, sd_y=0.1){ 
 
   treatments <- factor(sample(1:n_arms, N, replace = TRUE), 
@@ -48,6 +48,7 @@ summary(model_6m)
 summary(model_12)
 
 
+# Function to simulate trial data (2-stages, with dose selection)
 sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1){
   
   # stage1
@@ -63,7 +64,7 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1){
   return(list_res)
 }
 
-
+# Example
 # n_arms=4; N1=30*4; N2=30*2; mu=c(0,1,2,5); sd_y=0.1
 res = sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1)
 res
