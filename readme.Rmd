@@ -1,5 +1,5 @@
 ---
-title: "e-WHORM"
+title: "Statistical considerations for designing e-WHORM adaptive trial"
 output: github_document
 ---
 
@@ -9,7 +9,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Statistical considerations for the e-WHORM trial design
 
-Preliminary simulation study on the design of a randomized, placebo-controlled, double-blind, parallel-group phase-II study to investigate the efficacy and safety of oxfendazole (OXF) in subjects with onchocerciasis, loiasis, mansonellosis and/or soil-transmitted helminth.
+Simulation study on the design of a randomized, placebo-controlled, double-blind, parallel-group phase-II study to investigate the efficacy and safety of oxfendazole (OXF) in subjects with onchocerciasis, loiasis, mansonellosis and/or soil-transmitted helminth.
 
 
 
@@ -20,4 +20,7 @@ Preliminary simulation study on the design of a randomized, placebo-controlled, 
 
 [e-WHORM](https://ewhorm.org/) Project Launched to Eliminate Worm Infections in Sub Saharan Africa
 
-![ ](./figures/ewhorm.png){width=30%}
+
+![ ](./figures/logo.svg){width=30%}
+
+<!-- ![ ](./figures/ewhorm.png){width=30%} -->
