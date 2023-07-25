@@ -69,4 +69,14 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1){
 res = sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1)
 res
 
+# Function to decide the selected dose
+select_dose <- function(){
+  
+}
+
+select_dose_borrow <- function(){
+  
+}
+
+
 
