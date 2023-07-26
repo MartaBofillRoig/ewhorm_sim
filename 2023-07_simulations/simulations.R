@@ -4,16 +4,19 @@
 # Marta Bofill Roig
 ##########################
 
-# Prelude - Auxiliar functions
-# Function to get the column index of the maximum value in a row
-get_max_col_index <- function(row) {
-  return(which.max(row))
-}
-
 # Settings
 set.seed(123)
 mu=c(0,1,2,5)
 N1 = 30*4
+
+# install.packages("DescTools")
+library(DescTools)
+
+# Prelude - Auxiliary functions
+# Function to get the column index of the maximum value in a row
+get_max_col_index <- function(row) {
+  return(which.max(row))
+}
 
 # Function to simulate trial data (1-stage, multiple arms)
 sim_data <- function(n_arms, N, mu_6m, mu_12m, sd_y=0.1){ 
@@ -49,15 +52,37 @@ summary(model_12)
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1){
+sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5){
   
   # stage1
   db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sd_y=sd_y)
   
-  # stage2
-  sel=sample(2:4,1)
-  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu[c(1,sel)], mu_12m=mu[c(1,sel)]+c(0,1,1,2)[c(1,sel)], sd_y=sd_y)
   
+  res_stage1 = DunnettTest(x=db_stage1$y_6m, g=db_stage1$treat) 
+  
+  # selection
+  
+  #Worst case: No trend is seen in any of the doses (e.g., all p> alpha1): select highest dose
+  if(sum(res_stage1$Placebo[,4]>alpha1)==3){ 
+    sel=4
+  }
+  #Intermediate case: some doses show a trend: select the (highest) dose, no new recruitment for the other doses
+  if(sum(res_stage1$Placebo[,4]<alpha1)<3){
+    sel=which.min(res_stage1$Placebo[,4])+1
+  }
+  #Intermediate case 2: some doses show a trend: select the lowest effective dose, no new recruitment for the other doses
+  if(sum(res_stage1$Placebo[,4]<alpha1)<3){
+    sel=which.min(res_stage1$Placebo[,4])+1
+  }
+  # Best case
+  if(sum(res_stage1$Placebo[,4]<alpha1)==3){
+    sel=2
+  }
+  
+  
+  # stage2
+  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu[c(1,sel)], mu_12m=mu[c(1,sel)]+c(0,1,1,2)[c(1,sel)], sd_y=sd_y)
+  levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
   
   list_res=list(db_stage1,db_stage2)
   
