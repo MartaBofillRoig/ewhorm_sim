@@ -18,6 +18,20 @@ get_max_col_index <- function(row) {
   return(which.max(row))
 }
 
+# Function to compute the hypotheses to test (closed test)
+get_hyp_mat <- function(n_hypothesis = 3, selected_hypothesis = 1){
+  elements <- c(rep(0, n_hypothesis), 1:n_hypothesis)
+  
+  hyp_mat <- unique(combinations(n=length(elements), r=n_hypothesis, v=elements, set = F, repeats.allowed = F))
+  
+  selected_rows <- hyp_mat[which(apply(hyp_mat == selected_hypothesis, 1, any)), ]
+  
+  selected_rows
+}
+# get_hyp_mat(3,2)
+
+
+
 # Function to simulate trial data (1-stage, multiple arms)
 sim_data <- function(n_arms, N, mu_6m, mu_12m, sd_y=0.1){ 
 
@@ -78,6 +92,12 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha
   if(sum(res_stage1$Placebo[,4]<alpha1)==3){
     sel=2
   }
+  
+  db_hyp= subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,2,4)])
+  DunnettTest(x=db_hyp$y_6m, g=db_hyp$treat) 
+  
+  t.test(db_stage1)
+  hyp_closedtest(sel=3)
   
   
   # stage2
