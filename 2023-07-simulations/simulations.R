@@ -11,6 +11,7 @@ source("aux-functions.R")
 library(future) 
 library(purrr)
 library(furrr)
+# library(parallel)
 
 # Settings 
 n_arms=4; N1=30*4; N2=30*2; sd_y=0.1; alpha1=0.5
@@ -52,8 +53,9 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd
     sel=1
   } 
   
-  sel<-sel+1
-  hyp <- get_hyp_mat(3,sel) 
+  sel <- sel+1
+  hyp <- get_hyp_mat(3,sel-1) 
+  hyp <- hyp + (hyp != 0)
   # (hyp) 
   
   sset_hyp1 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[1,][hyp[1,] != 0])])
@@ -88,15 +90,15 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd
 ##########################################################
 ##########################################################
 # Run simulations
-
 # Set a specific seed for reproducibility
-set.seed(123)  
+set.seed(421)  
 # Set the number of trials to run and other parameters
 n_trials <- 100000 
-n_cores <- 4  # Adjust the number of cores based on your machine's capabilities
-
+# n_cores <- detectCores()-1  # Adjust the number of cores based on your machine's capabilities
+n_cores <- availableCores()-1
 # Set up the "multicore" future plan
-plan(multicore, workers = n_cores)
+# plan(multicore, workers = n_cores)
+plan(multisession, workers = n_cores)
 
 # Run the simulations in parallel using future_map
 results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05), .options=furrr_options(seed = TRUE))
