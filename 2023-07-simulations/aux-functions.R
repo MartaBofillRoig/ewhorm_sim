@@ -52,4 +52,8 @@ sim_data <- function(n_arms, N, mu_6m, mu_12m, sd_y=0.1){
   return(data)
 }
 # Example
-# db = sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sd_y=0.1)
+# db = sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sd_y=0.1) 
+# model_6m = lm(y_6m~treat,data=db)
+# model_12m = lm(y_12m~treat,data=db)
+# summary(model_6m)
+# summary(model_12m) 

@@ -4,19 +4,22 @@
 # Marta Bofill Roig
 ##########################
 
-setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/2023-07_simulations")
-source("aux.R")
+setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/2023-07-simulations")
+source("aux-functions.R")
+library(future) 
+library(purrr)
 
-# Settings
-set.seed(123)
-mu=c(0,1,2,5)
-N1 = 30*4
+# Settings 
+# n_arms=4; N1=30*4; N2=30*2; mu=c(0,1,2,5); sd_y=0.1; alpha1=0.5
+# mu=c(0,0,0,0);
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5){
+sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5, alpha=0.05){
+  # mu_12m=mu+c(0,1,1,2)
+  mu_12m=mu
   
   # stage1
-  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sd_y=sd_y)
+  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu, mu_12m=mu_12m, sd_y=sd_y)
   res_stage1 = DunnettTest(x=db_stage1$y_6m, g=db_stage1$treat) 
   
   # selection
@@ -37,7 +40,7 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha
     sel=2
   }
   
-  hyp <- get_hyp_mat(3,sel) 
+  hyp <- get_hyp_mat(3,sel-1) 
   hyp <- hyp + (hyp != 0)
   
   sset_hyp1 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[1,][hyp[1,] != 0])])
@@ -52,31 +55,48 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha
   pvalue_anova3 <- summary(aov(y_12m ~ treat, data = sset_hyp3))[[1]][[5]][[1]]
   pvalue_anova4 <- summary(aov(y_12m ~ treat, data = sset_hyp4))[[1]][[5]][[1]]
   
-  pvalue_stage1 <- XX
+  # c(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
+  pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
   
   # stage2
-  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu[c(1,sel)], mu_12m=mu[c(1,sel)]+c(0,1,1,2)[c(1,sel)], sd_y=sd_y)
+  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sd_y=sd_y)
   levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
   pvalue_stage2 <- summary(aov(y_12m ~ treat, data = db_stage2))[[1]][[5]][[1]]
   
   # Inverse normal combination test
   combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(2) + qnorm(1 - pvalue_stage2) / sqrt(2))
   
-  list_res=list(db_stage1,db_stage2,sel,combined_pvalue)
-  
-  return(list_res)
+  # list_res=list(db_stage1,db_stage2,sel,combined_pvalue,pvalue_stage1,pvalue_stage2)
+  return(list(result1=(combined_pvalue<alpha), result2=sel)) 
 }
+# Example 
+# sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5, alpha=0.05)
 
-# Example
-# n_arms=4; N1=30*4; N2=30*2; mu=c(0,1,2,5); sd_y=0.1
-res = sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1)
-res
+##########################################################
+##########################################################
+# Run simulations
 
-# # Example
-# db = sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sd_y=0.1)
-# model_6m = lm(y_6m~treat,data=db)
-# model_12m = lm(y_12m~treat,data=db)
-# summary(model_6m)
-# summary(model_12m) 
+# Set a specific seed for reproducibility
+set.seed(123)  
+# Set the number of trials to run and other parameters
+n_trials <- 100000 
+n_cores <- 4  # Adjust the number of cores based on your machine's capabilities
 
+# Set up the "multicore" future plan
+plan(multicore, workers = n_cores)
+
+# Run the simulations in parallel using future_map
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,0,0,0), sd_y=0.1, alpha1=0.5, alpha=0.05), .options=furrr_options(seed = TRUE))
+
+# Extract the two sets of results from the list
+result1_values <- sapply(results_list, function(x) x$result1)
+result2_values <- sapply(results_list, function(x) x$result2)
+
+# Calculate the means
+mean_result1 <- mean(result1_values)
+summary_result2 <- table(as.factor(result2_values))
+
+# Print the means
+cat("Type 1 error:", mean_result1, "\n")
+cat("Selected dose:", summary_result2, "\n")
 
