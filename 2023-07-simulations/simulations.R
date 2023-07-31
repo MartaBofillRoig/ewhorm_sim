@@ -4,44 +4,57 @@
 # Marta Bofill Roig
 ##########################
 
+rm(list = ls())
+
 setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/2023-07-simulations")
 source("aux-functions.R")
 library(future) 
 library(purrr)
+library(furrr)
 
 # Settings 
-# n_arms=4; N1=30*4; N2=30*2; mu=c(0,1,2,5); sd_y=0.1; alpha1=0.5
-# mu=c(0,0,0,0);
+n_arms=4; N1=30*4; N2=30*2; sd_y=0.1; alpha1=0.5
+# mu=c(0,1,2,5); 
+mu=c(0,0,0,0);
+mu_6m=mu; mu_12m=mu
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5, alpha=0.05){
-  # mu_12m=mu+c(0,1,1,2)
-  mu_12m=mu
-  
+sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd_y=0.1, alpha1=0.5, alpha=0.05){
+
   # stage1
-  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu, mu_12m=mu_12m, sd_y=sd_y)
+  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu_6m, mu_12m=mu_12m, sd_y=sd_y)
   res_stage1 = DunnettTest(x=db_stage1$y_6m, g=db_stage1$treat) 
+  pval_dunnet = res_stage1$Placebo[,4]
   
-  # selection
+  # (pval_dunnet)
+  # sum(pval_dunnet>alpha1)
+  
+  # Selection
+  # Arms indicators: 1: Low; 2: Medium, 3:High 
+  
   #--- Worst case: No trend is seen in any of the doses (e.g., all p> alpha1): select highest dose
-  if(sum(res_stage1$Placebo[,4]>alpha1)==3){ 
-    sel=4
-  }
-  #--- Intermediate case: some doses show a trend: select the (highest) dose, no new recruitment for the other doses
-  if(sum(res_stage1$Placebo[,4]<alpha1)<3){
-    sel=which.min(res_stage1$Placebo[,4])+1
-  }
-  #--- Intermediate case 2: some doses show a trend: select the lowest effective dose, no new recruitment for the other doses
-  if(sum(res_stage1$Placebo[,4]<alpha1)<3){
-    sel=which.min(res_stage1$Placebo[,4])+1
-  }
-  #--- Best case
-  if(sum(res_stage1$Placebo[,4]<alpha1)==3){
-    sel=2
+  if(sum(pval_dunnet>alpha1)==3){ 
+    sel=3
+  } 
+  
+  #--- Intermediate case: some doses show a trend: select the lowest effective dose, no new recruitment for the other doses
+  if(sum(pval_dunnet<alpha1)<3 & sum(pval_dunnet<alpha1)>=1){ 
+    sel=which(pval_dunnet<alpha1)[1]
   }
   
-  hyp <- get_hyp_mat(3,sel-1) 
-  hyp <- hyp + (hyp != 0)
+  #--- Intermediate case 2: some doses show a trend: select the (highest) effective dose, no new recruitment for the other doses
+  # if(sum(pval_dunnet<alpha1)<3){
+  #   sel=which.min(pval_dunnet)+1
+  # }
+  
+  #--- Best case: All doses show a trend: select the lowest effective dose, no new recruitment for the other doses
+  if(sum(pval_dunnet<alpha1)==3){
+    sel=1
+  } 
+  
+  sel<-sel+1
+  hyp <- get_hyp_mat(3,sel) 
+  # (hyp) 
   
   sset_hyp1 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[1,][hyp[1,] != 0])])
   sset_hyp2 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[2,][hyp[2,] != 0])])
@@ -59,7 +72,7 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha
   pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
   
   # stage2
-  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sd_y=sd_y)
+  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sd_y=sd_y)
   levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
   pvalue_stage2 <- summary(aov(y_12m ~ treat, data = db_stage2))[[1]][[5]][[1]]
   
@@ -70,7 +83,7 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha
   return(list(result1=(combined_pvalue<alpha), result2=sel)) 
 }
 # Example 
-# sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,1,2,5), sd_y=0.1, alpha1=0.5, alpha=0.05)
+# sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05)
 
 ##########################################################
 ##########################################################
@@ -86,7 +99,7 @@ n_cores <- 4  # Adjust the number of cores based on your machine's capabilities
 plan(multicore, workers = n_cores)
 
 # Run the simulations in parallel using future_map
-results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu=c(0,0,0,0), sd_y=0.1, alpha1=0.5, alpha=0.05), .options=furrr_options(seed = TRUE))
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
 result1_values <- sapply(results_list, function(x) x$result1)
