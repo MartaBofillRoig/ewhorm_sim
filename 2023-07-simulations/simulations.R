@@ -115,3 +115,16 @@ summary_result2 <- table(as.factor(result2_values))
 cat("Type 1 error:", mean_result1, "\n")
 cat("Selected dose:", summary_result2, "\n")
 
+
+##########################################################
+##########################################################
+
+set <- list(
+  scenario1 = c(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05),
+  scenario2 = c(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05)
+)
+
+# sim_trial(c(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05))
+results <- future_map(set, ~ future_map2(replicate(5, .x), .y, sim_trial))
+
+
