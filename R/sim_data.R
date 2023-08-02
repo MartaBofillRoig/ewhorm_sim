@@ -25,16 +25,16 @@ sim_data <- function(n_arms, N, mu_6m, mu_12m, sigma, rmonth){
   
   # Treatment indicator for dataframe 
   max_col_indices <- apply(X, 1, get_max_col_index)
-  treat=unname(max_col_indices)
+  treat = unname(max_col_indices)
   
-  treat=factor(treat, levels = 1:n_arms,
+  treat = factor(treat, levels = 1:n_arms,
                labels = c("Placebo", "Low", "Medium", "High")[1:n_arms]) 
   
   # Recruitment
   time = sample(1:ceiling(N/rmonth), N, replace = T)
   
   # Output
-  data=data.frame(y_6m=y[,1], y_12m=y[,2], treat=treat, recruit_time = time)
+  data = data.frame(y_6m=y[,1], y_12m=y[,2], treat=treat, recruit_time = time)
   
   return(data)
 } 
