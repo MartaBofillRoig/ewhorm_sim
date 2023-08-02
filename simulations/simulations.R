@@ -8,6 +8,8 @@ rm(list = ls())
 
 setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/2023-07-simulations")
 source("aux-functions.R")
+
+# packges needed for this script
 library(future) 
 library(purrr)
 library(furrr)
@@ -18,6 +20,16 @@ n_arms=4; N1=30*4; N2=30*2; sd_y=0.1; alpha1=0.5
 # mu=c(0,1,2,5); 
 mu=c(0,0,0,0);
 mu_6m=mu; mu_12m=mu
+
+# underlying dependencies
+require(mvtnorm)#sim_data function
+
+
+##########################################################
+##########################################################
+# evaluate trial duration with respect to the rmonth, also assumptions regarding the break between stages
+mu=c(0,0,0,0); sigma=matrix(c(0.1,0,0,0.1), nrow = 2, byrow = T)
+y=sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sigma=sigma, rmonth=10) 
 
 
 ##########################################################
