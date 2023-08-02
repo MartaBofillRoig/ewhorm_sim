@@ -6,7 +6,7 @@
 #' @param mu_6m 6-month mean response per arm (vector of length `n_arm`)
 #' @param mu_12m 12-month mean response per arm (vector of length `n_arm`)
 #' @param sigma covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
-#' @param rmonth recruitment per month
+#' @param rmonth recruitment per month (recruitment speed assumed constant over time)
 #' @returns simulated data consisting of the responses at 6 and 12 months, treatment arm, and recruitment time for each subject.
 #' @importFrom mvtnorm rmvnorm
 #' @example 
