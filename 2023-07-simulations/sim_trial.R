@@ -1,9 +1,22 @@
-#############################
-# eWHORM simulations
-# Simulation trial function
-# July 2023
-# Marta Bofill Roig
-#############################
+#' Simulate data from a multi-arm multi-stage trial with shared control and dose selection
+#' @description Function to simulate trial data (2-stages, with dose selection)
+#' 
+#' @param n_arms number of arms (including control)
+#' @param N1 sample size stage 1
+#' @param N2 sample size stage 2
+#' @param mu_6m 6-month mean response per arm (vector of length `n_arm`)
+#' @param mu_12m 12-month mean response per arm (vector of length `n_arm`)
+#' @param sigma covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
+#' @param alpha1
+#' @param alpha
+#' @returns Combined p-value and selected dose
+#' @importFrom mvtnorm rmvnorm
+#' 
+#' @example 
+#'  
+#'  
+#' @details eWHORM simulations
+#' @author Marta Bofill Roig
 
 
 # Function to simulate trial data (2-stages, with dose selection)
@@ -51,13 +64,12 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd
   sset_hyp4 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[4,][hyp[4,] != 0])])
   
   # pvalues closed test
-  
   pvalue_anova1 <- summary(aov(y_12m ~ treat, data = sset_hyp1))[[1]][[5]][[1]]
   pvalue_anova2 <- summary(aov(y_12m ~ treat, data = sset_hyp2))[[1]][[5]][[1]]
   pvalue_anova3 <- summary(aov(y_12m ~ treat, data = sset_hyp3))[[1]][[5]][[1]]
   pvalue_anova4 <- summary(aov(y_12m ~ treat, data = sset_hyp4))[[1]][[5]][[1]]
   
-  # c(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
+  # 
   pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
   
   # stage2
