@@ -1,5 +1,6 @@
 ##########################
 # eWHORM simulations
+# Auxiliary functions
 # July 2023
 # Marta Bofill Roig
 ##########################
