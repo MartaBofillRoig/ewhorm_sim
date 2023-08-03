@@ -6,7 +6,7 @@
 
 rm(list = ls())
 
-setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/2023-07-simulations")
+setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
 source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/aux-functions.R")
 source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_trial.R")
 source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_data.R")
@@ -24,13 +24,15 @@ mu=c(0,0,0,0);
 mu_6m=mu; mu_12m=mu
 
 # underlying dependencies
-require(mvtnorm)#sim_data function
+require(mvtnorm)#sim_data function 
+require(DescTools)#aux functions
+require(gtools)#aux functions
 
 
 ##########################################################
 ##########################################################
 # evaluate trial duration with respect to the rmonth, also assumptions regarding the break between stages
-mu=c(0,0,0,0); sigma=matrix(c(0.1,0,0,0.1), nrow = 2, byrow = T)
+mu=c(0,0,0,0); sigma=matrix(c(0.1,0,0,0.1), nrow = 2, byrow = T); rmonth=10; p_safety=c(0.9,0.8,0.7)
 y=sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sigma=sigma, rmonth=10) 
 y
 summary(y$recruit_time)

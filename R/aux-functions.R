@@ -5,11 +5,6 @@
 # Marta Bofill Roig
 ##########################
 
-# install.packages("DescTools")
-library(DescTools)
-library(gtools)
-
-# Auxiliary functions 
 # Function to get the column index of the maximum value in a row
 get_max_col_index <- function(row) {
   return(which.max(row))
