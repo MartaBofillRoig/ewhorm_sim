@@ -20,10 +20,10 @@
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd_y=0.1, alpha1=0.5, alpha=0.05){
+sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05){
   
   # stage1
-  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu_6m, mu_12m=mu_12m, sd_y=sd_y)
+  db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu_6m, mu_12m=mu_12m, sigma=sigma, rmonth=rmonth)
   res_stage1 = DunnettTest(x=db_stage1$y_6m, g=db_stage1$treat) 
   pval_dunnet = res_stage1$Placebo[,4]
   
@@ -70,10 +70,10 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu_6m, mu_12m=mu_12m, sd
   pvalue_anova4 <- summary(aov(y_12m ~ treat, data = sset_hyp4))[[1]][[5]][[1]]
   
   # 
-  pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
+  pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4) 
   
   # stage2
-  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sd_y=sd_y)
+  db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sigma=sigma, rmonth=rmonth)
   levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
   pvalue_stage2 <- summary(aov(y_12m ~ treat, data = db_stage2))[[1]][[5]][[1]]
   
