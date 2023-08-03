@@ -15,7 +15,7 @@
 #' @importFrom mvtnorm rmvnorm
 #' 
 #' @example 
-#'  
+#' sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T)
 #'  
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
