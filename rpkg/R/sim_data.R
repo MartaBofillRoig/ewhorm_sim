@@ -10,6 +10,7 @@
 #' @returns simulated data consisting of the responses at 6 and 12 months, treatment arm, and recruitment time for each subject.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats model.matrix
+#' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
 

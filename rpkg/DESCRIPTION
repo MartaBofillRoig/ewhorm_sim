@@ -7,7 +7,8 @@ Authors@R:
     c(person("Marta", "Bofill Roig", email = "marta.bofillroig@meduniwien.ac.at", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4400-7541")),
     person("Martin", "Posch", email = "martin.posch@meduniwien.ac.at", role = c("aut")),
     person("Sonja", "Zehetmayer", email = "sonja.zehetmayer@meduniwien.ac.at", role = c("aut")))
-Description: Data simulation and analysis for the design of e-WHORM trial
+Description: 
+  Data simulation and analysis for the design of e-WHORM trial
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
@@ -17,3 +18,7 @@ Imports:
   gtools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

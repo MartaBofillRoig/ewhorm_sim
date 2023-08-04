@@ -2,6 +2,8 @@
 
 export(get_hyp_mat)
 export(get_max_col_index)
+export(sim_data)
+export(sim_trial)
 importFrom(DescTools,DunnettTest)
 importFrom(gtools,combinations)
 importFrom(mvtnorm,rmvnorm)

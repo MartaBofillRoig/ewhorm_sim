@@ -19,6 +19,7 @@
 #' @importFrom stats pnorm
 #' @importFrom stats qnorm
 #' @importFrom stats aov
+#' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
 

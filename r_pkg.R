@@ -16,9 +16,23 @@ devtools::check_built(path = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/r
 devtools::build_manual(pkg = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg", path = NULL)
 
 #create vignette
-# usethis::use_vignette("my-vignette")
+usethis::use_vignette("my-vignette")
 
 # pkgdown::build_site(pkg = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
 
 # https://www.r-bloggers.com/2017/08/building-a-website-with-pkgdown-a-short-guide/
 # https://r-pkgs.org/vignettes.html
+
+library(ewhorm)
+ewhorm::sim_data(n_arms = 4,
+                 N = 30 * 4,
+                 mu_6m = c(0,0,0,0),
+                 mu_12m= c(0,0,0,0),
+                 sigma=diag(1,2),
+                 rmonth =12)
+
+
+# sim_trial(n_arms=4, N1=120, N2=60, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T)
+#' @examples
+#' mu=c(0,0,0,0); sigma=matrix(c(0.1,0,0,0.1), nrow = 2, byrow = T)
+#' y=sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sigma=sigma, rmonth=10)
