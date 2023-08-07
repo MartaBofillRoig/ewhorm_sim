@@ -38,11 +38,11 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
     safety_dose2 <- (runif(1)<p_safety[2])
     safety_dose3 <- (runif(1)<p_safety[3])
   }
-  # if safety_dosei is true, then consider safe
+  # if safety_dose(i) is true, then consider safe
   safety=c(safety_dose1,safety_dose2,safety_dose3)
 
   # Selection
-  # Arms indicators: 1: Low; 2: Medium, 3:High
+  #--- Arms indicators: 1: Low; 2: Medium, 3:High
 
   #--- Worst case: No trend is seen in any of the doses (e.g., all p> alpha1): select highest dose
   if(sum(pval_dunnet>alpha1)==3){
@@ -81,12 +81,6 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   pvalue_Dunnett4 <- min(DunnettTest(x=sset_hyp4$y_12m, g=sset_hyp4$treat)$Placebo[,4])
   #
   pvalue_stage1 <- max(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4)
-
-  # pvalue_anova1 <- summary(aov(y_12m ~ treat, data = sset_hyp1))[[1]][[5]][[1]]
-  # pvalue_anova2 <- summary(aov(y_12m ~ treat, data = sset_hyp2))[[1]][[5]][[1]]
-  # pvalue_anova3 <- summary(aov(y_12m ~ treat, data = sset_hyp3))[[1]][[5]][[1]]
-  # pvalue_anova4 <- summary(aov(y_12m ~ treat, data = sset_hyp4))[[1]][[5]][[1]]
-  # pvalue_stage1 <- max(pvalue_anova1,pvalue_anova2,pvalue_anova3,pvalue_anova4)
 
   # stage2
   db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sigma=sigma, rmonth=rmonth)

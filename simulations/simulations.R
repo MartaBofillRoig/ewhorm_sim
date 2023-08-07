@@ -41,7 +41,7 @@ N2=60
 mu = c(0,0,0,0)
 mu_6m = mu
 mu_12m= mu
-sigma=diag(1,2)
+sg_m=matrix(c(1,.9,.9,1),nrow=2,byrow = T)
 rmonth=12
 alpha1=0.5
 alpha=0.05
@@ -50,9 +50,9 @@ safety=T
 
 simulated_data <- ewhorm::sim_data(n_arms = 4,
                                    N = 30 * 4,
-                                   mu_6m = c(0,0,0,0),
-                                   mu_12m= c(0,0,0,0),
-                                   sigma=diag(0.5,2),
+                                   mu_6m = mu,
+                                   mu_12m= mu,
+                                   sigma=sg_m,
                                    rmonth = 12)
 head(simulated_data,10)
 summary(simulated_data$recruit_time)
@@ -81,7 +81,7 @@ n_cores <- availableCores()-1
 plan(multisession, workers = n_cores)
 
 # Run the simulations in parallel using future_map
-results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
 result1_values <- sapply(results_list, function(x) x$result1)
@@ -95,8 +95,8 @@ mean_safety <- mean(safety_values)
 
 # Print the means
 cat("Type 1 error:", mean_result1, "\n")
-cat("Selected dose:", summary_result2, "\n")
-
+cat("Selected dose:", summary_result2, "\n") 
+cat("Safety selected dose:", mean_safety, "\n")
 
 ##########################################################
 ##########################################################
