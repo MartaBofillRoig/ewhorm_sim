@@ -20,7 +20,7 @@ sim_data <- function(n_arms, N, mu_6m, mu_12m, sigma, rmonth){
                        levels = 1:n_arms,
                        labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
   X <- model.matrix(~ treatments - 1)
-  y <- X %*% matrix(c(mu_6m, mu_12m), nrow=4, byrow = F) + rmvnorm(n=N, mean = c(0,0), sigma = sigma )
+  y <- X %*% matrix(c(mu_6m, mu_12m), nrow=n_arms, byrow = F) + rmvnorm(n=N, mean = c(0,0), sigma = sigma )
 
   # Treatment indicator for dataframe
   max_col_indices <- apply(X, 1, get_max_col_index)

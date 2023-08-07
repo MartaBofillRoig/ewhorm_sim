@@ -31,6 +31,16 @@ ewhorm::sim_data(n_arms = 4,
                  sigma=diag(1,2),
                  rmonth =12)
 
+sim_trial(n_arms=4, 
+          N1=120, N2=60, 
+          mu_6m = c(0,0,0,0),
+          mu_12m= c(0,0,0,0), 
+          sigma=diag(1,2), 
+          rmonth=12, 
+          alpha1=0.5, 
+          alpha=0.05, 
+          p_safety=c(0.9,0.8,0.7), 
+          safety=T)
 
 # sim_trial(n_arms=4, N1=120, N2=60, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T)
 #' @examples

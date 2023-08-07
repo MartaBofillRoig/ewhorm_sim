@@ -7,9 +7,12 @@
 rm(list = ls())
 
 setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
-source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/aux-functions.R")
-source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_trial.R")
-source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_data.R")
+# source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_hyp_mat.R")
+# source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_max_col_index.R")
+# source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_trial.R")
+# source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_data.R")
+install.packages('C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
+library(ewhorm)
 
 # packges needed for this script
 library(future) 
@@ -18,24 +21,50 @@ library(furrr)
 # library(parallel)
 
 # Settings 
-n_arms=4; N1=30*4; N2=30*2; sd_y=0.1; alpha1=0.5
-# mu=c(0,1,2,5); 
-mu=c(0,0,0,0);
-mu_6m=mu; mu_12m=mu
+# n_arms=4; N1=30*4; N2=30*2; sd_y=0.1; alpha1=0.5
+# # mu=c(0,1,2,5); 
+# mu=c(0,0,0,0);
+# mu_6m=mu; mu_12m=mu
+
+
 
 # underlying dependencies
 require(mvtnorm)#sim_data function 
 require(DescTools)#aux functions
 require(gtools)#aux functions
 
+# Example
+
+n_arms=4
+N1=120
+N2=60
+mu = c(0,0,0,0)
+mu_6m = mu
+mu_12m= mu
+sigma=diag(1,2)
+rmonth=12
+alpha1=0.5
+alpha=0.05
+p_safety=c(0.9,0.8,0.7) 
+safety=T
+
+simulated_data <- ewhorm::sim_data(n_arms = 4,
+                                   N = 30 * 4,
+                                   mu_6m = c(0,0,0,0),
+                                   mu_12m= c(0,0,0,0),
+                                   sigma=diag(0.5,2),
+                                   rmonth = 12)
+head(simulated_data,10)
+summary(simulated_data$recruit_time)
 
 ##########################################################
 ##########################################################
 # evaluate trial duration with respect to the rmonth, also assumptions regarding the break between stages
-mu=c(0,0,0,0); sigma=matrix(c(0.1,0,0,0.1), nrow = 2, byrow = T); rmonth=10; p_safety=c(0.9,0.8,0.7)
-y=sim_data(n_arms=4, N=30*4, mu_6m=mu, mu_12m=mu+c(0,1,1,2), sigma=sigma, rmonth=10) 
-y
-summary(y$recruit_time)
+
+summary(simulated_data$recruit_time)
+
+
+sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), alpha1=0.5, alpha=0.05,rmonth = 12)
 
 ##########################################################
 ##########################################################
@@ -43,7 +72,8 @@ summary(y$recruit_time)
 # Set a specific seed for reproducibility
 set.seed(421)  
 # Set the number of trials to run and other parameters
-n_trials <- 100000 
+n_trials <- 1000
+# 00 
 # n_cores <- detectCores()-1  # Adjust the number of cores based on your machine's capabilities
 n_cores <- availableCores()-1
 # Set up the "multicore" future plan
@@ -51,15 +81,17 @@ n_cores <- availableCores()-1
 plan(multisession, workers = n_cores)
 
 # Run the simulations in parallel using future_map
-results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sd_y=0.1, alpha1=0.5, alpha=0.05), .options=furrr_options(seed = TRUE))
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
 result1_values <- sapply(results_list, function(x) x$result1)
 result2_values <- sapply(results_list, function(x) x$result2)
+safety_values <- sapply(results_list, function(x) x$safety)
 
 # Calculate the means
 mean_result1 <- mean(result1_values)
 summary_result2 <- table(as.factor(result2_values))
+mean_safety <- mean(safety_values)
 
 # Print the means
 cat("Type 1 error:", mean_result1, "\n")
