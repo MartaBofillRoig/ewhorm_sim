@@ -10,8 +10,7 @@ rm(list = ls())
 setwd("~/GitHub/ewhorm_sim/simulations")
 install.packages('~/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
 
-# install.packages("survcomp")
-library(survcomp)
+
 # local
 # setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_hyp_mat.R")
@@ -62,7 +61,7 @@ simulated_data <- ewhorm::sim_data(n_arms = 4,
                                    sigma=sg_m,
                                    rmonth = 12)
 head(simulated_data,10)
-summary(simulated_data$recruit_time)
+summary(simulated_data)
 
 ##########################################################
 ##########################################################
@@ -88,7 +87,7 @@ n_cores <- availableCores()-1
 plan(multisession, workers = n_cores)
 
 # Run the simulations in parallel using future_map
-results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=.5, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
 combined_pvalue_values <- sapply(results_list, function(x) x$combined_pvalue)
