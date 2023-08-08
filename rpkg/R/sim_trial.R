@@ -14,12 +14,13 @@
 #' @param safety indicator - if true, it simulates safety according to  `p_safety`
 #' @returns Combined p-value, selected dose and safety for each dose (if argument `safety=TRUE`)
 #' @importFrom mvtnorm rmvnorm
-#' @importFrom DescTools DunnettTest
 #' @importFrom stats runif
 #' @importFrom stats pnorm
 #' @importFrom stats qnorm
 #' @importFrom stats aov
+#' @importFrom stats t.test
 #' @importFrom multcomp glht
+#' @importFrom multcomp mcp
 #' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
@@ -30,11 +31,11 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
 
   # stage1
   db_stage1 = sim_data(n_arms=n_arms, N=N1, mu_6m=mu_6m, mu_12m=mu_12m, sigma=sigma, rmonth=rmonth)
-  
+
   recruit_time1 = max(db_stage1$recruit_time)
-  
+
   model_aov = aov(y_6m ~ treat, db_stage1)
-  model_dunnet = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less")) 
+  model_dunnet = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less"))
   pval_dunnet = model_dunnet$test$pvalues
 
   # Safety
@@ -78,22 +79,22 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   sset_hyp2 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[2,][hyp[2,] != 0])])
   sset_hyp3 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[3,][hyp[3,] != 0])])
   sset_hyp4 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[4,][hyp[4,] != 0])])
- 
-  
-  # 
+
+
+  #
   # pvalue_Dunnett1 <- min(DunnettTest(x=sset_hyp1$y_12m, g=sset_hyp1$treat)$Placebo[,4])
   # pvalue_Dunnett2 <- min(DunnettTest(x=sset_hyp2$y_12m, g=sset_hyp2$treat)$Placebo[,4])
   # pvalue_Dunnett3 <- min(DunnettTest(x=sset_hyp3$y_12m, g=sset_hyp3$treat)$Placebo[,4])
   # pvalue_Dunnett4 <- min(DunnettTest(x=sset_hyp4$y_12m, g=sset_hyp4$treat)$Placebo[,4])
-  # 
-  pvalue_Dunnett1 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp1), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)  
+  #
+  pvalue_Dunnett1 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp1), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett2 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp2), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett3 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp3), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett4 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp4), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
-  
+
   #
   pvalue_stage1 <- max(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4)
-  wmax=which.max(c(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4)) 
+  wmax=which.max(c(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4))
   if(wmax==4){
     N1s=4*30
     N2s=2*30
@@ -106,22 +107,22 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
     N1s=2*30
     N2s=2*30
   }
-  
+
   # stage2
   db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sigma=sigma, rmonth=rmonth)
   levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
   pvalue_stage2 <- t.test(y_12m ~ treat, data = db_stage2, alternative = c("less"))$p.value
 
   recruit_time2 = max(db_stage2$recruit_time)
-  
+
   # Inverse normal combination test
   combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(N1s/(N1s+N2s)) + qnorm(1 - pvalue_stage2) / sqrt(N2s/(N1s+N2s)))
-  
+
   # Fisher combination test
-  # combined_test = -2*(log(pvalue_stage1)+log(pvalue_stage2)) 
+  # combined_test = -2*(log(pvalue_stage1)+log(pvalue_stage2))
   # combined_pvalue = 1- pchisq(combined_test, 2)
-  
-  return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety, 
+
+  return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety,
               pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2,
               recruit_time1=recruit_time1, recruit_time2=recruit_time2))
 }

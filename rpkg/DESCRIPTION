@@ -13,8 +13,8 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Imports: 
   mvtnorm,
-  stats,
-  DescTools,
+  stats, 
+  multcomp,
   gtools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1

@@ -1,9 +1,8 @@
 #Sys.setenv("_R_CHECK_SYSTEM_CLOCK_" = 0)
 
-setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
-
 # Create r package folder
-usethis::create_package("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
+# setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
+# usethis::create_package("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
 
 # Copy in R folder the functions of the r package
 setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
@@ -16,7 +15,7 @@ devtools::check_built(path = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/r
 devtools::build_manual(pkg = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg", path = NULL)
 
 #create vignette
-usethis::use_vignette("my-vignette")
+# usethis::use_vignette("my-vignette")
 
 # pkgdown::build_site(pkg = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/rpkg")
 
