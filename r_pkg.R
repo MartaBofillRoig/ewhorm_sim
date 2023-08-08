@@ -23,12 +23,14 @@ devtools::build_manual(pkg = "C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/r
 # https://r-pkgs.org/vignettes.html
 
 library(ewhorm)
-ewhorm::sim_data(n_arms = 4,
+db <- ewhorm::sim_data(n_arms = 4,
                  N = 30 * 4,
                  mu_6m = c(0,0,0,0),
                  mu_12m= c(0,0,0,0),
                  sigma=diag(1,2),
                  rmonth =12)
+
+summary(db)
 
 sim_trial(n_arms=4, 
           N1=120, N2=60, 
