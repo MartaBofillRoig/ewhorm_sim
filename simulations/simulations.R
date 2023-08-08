@@ -10,6 +10,8 @@ rm(list = ls())
 setwd("~/GitHub/ewhorm_sim/simulations")
 install.packages('~/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
 
+# install.packages("survcomp")
+library(survcomp)
 # local
 # setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_hyp_mat.R")
@@ -75,7 +77,7 @@ sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), al
 ##########################################################
 # Run simulations
 # Set a specific seed for reproducibility
-set.seed(241)  
+set.seed(315)  
 # Set the number of trials to run and other parameters
 n_trials <- 100000
 # 00 
@@ -89,21 +91,27 @@ plan(multisession, workers = n_cores)
 results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
-result1_values <- sapply(results_list, function(x) x$combined_pvalue)
-result2_values <- sapply(results_list, function(x) x$selected_dose)
+combined_pvalue_values <- sapply(results_list, function(x) x$combined_pvalue)
+selected_dose_values <- sapply(results_list, function(x) x$selected_dose)
 safety_values <- sapply(results_list, function(x) x$safety)
 pvalue_stage1_values <- sapply(results_list, function(x) x$pvalue_stage1)
 pvalue_stage2_values <- sapply(results_list, function(x) x$pvalue_stage2)
 
+recruit_times1_values <- sapply(results_list, function(x) x$recruit_time1)
+recruit_times2_values <- sapply(results_list, function(x) x$recruit_time2)
+
+summary(recruit_times1_values)
+summary(recruit_times2_values)
 # Calculate the means
 
-summary(result1_values)
+summary(combined_pvalue_values)
 summary(pvalue_stage1_values)
 summary(pvalue_stage2_values)
 
-mean_result1 <- sum((result1_values<0.05), na.rm = T)/length(result1_values)
-summary_result2 <- table(as.factor(result2_values))
+mean_result1 <- sum((combined_pvalue_values<0.05))/length(combined_pvalue_values)
+summary_result2 <- table(as.factor(selected_dose_values))
 mean_safety <- mean(safety_values)
+
 
 # Print the means
 cat("Type 1 error:", mean_result1, "\n")

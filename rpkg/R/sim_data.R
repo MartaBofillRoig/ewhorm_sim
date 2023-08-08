@@ -16,7 +16,8 @@
 
 sim_data <- function(n_arms, N, mu_6m, mu_12m, sigma, rmonth){
 
-  treatments <- factor(sample(1:n_arms, N, replace = TRUE),
+  treatments <- factor(c(sample(rep(1:n_arms, floor(N/n_arms))), sample(1:n_arms, N-floor(N/n_arms)*n_arms, replace=T)),
+                      # sample(1:n_arms, N, replace = TRUE),
                        levels = 1:n_arms,
                        labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
   X <- model.matrix(~ treatments - 1)
