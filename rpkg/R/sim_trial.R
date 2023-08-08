@@ -74,26 +74,27 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   hyp <- get_hyp_mat(3,sel-1)
   hyp <- hyp + (hyp != 0)
   # (hyp)
+  
+  ind_hyp1 <- levels(db_stage1$treat)[c(1,hyp[1,][hyp[1,] != 0])]
+  ind_hyp2 <- levels(db_stage1$treat)[c(1,hyp[2,][hyp[2,] != 0])]
+  ind_hyp3 <- levels(db_stage1$treat)[c(1,hyp[3,][hyp[3,] != 0])]
+  ind_hyp4 <- levels(db_stage1$treat)[c(1,hyp[4,][hyp[4,] != 0])]
 
-  sset_hyp1 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[1,][hyp[1,] != 0])])
-  sset_hyp2 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[2,][hyp[2,] != 0])])
-  sset_hyp3 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[3,][hyp[3,] != 0])])
-  sset_hyp4 <- subset(db_stage1,db_stage1$treat==levels(db_stage1$treat)[c(1,hyp[4,][hyp[4,] != 0])])
+  sset_hyp1 <- subset(db_stage1,(db_stage1$treat==ind_hyp1[1])+(db_stage1$treat==ind_hyp1[2])==1)
+  sset_hyp2 <- subset(db_stage1,(db_stage1$treat==ind_hyp2[1])+(db_stage1$treat==ind_hyp2[2])+(db_stage1$treat==ind_hyp2[3])==1)
+  sset_hyp3 <- subset(db_stage1,(db_stage1$treat==ind_hyp3[1])+(db_stage1$treat==ind_hyp3[2])+(db_stage1$treat==ind_hyp3[3])==1)
+  sset_hyp4 <- subset(db_stage1,(db_stage1$treat==ind_hyp4[1])+(db_stage1$treat==ind_hyp4[2])+(db_stage1$treat==ind_hyp4[3])+(db_stage1$treat==ind_hyp4[4])==1)
+  
 
-
-  #
-  # pvalue_Dunnett1 <- min(DunnettTest(x=sset_hyp1$y_12m, g=sset_hyp1$treat)$Placebo[,4])
-  # pvalue_Dunnett2 <- min(DunnettTest(x=sset_hyp2$y_12m, g=sset_hyp2$treat)$Placebo[,4])
-  # pvalue_Dunnett3 <- min(DunnettTest(x=sset_hyp3$y_12m, g=sset_hyp3$treat)$Placebo[,4])
-  # pvalue_Dunnett4 <- min(DunnettTest(x=sset_hyp4$y_12m, g=sset_hyp4$treat)$Placebo[,4])
-  #
+  # pvalues closed test 
   pvalue_Dunnett1 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp1), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett2 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp2), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett3 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp3), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
   pvalue_Dunnett4 = min(summary(glht(model = aov(y_12m ~ treat, sset_hyp4), linfct=mcp(treat="Dunnett"), alternative = "less"))$test$pvalues)
 
-  #
+  # 
   pvalue_stage1 <- max(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4)
+  
   wmax=which.max(c(pvalue_Dunnett1,pvalue_Dunnett2,pvalue_Dunnett3,pvalue_Dunnett4))
   if(wmax==4){
     N1s=4*30
@@ -116,8 +117,9 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   recruit_time2 = max(db_stage2$recruit_time)
 
   # Inverse normal combination test
-  combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(N1s/(N1s+N2s)) + qnorm(1 - pvalue_stage2) / sqrt(N2s/(N1s+N2s)))
-
+  # combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(N1s/(N1s+N2s)) + qnorm(1 - pvalue_stage2) / sqrt(N2s/(N1s+N2s)))
+  combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(2) + qnorm(1 - pvalue_stage2) / sqrt(2))
+  
   # Fisher combination test
   # combined_test = -2*(log(pvalue_stage1)+log(pvalue_stage2))
   # combined_pvalue = 1- pchisq(combined_test, 2)
