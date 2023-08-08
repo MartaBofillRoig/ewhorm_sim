@@ -85,7 +85,7 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   # stage2
   db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,sel)], mu_12m=mu_12m[c(1,sel)], sigma=sigma, rmonth=rmonth)
   levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,sel)]
-  pvalue_stage2 <- summary(aov(y_12m ~ treat, data = db_stage2))[[1]][[5]][[1]]
+  pvalue_stage2 <- t.test(y_12m ~ treat, data = db_stage2, alternative = c("less"))$p.value
 
   # Inverse normal combination test
   combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(2) + qnorm(1 - pvalue_stage2) / sqrt(2))
