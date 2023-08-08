@@ -6,12 +6,17 @@
 
 rm(list = ls())
 
-setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
+# server
+setwd("~/GitHub/ewhorm_sim/simulations")
+install.packages('~/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
+
+# local
+# setwd("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/simulations")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_hyp_mat.R")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/get_max_col_index.R")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_trial.R")
 # source("C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/R/sim_data.R")
-install.packages('C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
+# install.packages('C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
 library(ewhorm)
 
 # packges needed for this script
@@ -70,9 +75,9 @@ sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), al
 ##########################################################
 # Run simulations
 # Set a specific seed for reproducibility
-set.seed(421)  
+set.seed(241)  
 # Set the number of trials to run and other parameters
-n_trials <- 1000
+n_trials <- 100000
 # 00 
 # n_cores <- detectCores()-1  # Adjust the number of cores based on your machine's capabilities
 n_cores <- availableCores()-1
@@ -84,12 +89,19 @@ plan(multisession, workers = n_cores)
 results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=0.1, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
-result1_values <- sapply(results_list, function(x) x$result1)
-result2_values <- sapply(results_list, function(x) x$result2)
+result1_values <- sapply(results_list, function(x) x$combined_pvalue)
+result2_values <- sapply(results_list, function(x) x$selected_dose)
 safety_values <- sapply(results_list, function(x) x$safety)
+pvalue_stage1_values <- sapply(results_list, function(x) x$pvalue_stage1)
+pvalue_stage2_values <- sapply(results_list, function(x) x$pvalue_stage2)
 
 # Calculate the means
-mean_result1 <- mean(result1_values)
+
+summary(result1_values)
+summary(pvalue_stage1_values)
+summary(pvalue_stage2_values)
+
+mean_result1 <- sum((result1_values<0.05), na.rm = T)/length(result1_values)
 summary_result2 <- table(as.factor(result2_values))
 mean_safety <- mean(safety_values)
 

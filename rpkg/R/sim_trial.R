@@ -91,5 +91,6 @@ sim_trial <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, 
   combined_pvalue = 1 - pnorm(qnorm(1 - pvalue_stage1) / sqrt(2) + qnorm(1 - pvalue_stage2) / sqrt(2))
 
   # list_res=list(db_stage1,db_stage2,sel,combined_pvalue,pvalue_stage1,pvalue_stage2)
-  return(list(result1=(combined_pvalue<alpha), result2=sel, safety=safety))
+  # return(list(result1=(combined_pvalue<alpha), result2=sel, safety=safety))
+  return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety, pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2))
 }
