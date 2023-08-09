@@ -2,16 +2,11 @@
 # eWHORM simulations
 # July 2023
 # Marta Bofill Roig
-##########################
-
-rm(list = ls(all.names = TRUE)) #will clear all objects includes hidden objects.
-gc() #free up memrory and report the memory usage.
+########################## 
 
 rm(list = ls()) 
 # Remove Package
-remove.packages("ewhorm")
-detach("package:ewhorm", unload=TRUE)
-unloadNamespace("ewhorm")
+# remove.packages("ewhorm") 
 
 # server
 setwd("~/GitHub/ewhorm_sim/simulations")
@@ -46,8 +41,9 @@ require(gtools)#aux functions
 # rmonth=12
 # alpha1=0.5
 # alpha=0.05
-# p_safety=c(0.9,0.8,0.7) 
-# safety=T 
+# p_safety=c(0.9,0.8,0.7)
+# safety=T
+# promising=T
 
 mu = c(0,0,0,0)
 sg_m=matrix(c(1,.9,.9,1),nrow=2,byrow = T)
@@ -70,7 +66,7 @@ sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=diag(0.5,2), al
 ##########################################################
 # Run simulations
 # Set a specific seed for reproducibility
-set.seed(315)  
+set.seed(55)  
 # Set the number of trials to run and other parameters
 n_trials <- 100000
 # 00 
@@ -81,7 +77,7 @@ n_cores <- availableCores()-1
 plan(multisession, workers = n_cores)
 
 # Run the simulations in parallel using future_map
-results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=.5, alpha=0.05,rmonth = 12), .options=furrr_options(seed = TRUE))
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, alpha1=.5, alpha=0.05, rmonth = 12), .options=furrr_options(seed = TRUE))
 
 # Extract the two sets of results from the list
 combined_pvalue_values <- sapply(results_list, function(x) x$combined_pvalue)
@@ -110,6 +106,41 @@ mean_safety <- mean(safety_values)
 cat("Type 1 error:", mean_result1, "\n")
 cat("Selected dose:", summary_result2, "\n") 
 cat("Safety selected dose:", mean_safety, "\n")
+
+##########################################################
+##########################################################
+# Run simulations
+# Set a specific seed for reproducibility
+set.seed(4235)  
+# Set the number of trials to run and other parameters
+n_trials <- 100000
+# 00 
+# n_cores <- detectCores()-1  # Adjust the number of cores based on your machine's capabilities
+n_cores <- availableCores()-1
+# Set up the "multicore" future plan
+# plan(multicore, workers = n_cores)
+plan(multisession, workers = n_cores)
+
+
+sg_m=matrix(c(1,1,1,1),nrow=2,byrow = T)
+mu1 = c(0,0,0,1.3)
+# Run the simulations in parallel using future_map
+results_list <- future_map(1:n_trials, function(i) sim_trial(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu1, mu_12m=mu1, sigma=sg_m, alpha1=.1, alpha=0.05,rmonth = 12, promising = T), .options=furrr_options(seed = TRUE))
+
+# Extract the two sets of results from the list
+combined_pvalue_values <- sapply(results_list, function(x) x$combined_pvalue)
+selected_dose_values <- sapply(results_list, function(x) x$selected_dose) 
+pvalue_stage1_values <- sapply(results_list, function(x) x$pvalue_stage1)
+pvalue_stage2_values <- sapply(results_list, function(x) x$pvalue_stage2) 
+
+mean_result1 <- sum((combined_pvalue_values<0.05))/length(combined_pvalue_values)
+summary_result2 <- table(as.factor(selected_dose_values)) 
+
+
+# Print the means
+cat("Type 1 error:", mean_result1, "\n")
+cat("Selected dose:", summary_result2, "\n")  
+
 
 ##########################################################
 ##########################################################
