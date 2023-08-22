@@ -1,0 +1,64 @@
+#' Simulate data from a multi-arm multi-stage trial with shared control and dose selection
+#' @description Function to simulate trial data (2-stages, with dose selection)
+#'
+#' @param n_arms number of arms (including control)
+#' @param N1 sample size stage 1
+#' @param N2 sample size stage 2
+#' @param mu_6m 6-month mean response per arm (vector of length `n_arm`)
+#' @param mu_12m 12-month mean response per arm (vector of length `n_arm`)
+#' @param sigma covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
+#' @param alpha1 significance level for dose selection
+#' @param alpha significance level for selected dose vs control comparison
+#' @param rmonth recruitment per month (recruitment speed assumed constant over time)
+#' @param p_safety probability of each dose to be safe
+#' @param safety indicator - if true, it simulates safety according to  `p_safety`
+#' @returns Combined p-value, selected dose and safety for each dose (if argument `safety=TRUE`)
+#' @importFrom mvtnorm rmvnorm
+#' @importFrom stats runif
+#' @importFrom stats pnorm
+#' @importFrom stats qnorm
+#' @importFrom stats aov
+#' @importFrom stats t.test
+#' @importFrom multcomp glht
+#' @importFrom multcomp mcp
+#' @export
+#' @details eWHORM simulations
+#' @author Marta Bofill Roig
+
+
+# Function to simulate trial data (2-stages, with dose selection)
+sim_trial_ce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
+
+  # stage1
+  db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sg_m, rmonth=rmonth)
+
+  recruit_time1 = max(db_stage1$recruit_time)
+
+
+
+  # stage2
+  # sc=1 --> Arm A or B continue to stage 2
+  # sc=0 --> Arm A and B stop and do not continue to stage 2
+  if(sc==1){
+    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sg_m, rmonth=rmonth)
+    levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
+  }
+  if(sc==0){
+    db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
+    levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,4)]
+
+  }
+  recruit_time2 = max(db_stage2$recruit_time)
+
+
+  return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety,
+              pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2,
+              recruit_time1=recruit_time1, recruit_time2=recruit_time2))
+}
+
+# mu = c(0,0,0,0)
+# sg_m=matrix(c(1,.9,.9,1),nrow=2,byrow = T)
+# N1=30*4; N2=30*2
+# mu_6m <- mu; mu_12m <- mu
+# rmonth=10
+# n_arms=4
