@@ -31,12 +31,17 @@
 # Function to simulate trial data (2-stages, with dose selection)
 sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
 
-  N=N1+N2
 
+  #######################################
   # stage1
   db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sg_m, rmonth=rmonth)
-
   recruit_time1 = max(db_stage1$recruit_time)
+
+  # calculate pvalues, include tranformation ttest to z
+
+  #######################################
+  # preplan
+  N=N1+N2
 
   db_stage1
 
@@ -51,16 +56,25 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   A_matrix <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=0.025)
   A_matrix@Aj
 
+  # z_gamma <- qnorm(1-.025)
+  # N=(N1+N2)/3
+  # n1=N/2
+  # w1=sqrt(n1/N)
+  # w2=sqrt((N-n1)/N)
+  #
+  # 1-pnorm((z_gamma-w1*z1[2])/(w2))
 
-  z_gamma <- qnorm(1-.025)
-  N=(N1+N2)/3
-  n1=N/2
-  w1=sqrt(n1/N)
-  w2=sqrt((N-n1)/N)
+  # define A --> pending
 
-  1-pnorm((z_gamma-w1*z1[2])/(w2))
+  #######################################
 
+  # decisions based on pvalues ttest1 and ttest2 -->pending
 
+  if(sum(pval<alpha1)==2){sc=3}
+  if(sum(pval<alpha1)==1){sc=1;sel=xx}
+  if(sum(pval<alpha1)==0){sc=0}
+
+  #######################################
   # stage2
   # sc=1 --> Arm A or B continue to stage 2
   # sc=0 --> Arm A and B stop and do not continue to stage 2
@@ -77,6 +91,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   recruit_time2 = max(db_stage2$recruit_time)
 
 
+  #######################################
   return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety,
               pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2,
               recruit_time1=recruit_time1, recruit_time2=recruit_time2))
