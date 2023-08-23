@@ -21,24 +21,50 @@
 #' @importFrom stats t.test
 #' @importFrom multcomp glht
 #' @importFrom multcomp mcp
+#' @importFrom gMCP doInterim
+#' @importFrom gMCP BonferroniHolm
 #' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial_ce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
+sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
+
+  N=N1+N2
 
   # stage1
   db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sg_m, rmonth=rmonth)
 
   recruit_time1 = max(db_stage1$recruit_time)
 
+  db_stage1
+
+  model=summary(lm(y_6m~treat,data=db_stage1))
+  model$coefficients[2,3]
+
+  graph_bh <- BonferroniHolm(3)
+
+  p1=c(.1,.12)
+  z1 <- c(qnorm(1-p1),0)
+  v <- c(1/2,1/2,0)
+  A_matrix <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=0.025)
+  A_matrix@Aj
+
+
+  z_gamma <- qnorm(1-.025)
+  N=(N1+N2)/3
+  n1=N/2
+  w1=sqrt(n1/N)
+  w2=sqrt((N-n1)/N)
+
+  1-pnorm((z_gamma-w1*z1[2])/(w2))
 
 
   # stage2
   # sc=1 --> Arm A or B continue to stage 2
   # sc=0 --> Arm A and B stop and do not continue to stage 2
+
   if(sc==1){
     db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sg_m, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
