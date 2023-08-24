@@ -37,6 +37,11 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sg_m, rmonth=rmonth)
   recruit_time1 = max(db_stage1$recruit_time)
 
+  model_aov = aov(y_6m ~ treat, db_stage1)
+  model_dunnet = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnet = model_dunnet$test$pvalues
+  z = qnorm(1-pval_dunnet)
+
   # calculate pvalues, include tranformation ttest to z
 
   #######################################
@@ -50,6 +55,8 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
   graph_bh <- BonferroniHolm(3)
 
+
+  # the package assumes that wj are equal for all j
   p1=c(.1,.12)
   z1 <- c(qnorm(1-p1),0)
   v <- c(1/2,1/2,0)
