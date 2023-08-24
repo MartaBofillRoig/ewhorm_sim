@@ -29,7 +29,7 @@
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.5, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
+sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
 
 
   #######################################
@@ -40,11 +40,33 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   model_aov = aov(y_6m ~ treat, db_stage1)
   model_dunnet = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less"))
   pval_dunnet = model_dunnet$test$pvalues
-  z = qnorm(1-pval_dunnet)
-
-  # calculate pvalues, include tranformation ttest to z
 
   #######################################
+  pval <- c()
+
+  for(j in 1:(n_arms-1)){
+    sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
+    mod1 = lm(y_6m ~ treat, sub1) #are we using this model or should we use individual models?
+    res1 = summary(mod1)
+    pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = FALSE)
+  }
+  z = qnorm(1-pval)
+
+
+# --> PENDING: check if for works
+  # sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[2])==1)
+  # sub2 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[3])==1)
+  #
+  # mod1 = lm(y_6m ~ treat, sub1) #are we using this model or should we use individual models?
+  # res1 = summary(mod1)
+  # pval[1] <- pt(coef(res1)[2,3], mod$df, lower.tail = FALSE)
+  #
+  # mod = lm(y_6m ~ treat, db_stage1)
+
+
+
+  #######################################
+
   # preplan
   N=N1+N2
 
@@ -78,7 +100,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   # decisions based on pvalues ttest1 and ttest2 -->pending
 
   if(sum(pval<alpha1)==2){sc=3}
-  if(sum(pval<alpha1)==1){sc=1;sel=xx}
+  if(sum(pval<alpha1)==1){sc=1;sel=3}
   if(sum(pval<alpha1)==0){sc=0}
 
   #######################################
@@ -86,6 +108,10 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   # sc=1 --> Arm A or B continue to stage 2
   # sc=0 --> Arm A and B stop and do not continue to stage 2
 
+  if(sc==2){
+    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sigma=sg_m, rmonth=rmonth)
+    levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,2,3)]
+  }
   if(sc==1){
     db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sg_m, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
@@ -104,6 +130,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
               recruit_time1=recruit_time1, recruit_time2=recruit_time2))
 }
 
+# library(multcomp);library(ewhorm)
 # mu = c(0,0,0,0)
 # sg_m=matrix(c(1,.9,.9,1),nrow=2,byrow = T)
 # N1=30*4; N2=30*2
