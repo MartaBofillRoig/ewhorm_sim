@@ -38,70 +38,41 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   recruit_time1 = max(db_stage1$recruit_time)
 
   model_aov = aov(y_6m ~ treat, db_stage1)
-  model_dunnet = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnet = model_dunnet$test$pvalues
+  model_dunnett = summary(glht(model = model_aov, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnett = model_dunnett$test$pvalues
 
   #######################################
+  # decisions based on pvalues from Dunnett test at 6 month
+
+  if(sum(pval_dunnett<alpha1)==2){sc=3}
+  if(sum(pval_dunnett<alpha1)==1){sc=1;sel=3}
+  if(sum(pval_dunnett<alpha1)==0){sc=0}
+
+  #######################################
+  # pvalues ttest 12 months
+
   pval <- c()
 
-  for(j in 1:(n_arms-1)){
+  for(j in 1:(n_arms-2)){
     sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
-    mod1 = lm(y_6m ~ treat, sub1) #are we using this model or should we use individual models?
+    mod1 = lm(y_12m ~ treat, sub1) #are we using this model or should we use individual models?
     res1 = summary(mod1)
     pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = FALSE)
   }
   z = qnorm(1-pval)
 
-
-# --> PENDING: check if for works
-  # sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[2])==1)
-  # sub2 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[3])==1)
-  #
-  # mod1 = lm(y_6m ~ treat, sub1) #are we using this model or should we use individual models?
-  # res1 = summary(mod1)
-  # pval[1] <- pt(coef(res1)[2,3], mod$df, lower.tail = FALSE)
-  #
-  # mod = lm(y_6m ~ treat, db_stage1)
-
-
-
   #######################################
+  # preplanning adaptive conditional error
 
-  # preplan
   N=N1+N2
-
-  db_stage1
-
-  model=summary(lm(y_6m~treat,data=db_stage1))
-  model$coefficients[2,3]
-
   graph_bh <- BonferroniHolm(3)
 
-
   # the package assumes that wj are equal for all j
-  p1=c(.1,.12)
-  z1 <- c(qnorm(1-p1),0)
   v <- c(1/2,1/2,0)
-  A_matrix <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=0.025)
-  A_matrix@Aj
-
-  # z_gamma <- qnorm(1-.025)
-  # N=(N1+N2)/3
-  # n1=N/2
-  # w1=sqrt(n1/N)
-  # w2=sqrt((N-n1)/N)
-  #
-  # 1-pnorm((z_gamma-w1*z1[2])/(w2))
-
-  # define A --> pending
-
-  #######################################
-
-  # decisions based on pvalues ttest1 and ttest2 -->pending
-
-  if(sum(pval<alpha1)==2){sc=3}
-  if(sum(pval<alpha1)==1){sc=1;sel=3}
-  if(sum(pval<alpha1)==0){sc=0}
+  z1 <- c(z,0)
+  preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=0.025)
+  # preplan@Aj
+  # preplan@BJ
 
   #######################################
   # stage2
@@ -111,26 +82,84 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   if(sc==2){
     db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sigma=sg_m, rmonth=rmonth)
     levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,2,3)]
+    recruit_time2 = max(db_stage2$recruit_time)
+
+    pval2 <- c()
+
+    for(j in 1:2){
+      sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+      mod2 = lm(y_12m ~ treat, sub2) #are we using this model or should we use individual models?
+      res2 = summary(mod2)
+      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+    }
+
+    Avalues <- c(preplan@BJ[7]/2, #H123
+                 preplan@BJ[6], #H12
+                 preplan@BJ[5], #H13
+                 preplan@BJ[3], #H23
+                 preplan@BJ[2], #H2
+                 preplan@BJ[4]  #H1
+    )
+
+    pval2[1] <= Avalues[c(1,2,3,6)] #p1
+
+    pval2[2] <= Avalues[c(1,2,4,5)] #p2
+
   }
   if(sc==1){
     db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sg_m, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
+    recruit_time2 = max(db_stage2$recruit_time)
+
+    pval2 <- c()
+
+    for(j in 1:2){
+      sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+      mod2 = lm(y_12m ~ treat, sub2) #are we using this model or should we use individual models?
+      res2 = summary(mod2)
+      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+    }
+
+    Avalues <- c(preplan@BJ[7]/2, #H123
+                 preplan@BJ[6], #H12
+                 preplan@BJ[5], #H13
+                 preplan@BJ[3], #H23
+                 preplan@BJ[2], #H2
+                 preplan@BJ[1]  #H3
+    )
+
+    pval2[1] <= Avalues[c(1,2,4,5)] #p2
+
+    pval2[2] <= Avalues[c(1,3,4,6)] #p3
+
   }
   if(sc==0){
-    db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
-    levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,4)]
+    db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sg_m, rmonth=rmonth)
+    levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1)],"High")
+    recruit_time2 = max(db_stage2$recruit_time)
+
+    mod2 = lm(y_12m ~ treat, db_stage2) #are we using this model or should we use individual models?
+    res2 = summary(mod2)
+    pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+
+    Avalues <- c(preplan@BJ[7], #H123
+                 preplan@BJ[5], #H13
+                 preplan@BJ[3], #H23
+                 preplan@BJ[1]  #H3
+                )
+
+    pval2 <= Avalues #p3
 
   }
-  recruit_time2 = max(db_stage2$recruit_time)
-
 
   #######################################
+  # TO BE UPDATED --> what shall we report?
   return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety,
               pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2,
               recruit_time1=recruit_time1, recruit_time2=recruit_time2))
 }
 
-# library(multcomp);library(ewhorm)
+# library(multcomp);library(ewhorm);library(gMCP)
 # mu = c(0,0,0,0)
 # sg_m=matrix(c(1,.9,.9,1),nrow=2,byrow = T)
 # N1=30*4; N2=30*2
