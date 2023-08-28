@@ -44,7 +44,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   #######################################
   # decisions based on pvalues from Dunnett test at 6 month
 
-  if(sum(pval_dunnett<alpha1)==2){sc=3}
+  if(sum(pval_dunnett<alpha1)==2){sc=2}
   if(sum(pval_dunnett<alpha1)==1){sc=1;sel=3}
   if(sum(pval_dunnett<alpha1)==0){sc=0}
 
