@@ -34,7 +34,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
   #######################################
   # stage1
-  db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sg_m, rmonth=rmonth)
+  db_stage1 = sim_data(n_arms=n_arms-1, N=N1, mu_6m=mu_6m[1:n_arms-1], mu_12m=mu_12m[1:n_arms-1], sigma=sigma, rmonth=rmonth)
   recruit_time1 = max(db_stage1$recruit_time)
 
   model_aov = aov(y_6m ~ treat, db_stage1)
@@ -80,7 +80,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   # sc=0 --> Arm A and B stop and do not continue to stage 2
 
   if(sc==2){
-    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sigma=sg_m, rmonth=rmonth)
+    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sigma=sigma, rmonth=rmonth)
     levels(db_stage2$treat) = levels(db_stage1$treat)[c(1,2,3)]
     recruit_time2 = max(db_stage2$recruit_time)
 
@@ -101,13 +101,16 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                  preplan@BJ[4]  #H1
     )
 
-    pval2[1] <= Avalues[c(1,2,3,6)] #p1
+    # pval2[1] <= Avalues[c(1,2,3,6)] #p1
+    # pval2[2] <= Avalues[c(1,2,4,5)] #p2
 
-    pval2[2] <= Avalues[c(1,2,4,5)] #p2
+    decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,3,6)],
+                               pval2[2] <= Avalues[c(1,2,4,5)],
+                               byrow = F, ncol = 2)
 
   }
   if(sc==1){
-    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sg_m, rmonth=rmonth)
+    db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sigma, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
     recruit_time2 = max(db_stage2$recruit_time)
 
@@ -128,13 +131,16 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                  preplan@BJ[1]  #H3
     )
 
-    pval2[1] <= Avalues[c(1,2,4,5)] #p2
+    # pval2[1] <= Avalues[c(1,2,4,5)] #p2
+    # pval2[2] <= Avalues[c(1,3,4,6)] #p3
 
-    pval2[2] <= Avalues[c(1,3,4,6)] #p3
+    decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,4,5)],
+                               pval2[2] <= Avalues[c(1,3,4,6)]),
+                               byrow = F, ncol = 2)
 
   }
   if(sc==0){
-    db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sg_m, rmonth=rmonth)
+    db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1)],"High")
     recruit_time2 = max(db_stage2$recruit_time)
 
@@ -148,15 +154,19 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                  preplan@BJ[1]  #H3
                 )
 
-    pval2 <= Avalues #p3
+    decision_stage2 = matrix(pval2 <= Avalues, ncol = 1) #p3
 
   }
 
   #######################################
   # TO BE UPDATED --> what shall we report?
-  return(list(combined_pvalue=combined_pvalue, selected_dose=sel, safety=safety,
-              pvalue_stage1=pvalue_stage1, pvalue_stage2=pvalue_stage2,
-              recruit_time1=recruit_time1, recruit_time2=recruit_time2))
+  return(list(pvalue_stage1=pval,
+              pvalue_stage2=pval2,
+              decision_stage1=(pval<alpha1),
+              decision_stage2=decision_stage2,
+              selected_dose=sel,
+              recruit_time1=recruit_time1,
+              recruit_time2=recruit_time2))
 }
 
 # library(multcomp);library(ewhorm);library(gMCP)
