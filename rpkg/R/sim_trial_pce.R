@@ -45,9 +45,9 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   #######################################
   # decisions based on pvalues from Dunnett test at 6 month
 
-  if(sum(pval_dunnett<alpha1)==2){sc=2}
+  if(sum(pval_dunnett<alpha1)==2){sc=2;sel=2:3}
   if(sum(pval_dunnett<alpha1)==1){sc=1;sel=3}
-  if(sum(pval_dunnett<alpha1)==0){sc=0}
+  if(sum(pval_dunnett<alpha1)==0){sc=0;sel=0}
 
   #######################################
   # pvalues ttest 12 months
@@ -62,6 +62,12 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   }
   z = qnorm(1-pval)
 
+  decision_s1 <- c()
+  decision_s1[1] = ifelse(pval[1]<alpha1, "Reject", "Accept")
+  decision_s1[2] = ifelse(pval[2]<alpha1, "Reject", "Accept")
+
+  decision_stage1 = data.frame(decision_s1, row.names = levels(db_stage1$treat)[2:3])
+
   #######################################
   # preplanning adaptive conditional error
 
@@ -71,7 +77,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   # the package assumes that wj are equal for all j
   v <- c(1/2,1/2,0)
   z1 <- c(z,0)
-  preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=0.025)
+  preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=alpha)
   # preplan@Aj
   # preplan@BJ
 
@@ -104,10 +110,20 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     # pval2[1] <= Avalues[c(1,2,3,6)] #p1
     # pval2[2] <= Avalues[c(1,2,4,5)] #p2
+    # decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,3,6)],
+    #                            pval2[2] <= Avalues[c(1,2,4,5)]),
+    #                            byrow = F, ncol = 2)
 
-    decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,3,6)],
-                               pval2[2] <= Avalues[c(1,2,4,5)]),
-                               byrow = F, ncol = 2)
+
+    decision <- c()
+    decision[1] = ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept")
+    decision[2] = ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
+
+    #
+
+    decision_stage2 = data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
+
+    pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
 
   }
 
@@ -135,10 +151,19 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     # pval2[1] <= Avalues[c(1,2,4,5)] #p2
     # pval2[2] <= Avalues[c(1,3,4,6)] #p3
+    # decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,4,5)],
+    #                            pval2[2] <= Avalues[c(1,3,4,6)]),
+    #                            byrow = F, ncol = 2)
 
-    decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,4,5)],
-                               pval2[2] <= Avalues[c(1,3,4,6)]),
-                               byrow = F, ncol = 2)
+
+    decision <- c()
+    decision[1] = ifelse(sum(pval2[1] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
+    decision[2] = ifelse(sum(pval2[2] <= Avalues[c(1,3,4,6)])==4, "Reject", "Accept")
+
+    #
+    decision_stage2 = data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
+
+    pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
 
   }
   if(sc==0){
@@ -157,14 +182,24 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                 )
 
     decision_stage2 = matrix(pval2 <= Avalues, ncol = 1) #p3
+
+
+    decision <- c()
+    decision[1] = ifelse(sum(pval2 <= Avalues)==4, "Reject", "Accept")
+
+    #
+    decision_stage2 = data.frame(decision, row.names = levels(db_stage2$treat)[2])
+
+    pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2])
+
   }
 
   #######################################
-  # TO BE UPDATED --> what shall we report?
   return(list(pvalue_stage1=pval,
               pvalue_stage2=pval2,
-              decision_stage1=(pval<alpha1),
+              decision_stage1=decision_stage1,
               decision_stage2=decision_stage2,
+              critical_values=preplan,
               selected_dose=sel,
               recruit_time1=recruit_time1,
               recruit_time2=recruit_time2))
@@ -176,4 +211,4 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 # N1=30*4; N2=30*2
 # mu_6m <- mu; mu_12m <- mu
 # rmonth=10
-# n_arms=4
+# n_arms=4;alpha1=0.1
