@@ -12,7 +12,7 @@ This repository includes:
 
 - R package `ewhorm` with functions to simulate and analyse adaptive
   basket trials
-- R scrips to perform simulations
+- R scripts to perform simulations
 
 ------------------------------------------------------------------------
 
