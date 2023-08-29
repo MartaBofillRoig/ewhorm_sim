@@ -1,5 +1,5 @@
-#' Simulate data from a multi-arm multi-stage trial with shared control and dose selection
-#' @description Function to simulate trial data (2-stages, with dose selection)
+#' Simulate data from a multi-arm multi-stage trial with shared control and two initial doses, where an additional dose could be added after the interim analysis
+#' @description Function to simulate trial data (2-stages, with dose selection). The analyses are performed using partial conditional error.
 #'
 #' @param n_arms number of arms (including control)
 #' @param N1 sample size stage 1
@@ -10,15 +10,16 @@
 #' @param alpha1 significance level for dose selection
 #' @param alpha significance level for selected dose vs control comparison
 #' @param rmonth recruitment per month (recruitment speed assumed constant over time)
-#' @param p_safety probability of each dose to be safe
-#' @param safety indicator - if true, it simulates safety according to  `p_safety`
-#' @returns Combined p-value, selected dose and safety for each dose (if argument `safety=TRUE`)
+#' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
 #' @importFrom stats pnorm
 #' @importFrom stats qnorm
 #' @importFrom stats aov
 #' @importFrom stats t.test
+#' @importFrom stats coef
+#' @importFrom stats lm
+#' @importFrom stats pt
 #' @importFrom multcomp glht
 #' @importFrom multcomp mcp
 #' @importFrom gMCP doInterim
@@ -29,7 +30,7 @@
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05, p_safety=c(0.9,0.8,0.7), safety=T, promising=F){
+sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05){
 
 
   #######################################
@@ -105,10 +106,11 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     # pval2[2] <= Avalues[c(1,2,4,5)] #p2
 
     decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,3,6)],
-                               pval2[2] <= Avalues[c(1,2,4,5)],
+                               pval2[2] <= Avalues[c(1,2,4,5)]),
                                byrow = F, ncol = 2)
 
   }
+
   if(sc==1){
     db_stage2 = sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)], mu_12m=mu_12m[c(1,sel,4)], sigma=sigma, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1,sel)],"High")
@@ -155,7 +157,6 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                 )
 
     decision_stage2 = matrix(pval2 <= Avalues, ncol = 1) #p3
-
   }
 
   #######################################

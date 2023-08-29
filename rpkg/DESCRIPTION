@@ -15,6 +15,7 @@ Imports:
   mvtnorm,
   stats, 
   multcomp,
+  gMCP,
   gtools
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.1
