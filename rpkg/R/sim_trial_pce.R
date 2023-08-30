@@ -56,7 +56,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
   for(j in 1:(n_arms-2)){
     sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
-    mod1 = lm(y_12m ~ treat, sub1) #are we using this model or should we use individual models?
+    mod1 = lm(y_12m ~ treat, sub1)
     res1 = summary(mod1)
     pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = FALSE)
   }
@@ -83,6 +83,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
   #######################################
   # stage2
+  # sc=2 --> Arm A and B continue to stage 2
   # sc=1 --> Arm A or B continue to stage 2
   # sc=0 --> Arm A and B stop and do not continue to stage 2
 
@@ -120,7 +121,6 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     decision[2] = ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
 
     #
-
     decision_stage2 = data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
 
     pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
@@ -157,8 +157,12 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
 
     decision <- c()
-    decision[1] = ifelse(sum(pval2[1] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
-    decision[2] = ifelse(sum(pval2[2] <= Avalues[c(1,3,4,6)])==4, "Reject", "Accept")
+
+    dec1 <- sum(pval2[1] <= Avalues[c(1,2,4,5)])
+    dec2 <- sum(pval2[2] <= Avalues[c(1,3,4,6)])
+
+    decision[1] = ifelse(dec1==4, "Reject", "Accept")
+    decision[2] = ifelse(dec2==4, "Reject", "Accept")
 
     #
     decision_stage2 = data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
@@ -197,6 +201,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   #######################################
   return(list(pvalue_stage1=pval,
               pvalue_stage2=pval2,
+              sc=sc,
               decision_stage1=decision_stage1,
               decision_stage2=decision_stage2,
               critical_values=preplan,
