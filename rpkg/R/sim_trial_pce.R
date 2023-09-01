@@ -10,6 +10,7 @@
 #' @param alpha1 significance level for dose selection
 #' @param alpha significance level for selected dose vs control comparison
 #' @param rmonth recruitment per month (recruitment speed assumed constant over time)
+#' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
@@ -30,7 +31,7 @@
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05){
+sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05, sim_out=F){
 
 
   #######################################
@@ -46,7 +47,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   # decisions based on pvalues from Dunnett test at 6 month
 
   if(sum(pval_dunnett<alpha1)==2){sc=2;sel=2:3}
-  if(sum(pval_dunnett<alpha1)==1){sc=1;sel=3}
+  if(sum(pval_dunnett<alpha1)==1){sc=1;sel=which.min(pval_dunnett)+1}
   if(sum(pval_dunnett<alpha1)==0){sc=0;sel=0}
 
   #######################################
@@ -125,6 +126,10 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
 
+    stage2_arms = c(1,1,0)
+    simdec_output = c(ifelse(decision[1]=="Reject", 1, 0),
+                      ifelse(decision[2]=="Reject", 1, 0),
+                      NA)
   }
 
   if(sc==1){
@@ -169,6 +174,12 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
 
+    if(sel==2){stage2_arms = c(1,0,1)}
+    if(sel==3){stage2_arms = c(0,1,1)}
+    simdec_output = c(0,
+                      ifelse(decision[1]=="Reject", 1, 0),
+                      ifelse(decision[2]=="Reject", 1, 0))
+
   }
   if(sc==0){
     db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
@@ -196,18 +207,28 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     pval2 = data.frame(pval2, row.names = levels(db_stage2$treat)[2])
 
+    stage2_arms = c(0,0,1)
+    simdec_output = c(0, 0,
+                      ifelse(decision[1]=="Reject", 1, 0))
+
   }
 
   #######################################
-  return(list(pvalue_stage1=pval,
-              pvalue_stage2=pval2,
-              sc=sc,
-              decision_stage1=decision_stage1,
-              decision_stage2=decision_stage2,
-              critical_values=preplan,
-              selected_dose=sel,
-              recruit_time1=recruit_time1,
-              recruit_time2=recruit_time2))
+  if(sim_out==F){
+    return(list(pvalue_stage1=pval,
+                pvalue_stage2=pval2,
+                sc=sc,
+                decision_stage1=decision_stage1,
+                decision_stage2=decision_stage2,
+                critical_values=preplan,
+                selected_dose=sel,
+                recruit_time1=recruit_time1,
+                recruit_time2=recruit_time2))
+  }else{
+    return(list(stage2_arms=stage2_arms,
+                simdec_output=simdec_output))
+  }
+
 }
 
 # library(multcomp);library(ewhorm);library(gMCP)

@@ -13,7 +13,8 @@ sim_trial_pce(
   sigma,
   rmonth,
   alpha1 = 0.1,
-  alpha = 0.05
+  alpha = 0.05,
+  sim_out = F
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ sim_trial_pce(
 \item{alpha1}{significance level for dose selection}
 
 \item{alpha}{significance level for selected dose vs control comparison}
+
+\item{sim_out}{Option for simplified output for simulations (if \code{sim_out=TRUE} simplified version, the value is \code{FALSE} by default)}
 }
 \value{
 A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
