@@ -9,6 +9,7 @@
 #' @param sigma covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
 #' @param alpha1 significance level for dose selection
 #' @param alpha significance level for selected dose vs control comparison
+#' @param v vector giving the proportions of pre-planned measurements collected up to the interim analysis
 #' @param rmonth recruitment per month (recruitment speed assumed constant over time)
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
@@ -31,7 +32,7 @@
 
 
 # Function to simulate trial data (2-stages, with dose selection)
-sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05, sim_out=F){
+sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmonth, alpha1=0.1, alpha=0.05, v=c(1/2,1/2,0), sim_out=F){
 
 
   #######################################
@@ -76,7 +77,6 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
   graph_bh <- BonferroniHolm(3)
 
   # the package assumes that wj are equal for all j
-  v <- c(1/2,1/2,0)
   z1 <- c(z,0)
   preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=alpha)
   # preplan@Aj

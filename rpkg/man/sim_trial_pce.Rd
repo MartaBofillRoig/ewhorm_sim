@@ -14,6 +14,7 @@ sim_trial_pce(
   rmonth,
   alpha1 = 0.1,
   alpha = 0.05,
+  v = c(1/2, 1/2, 0),
   sim_out = F
 )
 }
@@ -35,6 +36,8 @@ sim_trial_pce(
 \item{alpha1}{significance level for dose selection}
 
 \item{alpha}{significance level for selected dose vs control comparison}
+
+\item{v}{vector giving the proportions of pre-planned measurements collected up to the interim analysis}
 
 \item{sim_out}{Option for simplified output for simulations (if \code{sim_out=TRUE} simplified version, the value is \code{FALSE} by default)}
 }
