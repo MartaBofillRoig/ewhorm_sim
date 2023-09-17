@@ -146,13 +146,25 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
       pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
     }
 
-    Avalues <- c(preplan@BJ[7]/2, #H123
-                 preplan@BJ[6], #H12
-                 preplan@BJ[5], #H13
-                 preplan@BJ[3], #H23
-                 preplan@BJ[2], #H2
-                 preplan@BJ[1]  #H3
-    )
+    if(sel=="Low"){
+      Avalues <- c(preplan@BJ[7]/2, #H123
+                   preplan@BJ[6]/2, #H12
+                   preplan@BJ[5], #H13
+                   preplan@BJ[3], #H23
+                   preplan@BJ[2], #H2
+                   preplan@BJ[1]  #H3
+      )
+    }
+    if(sel=="Medium"){
+      Avalues <- c(preplan@BJ[7]/2, #H123
+                   preplan@BJ[6], #H12
+                   preplan@BJ[5]/2, #H13
+                   preplan@BJ[3], #H23
+                   preplan@BJ[2], #H2
+                   preplan@BJ[1]  #H3
+      )
+    }
+
 
     # pval2[1] <= Avalues[c(1,2,4,5)] #p2
     # pval2[2] <= Avalues[c(1,3,4,6)] #p3
