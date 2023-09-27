@@ -97,7 +97,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     for(j in 1:2){
       sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-      mod2 = lm(y_12m ~ treat, sub2) #are we using this model or should we use individual models?
+      mod2 = lm(y_12m ~ treat, sub2)
       res2 = summary(mod2)
       pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
     }
@@ -130,6 +130,9 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     simdec_output = c(ifelse(decision[1]=="Reject", 1, 0),
                       ifelse(decision[2]=="Reject", 1, 0),
                       NA)
+
+    decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
+
   }
 
   if(sc==1){
@@ -138,15 +141,14 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     recruit_time2 = max(db_stage2$recruit_time)
 
     pval2 <- c()
-
     for(j in 1:2){
       sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-      mod2 = lm(y_12m ~ treat, sub2) #are we using this model or should we use individual models?
+      mod2 = lm(y_12m ~ treat, sub2)
       res2 = summary(mod2)
       pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
     }
 
-    if(sel=="Low"){
+    if(levels(db_stage2$treat)[2]=="Low"){
       Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6]/2, #H12
                    preplan@BJ[5], #H13
@@ -155,7 +157,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                    preplan@BJ[1]  #H3
       )
     }
-    if(sel=="Medium"){
+    if(levels(db_stage2$treat)[2]=="Medium"){
       Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
                    preplan@BJ[5]/2, #H13
@@ -192,13 +194,15 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                       ifelse(decision[1]=="Reject", 1, 0),
                       ifelse(decision[2]=="Reject", 1, 0))
 
+    decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
+
   }
   if(sc==0){
     db_stage2 = sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
     levels(db_stage2$treat) = c(levels(db_stage1$treat)[c(1)],"High")
     recruit_time2 = max(db_stage2$recruit_time)
 
-    mod2 = lm(y_12m ~ treat, db_stage2) #are we using this model or should we use individual models?
+    mod2 = lm(y_12m ~ treat, db_stage2)
     res2 = summary(mod2)
     pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
 
@@ -223,6 +227,8 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     simdec_output = c(0, 0,
                       ifelse(decision[1]=="Reject", 1, 0))
 
+    decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
+
   }
 
   #######################################
@@ -237,8 +243,10 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                 recruit_time1=recruit_time1,
                 recruit_time2=recruit_time2))
   }else{
+    res_intersection=ifelse(decision_intersection == "Reject", 1,0)
     return(list(stage2_arms=stage2_arms,
-                simdec_output=simdec_output))
+                simdec_output=simdec_output,
+                res_intersection=res_intersection))
   }
 
 }
@@ -250,3 +258,4 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 # mu_6m <- mu; mu_12m <- mu
 # rmonth=10
 # n_arms=4;alpha1=0.1
+# alpha=0.05
