@@ -81,6 +81,8 @@ plan(multisession, workers = n_cores)
 results_list <- future_map(1:n_trials, function(i) sim_trial_pce(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, rmonth=2, alpha1=0.1, alpha=0.05, sim_out=T), .options=furrr_options(seed = TRUE))
 
 
+sum(unlist(lapply(results_list, function(element) element$res_intersection)))/n_trials
+
 # Using simplified output
 res_stage2 = matrix(unlist(lapply(results_list, function(element) element$stage2_arms)),
                       ncol = 3, byrow = T) 
