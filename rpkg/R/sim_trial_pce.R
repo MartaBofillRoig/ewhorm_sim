@@ -241,7 +241,8 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
                 critical_values=preplan,
                 selected_dose=sel,
                 recruit_time1=recruit_time1,
-                recruit_time2=recruit_time2))
+                recruit_time2=recruit_time2,
+                pval_dunnett_stage1=pval_dunnett))
   }else{
     res_intersection=ifelse(decision_intersection == "Reject", 1,0)
     return(list(stage2_arms=stage2_arms,
