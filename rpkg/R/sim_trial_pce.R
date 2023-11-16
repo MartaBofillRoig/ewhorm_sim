@@ -60,7 +60,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
     sub1 = subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+(db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
     mod1 = lm(y_12m ~ treat, sub1)
     res1 = summary(mod1)
-    pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = FALSE)
+    pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = TRUE)
   }
   z = qnorm(1-pval)
 
@@ -99,7 +99,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
       sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
       mod2 = lm(y_12m ~ treat, sub2)
       res2 = summary(mod2)
-      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = TRUE)
     }
 
     Avalues <- c(preplan@BJ[7]/2, #H123
@@ -145,7 +145,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
       sub2 = subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
       mod2 = lm(y_12m ~ treat, sub2)
       res2 = summary(mod2)
-      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = TRUE)
     }
 
     if(levels(db_stage2$treat)[2]=="Low"){
@@ -204,7 +204,7 @@ sim_trial_pce <- function(n_arms=4, N1=30*4, N2=30*2, mu_6m, mu_12m, sigma, rmon
 
     mod2 = lm(y_12m ~ treat, db_stage2)
     res2 = summary(mod2)
-    pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = FALSE)
+    pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = TRUE)
 
     Avalues <- c(preplan@BJ[7], #H123
                  preplan@BJ[5], #H13

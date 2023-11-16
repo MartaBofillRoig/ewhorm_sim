@@ -53,8 +53,10 @@ summary(db)
 set.seed(32)
 # evaluate trial duration with respect to the rmonth, also assumptions regarding the break between stages
 v=c(0,0,0)
+mu = c(0,.5,.5,.5)
 
 sim_trial_pce(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, rmonth=2, alpha1=0.1, alpha=0.05) 
+
 sim_trial_pce(n_arms=4, N1=30*4, N2=30*2, mu_6m=mu, mu_12m=mu, sigma=sg_m, rmonth=2, 
               alpha1=0.1, alpha=0.05, v=v)
 
