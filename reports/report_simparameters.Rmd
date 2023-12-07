@@ -1,0 +1,24 @@
+---
+title: "Report -- eWHORM simulations"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Transformation of the data
+
+**Martin´s notes**
+
+Code examples
+
+## Values for the simulations
+
+baseline means, sd, correlations, ...
+
+## Considered parameters for the design
+
+Values
+
+alpha1, alpha, power, sample sizes, ...
