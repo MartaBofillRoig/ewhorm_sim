@@ -1,7 +1,7 @@
 ##########################
 # eWHORM simulations
 # August 2023
-# Marta Bofill Roig
+# Sonja
 ########################## 
 
 install.packages('C:/Users/mbofi/Dropbox/CeMSIIS/GitHub/ewhorm_sim/ewhorm_0.1.tar.gz',repos=NULL)
