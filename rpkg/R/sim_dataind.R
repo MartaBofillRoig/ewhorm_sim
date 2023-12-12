@@ -14,9 +14,9 @@
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
 
-n_arms=3; N=100; mu_0m =c(0,0,0); mu_6m =c(1,2,3); mu_12m=c(1,2,3); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
+# n_arms=3; N=100; mu_0m =c(0,0,0); mu_6m =c(1,2,3); mu_12m=c(1,2,3); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
 
-sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sigma, rmonth){
+sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth){
 
   treatments <- factor(c(sample(rep(1:n_arms, floor(N/n_arms))), sample(1:n_arms, N-floor(N/n_arms)*n_arms, replace=T)),
                       # sample(1:n_arms, N, replace = TRUE),
@@ -36,7 +36,7 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sigma, rmonth){
   time = sample(1:ceiling(N/rmonth), N, replace = T)
 
   # Output
-  data = data.frame(y_6m=y[,1], y_12m=y[,2], treat=treat, recruit_time = time)
+  data = data.frame(y_0m=y[,1],y_6m=y[,2], y_12m=y[,3], treat=treat, recruit_time = time)
 
   return(data)
 }
