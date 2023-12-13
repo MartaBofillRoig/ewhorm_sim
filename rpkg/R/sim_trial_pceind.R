@@ -36,9 +36,9 @@
 # individual observations are simulated
 
 # n_arms=4; N1=100; mu_0m =c(0,0,0,0); mu_6m =c(1,1,1,1); mu_12m=c(1,2,3,4); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
+#sim_trial_pceind (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-
-sim_trial_pce <- function(n_arms = 4, N1 , N2, mu_6m, mu_12m, sigma, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F)
+sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F)
   {
 
 
@@ -242,24 +242,25 @@ sim_trial_pce <- function(n_arms = 4, N1 , N2, mu_6m, mu_12m, sigma, rmonth, alp
                       ifelse(decision[1]=="Reject", 1, 0))
   }  
    
-  if(sel == 3){
+  if(sc == 3){
     
-  db_stage2 <- sim_data(n_arms=3, N=N2, mu_6m=mu_6m[c(1,sel,4)],
-                       mu_12m=mu_12m[c(1,sel,4)], 
-                         sigma=sigma, rmonth=rmonth)
+  db_stage2 <- sim_dataind(n_arms=3, N=N2, mu_0m=mu_0m[c(1,3,4)], mu_6m=mu_6m[c(1,3,4)], mu_12m=mu_12m[c(1,3,4)], sg=sg, rmonth=rmonth)
   
-  levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1,sel)],"High")
+  levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1,3)],"High")
   recruit_time2 <- max(db_stage2$recruit_time)
-    
+
+  db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
+  db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
+  
+  
   pval2 <- c()
     
-  for(j in 1:2){
-  
-  sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+
-                  (db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-  mod2 <- lm(y_12m ~ treat, sub2) #are we using this model or should we use individual models?
+  for(j in 1:2)
+    {
+  sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+ (db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+  mod2 <- lm(diff12_0 ~ treat, sub2) #are we using this model or should we use individual models?
   res2 <- summary(mod2)
-      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+  pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
     }
     
 
@@ -282,15 +283,14 @@ sim_trial_pce <- function(n_arms = 4, N1 , N2, mu_6m, mu_12m, sigma, rmonth, alp
     
     decision <- c()
     
-    dec1 <- sum(pval2[1] <= Avalues[c(1,2,4,5)])
+    dec1 <- sum(pval2[1] <= Avalues[c(1,2,4,5)])#Avalues[c(1,2,4,5)])
     dec2 <- sum(pval2[2] <= Avalues[c(1,3,4,6)])
     
     decision[1] <- ifelse(dec1==4, "Reject", "Accept")
     decision[2] <- ifelse(dec2==4, "Reject", "Accept")
     
     #
-    decision_stage2 <- data.frame(decision, 
-                                  row.names = levels(db_stage2$treat)[2:3])
+    decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
     
     pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
     
@@ -299,22 +299,23 @@ sim_trial_pce <- function(n_arms = 4, N1 , N2, mu_6m, mu_12m, sigma, rmonth, alp
                       ifelse(decision[1]=="Reject", 1, 0),
                       ifelse(decision[2]=="Reject", 1, 0))
     
+    decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
     
   } 
     
-    decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, 
-                                    "Reject", "Accept")
-  }
+  
   
   if(sc == 0){ # in that case please you should start dose 3
     
-    db_stage2 <- sim_data(n_arms=2, N=N2, mu_6m=mu_6m[c(1,4)], 
-                          mu_12m=mu_12m[c(1,4)], sigma=sigma, rmonth=rmonth)
+    db_stage2 <- sim_dataind(n_arms=2, N=N2, mu_0m=mu_0m[c(1,4)], mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
     
     levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1)],"High")
     recruit_time2 <- max(db_stage2$recruit_time)
 
-    mod2 <- lm(y_12m ~ treat, db_stage2) #are we using this model or should we use individual models?
+    db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
+    db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
+    
+    mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
     res2 <- summary(mod2)
     pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
 
@@ -353,11 +354,14 @@ sim_trial_pce <- function(n_arms = 4, N1 , N2, mu_6m, mu_12m, sigma, rmonth, alp
                 critical_values=preplan,
                 selected_dose=sel,
                 recruit_time1=recruit_time1,
-                recruit_time2=recruit_time2))
+                recruit_time2=recruit_time2,
+                pval.surr=pval.surr))
   }else{
+    res_intersection=ifelse(decision_intersection == "Reject", 1,0)
     return(list(stage2_arms=stage2_arms,
                 selected_dose=sel,
-                simdec_output=simdec_output))
+                simdec_output=simdec_output,
+                res_intersection=res_intersection))
   }
 
 }
