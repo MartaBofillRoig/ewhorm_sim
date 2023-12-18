@@ -42,7 +42,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   {
 
 
-  side <- F #this to allow to change the side, can we add this as an argument of the function??? #Fabrice
+  side <- T #this to allow to change the side, can we add this as an argument of the function??? #Fabrice
   #na <- n_arms - 1
   
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
