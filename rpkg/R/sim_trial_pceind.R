@@ -238,8 +238,8 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2])
 
   stage2_arms <- c(0,0,1)
-  simdec_output <- c(0, 0,
-                      ifelse(decision[1]=="Reject", 1, 0))
+  simdec_output <- c(0, 0,  ifelse(decision[1]=="Reject", 1, 0))
+  decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
   }  
    
   if(sc == 3){
@@ -346,16 +346,21 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   #######################################
   if(sim_out==F){
-    return(list(pvalue_stage1=pval,
+    res_intersection=ifelse(decision_intersection == "Reject", 1,0)
+    return(list(pval.surr=pval.surr,
+                pvalue_stage1=pval,
                 pvalue_stage2=pval2,
                 sc=sc,
                 decision_stage1=decision_stage1,
                 decision_stage2=decision_stage2,
                 critical_values=preplan,
-                selected_dose=sel,
                 recruit_time1=recruit_time1,
                 recruit_time2=recruit_time2,
-                pval.surr=pval.surr))
+                stage2_arms=stage2_arms,
+                selected_dose=sel,
+                simdec_output=simdec_output,
+                res_intersection=res_intersection
+                ))
   }else{
     res_intersection=ifelse(decision_intersection == "Reject", 1,0)
     return(list(stage2_arms=stage2_arms,
