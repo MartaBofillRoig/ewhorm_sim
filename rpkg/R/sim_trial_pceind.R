@@ -4,13 +4,15 @@
 #' @param n_arms number of arms (including control)
 #' @param N1 sample size stage 1
 #' @param N2 sample size stage 2
-#' @param mu_6m Mean difference between baseline and 6-month per arm (vector of length `n_arm`)
-#' @param mu_12m Mean difference between baseline and 12-month per arm (vector of length `n_arm`)
+#' @param mu_0m Baseline value per arm (vector of length `n_arm`)
+#' @param mu_6m 6-month value per arm (vector of length `n_arm`)
+#' @param mu_12m 12-month value per arm (vector of length `n_arm`)
 #' @param sigma covariance matrix between 6- and 12-month mean differences assumed equal across arms (matrix of dim 2x2)
 #' @param alpha1 significance level for dose selection (futility analysis)
 #' @param alpha significance level for selected dose vs control comparison
 #' @param v vector giving the proportions of pre-planned measurements collected up to the interim analysis
 #' @param rmonth recruitment per month (recruitment speed assumed constant over time)
+#' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
@@ -35,10 +37,10 @@
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-# n_arms=4; N1=100; mu_0m =c(0,0,0,0); mu_6m =c(1,1,1,1); mu_12m=c(1,2,3,4); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
+# n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
 #sim_trial_pceind (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F)
+sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F,sel_scen=0)
   {
 
 
@@ -186,10 +188,9 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   
   
 
-  if(sc == 1 ){# this means that low dose was the only one to be selected, so we drop both and start 
-                               #with high dose only in the second stage. Or none of the drug was accepted to cont
+  if(sc == 1 ){# this means that low dose was the only promising in the interim analysis
     
-  #if(sel == 0){
+  if(sel_scen == 0){ #so we drop both low and median doses and start with high dose only in the second stage.
     
   db_stage2 <- sim_dataind(n_arms=2, N = N2, mu_0m = mu_0m[c(1,4)],mu_6m = mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
       
@@ -207,19 +208,6 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
       
       
-      
-    #}
-
-    # if(sel=="Low"){ this should not be the case
-    #   Avalues <- c(preplan@BJ[7]/2, #H123
-    #                preplan@BJ[6]/2, #H12
-    #                preplan@BJ[5], #H13
-    #                preplan@BJ[3], #H23
-    #                preplan@BJ[2], #H2
-    #                preplan@BJ[1]  #H3
-    #   )
-    # }
-    #if(sel == 3){# "Medium"){
   Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
                    preplan@BJ[5]/2, #H13
@@ -240,7 +228,55 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   stage2_arms <- c(0,0,1)
   simdec_output <- c(0, 0,  ifelse(decision[1]=="Reject", 1, 0))
   decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
-  }  
+   }  
+    
+    if(sel_scen == 1){ #continue with low and median doses
+      
+      db_stage2 <- sim_dataind(n_arms=3, N = N2, mu_0m =mu_0m[c(1,2,3)], mu_6m =mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sg=sg, rmonth=rmonth)
+      levels(db_stage2$treat) <- levels(db_stage1$treat)[c(1,2,3)]
+      recruit_time2 <- max(db_stage2$recruit_time)
+      
+      db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
+      db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
+      
+      
+      
+      pval2 <- c()
+      
+      for(j in 1:2){
+        
+        sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+        mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
+        res2 <- summary(mod2)
+        pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+      }
+      
+      
+      Avalues <- c(preplan@BJ[7]/2, #H123
+                   preplan@BJ[6], #H12
+                   preplan@BJ[5], #H13
+                   preplan@BJ[3], #H23
+                   preplan@BJ[2], #H2
+                   preplan@BJ[4]  #H1
+      )
+      
+      decision <- c()
+      decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept") 
+      decision[2] <- ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
+      
+      decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
+      
+      pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
+      
+      stage2_arms <- c(1,1,0)
+      simdec_output <- c(ifelse(decision[1]=="Reject", 1, 0),
+                         ifelse(decision[2]=="Reject", 1, 0),
+                         NA)
+      
+      decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
+      
+    }
+  }
    
   if(sc == 3){
     
