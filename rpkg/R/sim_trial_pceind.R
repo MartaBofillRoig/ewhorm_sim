@@ -42,7 +42,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   {
 
 
-  side <- F #this to allow to change the side, can we add this as an argument of the function??? #Fabrice
+  side <- T #this to allow to change the side, can we add this as an argument of the function??? #Fabrice
   #na <- n_arms - 1
   
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
@@ -154,7 +154,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   for(j in 1:2){
       
   sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-  mod2 <- lm(y_12m ~ diff12_0, sub2) #are we using this model or should we use individual models?
+  mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
   res2 <- summary(mod2)
   pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
   }
@@ -202,7 +202,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   
   pval2 <- c()
 
-  mod2 <- lm(y_12m ~ treat, db_stage2) #are we using this model or should we use individual models?
+  mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
   res2 <- summary(mod2)
   pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
       
