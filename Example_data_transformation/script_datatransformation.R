@@ -117,7 +117,7 @@ cov_X0_X12m <- rho^2*sde0^2 #cov(log(X0), log(X12m))
 cov_X6_X0 <- rho*sde0^2 # cov(log(X6), log(X0m)) 
 cov_X6_X6 <- var6m
 cov_X6_X12m <- rho*sde0^2 #cov(log(X6), log(X12m)) 
-cov_X12m_X0 <- rho*sde0^2 #cov(log(X12m), log(X0)) 
+cov_X12m_X0 <- rho^2*sde0^2 #cov(log(X12m), log(X0)) 
 cov_X12m_X6 <- rho*sde0^2 #cov(log(X12m), log(X6m)) 
 cov_X12m_X12m <- var12m  #cov(log(X12m), log(X12m)) 
 
