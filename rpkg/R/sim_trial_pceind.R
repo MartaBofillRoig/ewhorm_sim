@@ -14,6 +14,7 @@
 #' @param rmonth recruitment per month (recruitment speed assumed constant over time)
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
+#' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
@@ -40,44 +41,40 @@
 # n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
 #sim_trial_pceind (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F,sel_scen=0)
+sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T)
   {
 
-
-  side <- T #this to allow to change the side, can we add this as an argument of the function??? #Fabrice
-  #na <- n_arms - 1
-  
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
   recruit_time1 <- max(db_stage1$recruit_time)
-  
-   
+
+
 
   db_stage1$treat <- relevel(db_stage1$treat, ref = "Placebo")
-  
+
   db_stage1$diff6_0<-db_stage1$y_6m-db_stage1$y_0m
   db_stage1$diff12_0<-db_stage1$y_12m-db_stage1$y_0m
-  
-  
+
+
   #Linear model
   #############
-  
+
   frame.sim <- subset(db_stage1, treat != "High")  #why do I need this?
   LowvsC <- lm(diff6_0 ~ treat, data=subset(frame.sim, treat!="Medium")) # adjust with the baseline please
   MedvsC <- lm(diff6_0  ~ treat , data=subset(frame.sim, treat!="Low"))
- 
-  
+
+
   #Obtain one-sided p-value
   #########################
-  
+
   plow <- pt(coef(summary(LowvsC))[, 3], LowvsC$df, lower = side)[2]
   #t.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="less")
-  
+
   pmed <- pt(coef(summary(MedvsC))[, 3], MedvsC$df, lower = side)[2]
   #t.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="less")
   pval.surr <- c(plow, pmed)  #pvalue of surrogate endpoint stage 1
 
-  
-    
+
+
   #######################################
   # decisions based on pvalues from linear model at 6 month
   # 1:Placebo, 2:low, 3:Median, 4:High
@@ -87,25 +84,25 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
     }
   if( (sum(pval.surr < alpha1) == 1 & which.min(pval.surr) == 1) ){  #low has p<alpha1, median has p>alpha1, both are NOT selected for second stage
     sc <- 1
-    sel <- 0 
-    } 
+    sel <- 0
+    }
   if( (sum(pval.surr < alpha1) == 1 & which.min(pval.surr) == 2)){  #low has p>alpha1, median has p<alpha1, median is selected for second stage
     sc <- 3
     sel <- 3
-  } 
-  if(sum(pval.surr < alpha1) == 0){ # both have p>alpha1, both are NOT selected for second stage
-     sc <- 0; sel <- 0 
   }
-  
-  
+  if(sum(pval.surr < alpha1) == 0){ # both have p>alpha1, both are NOT selected for second stage
+     sc <- 0; sel <- 0
+  }
+
+
   #######################################
   # pvalues ttest 12 months, stage 1
-  
+
 
   pval <- c()
 
   for(j in 1:(n_arms-2)){
-    
+
     sub1 <- subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+ (db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
     mod1 <- lm(diff12_0 ~ treat, sub1)
     res1 <- summary(mod1)
@@ -116,13 +113,13 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   decision_s1 <- c()
   decision_s1[1] = ifelse(pval[1]<alpha1, "Reject", "Accept")
   decision_s1[2] = ifelse(pval[2]<alpha1, "Reject", "Accept")
-  
+
   decision_stage1 = data.frame(decision_s1, row.names = levels(db_stage1$treat)[2:3])
-  
+
 
   #preplanning adaptive conditional error
   #######################################
-  
+
   N=N1+N2
   graph_bh <- BonferroniHolm(3)
 
@@ -138,30 +135,30 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   # sc=1 --> Arm A and B stop and start Arm C #if Arm B should be drop then drop Arm A too, start the second stage with only the Arm C Arm A or B continue to stage 2
   # sc=0 --> Arm A and B stop and start Arm C
   # sc=3 --> Arm A stop continue with Arm B and start Arm C
-  
 
-  if(sc==2){  # Arm A and B continue to stage 2  
-    
+
+  if(sc==2){  # Arm A and B continue to stage 2
+
   db_stage2 <- sim_dataind(n_arms=3, N = N2, mu_0m =mu_0m[c(1,2,3)], mu_6m =mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sg=sg, rmonth=rmonth)
   levels(db_stage2$treat) <- levels(db_stage1$treat)[c(1,2,3)]
   recruit_time2 <- max(db_stage2$recruit_time)
 
   db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
   db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
-  
-  
-  
+
+
+
   pval2 <- c()
 
   for(j in 1:2){
-      
+
   sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
   mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
   res2 <- summary(mod2)
   pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
   }
-  
-  
+
+
   Avalues <- c(preplan@BJ[7]/2, #H123
                  preplan@BJ[6], #H12
                  preplan@BJ[5], #H13
@@ -171,7 +168,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
     )
 
   decision <- c()
-  decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept") 
+  decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept")
   decision[2] <- ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
 
   decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
@@ -182,32 +179,32 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   simdec_output <- c(ifelse(decision[1]=="Reject", 1, 0),
                       ifelse(decision[2]=="Reject", 1, 0),
                       NA)
-    
+
   decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
   }
-  
-  
+
+
 
   if(sc == 1 ){# this means that low dose was the only promising in the interim analysis
-    
+
   if(sel_scen == 0){ #so we drop both low and median doses and start with high dose only in the second stage.
-    
+
   db_stage2 <- sim_dataind(n_arms=2, N = N2, mu_0m = mu_0m[c(1,4)],mu_6m = mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
-      
+
   levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1)],"High") # c(levels(db_stage1$treat)[c(1,sel)],"High")
   recruit_time2 <- max(db_stage2$recruit_time)
 
   db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
   db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
-  
-  
+
+
   pval2 <- c()
 
   mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
   res2 <- summary(mod2)
   pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-      
-      
+
+
   Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
                    preplan@BJ[5]/2, #H13
@@ -228,30 +225,30 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   stage2_arms <- c(0,0,1)
   simdec_output <- c(0, 0,  ifelse(decision[1]=="Reject", 1, 0))
   decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
-   }  
-    
+   }
+
     if(sel_scen == 1){ #continue with low and median doses
-      
+
       db_stage2 <- sim_dataind(n_arms=3, N = N2, mu_0m =mu_0m[c(1,2,3)], mu_6m =mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sg=sg, rmonth=rmonth)
       levels(db_stage2$treat) <- levels(db_stage1$treat)[c(1,2,3)]
       recruit_time2 <- max(db_stage2$recruit_time)
-      
+
       db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
       db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
-      
-      
-      
+
+
+
       pval2 <- c()
-      
+
       for(j in 1:2){
-        
+
         sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
         mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
         res2 <- summary(mod2)
         pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
       }
-      
-      
+
+
       Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
                    preplan@BJ[5], #H13
@@ -259,38 +256,38 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
                    preplan@BJ[2], #H2
                    preplan@BJ[4]  #H1
       )
-      
+
       decision <- c()
-      decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept") 
+      decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept")
       decision[2] <- ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
-      
+
       decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
-      
+
       pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
-      
+
       stage2_arms <- c(1,1,0)
       simdec_output <- c(ifelse(decision[1]=="Reject", 1, 0),
                          ifelse(decision[2]=="Reject", 1, 0),
                          NA)
-      
+
       decision_intersection = ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
-      
+
     }
   }
-   
+
   if(sc == 3){
-    
+
   db_stage2 <- sim_dataind(n_arms=3, N=N2, mu_0m=mu_0m[c(1,3,4)], mu_6m=mu_6m[c(1,3,4)], mu_12m=mu_12m[c(1,3,4)], sg=sg, rmonth=rmonth)
-  
+
   levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1,3)],"High")
   recruit_time2 <- max(db_stage2$recruit_time)
 
   db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
   db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
-  
-  
+
+
   pval2 <- c()
-    
+
   for(j in 1:2)
     {
   sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+ (db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
@@ -298,7 +295,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   res2 <- summary(mod2)
   pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
     }
-    
+
 
 
   Avalues <- c(preplan@BJ[7]/2, #H123
@@ -308,49 +305,49 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
                    preplan@BJ[2], #H2
                    preplan@BJ[1]  #H3
 )
-    
-    
+
+
     # pval2[1] <= Avalues[c(1,2,4,5)] #p2
     # pval2[2] <= Avalues[c(1,3,4,6)] #p3
     # decision_stage2 = matrix(c(pval2[1] <= Avalues[c(1,2,4,5)],
     #                            pval2[2] <= Avalues[c(1,3,4,6)]),
     #                            byrow = F, ncol = 2)
-    
-    
+
+
     decision <- c()
-    
+
     dec1 <- sum(pval2[1] <= Avalues[c(1,2,4,5)])#Avalues[c(1,2,4,5)])
     dec2 <- sum(pval2[2] <= Avalues[c(1,3,4,6)])
-    
+
     decision[1] <- ifelse(dec1==4, "Reject", "Accept")
     decision[2] <- ifelse(dec2==4, "Reject", "Accept")
-    
+
     #
     decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
-    
+
     pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
-    
+
     stage2_arms <- c(0,1,1)
     simdec_output <- c(0,
                       ifelse(decision[1]=="Reject", 1, 0),
                       ifelse(decision[2]=="Reject", 1, 0))
-    
+
     decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
-    
-  } 
-    
-  
-  
+
+  }
+
+
+
   if(sc == 0){ # in that case please you should start dose 3
-    
+
     db_stage2 <- sim_dataind(n_arms=2, N=N2, mu_0m=mu_0m[c(1,4)], mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
-    
+
     levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1)],"High")
     recruit_time2 <- max(db_stage2$recruit_time)
 
     db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
     db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
-    
+
     mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
     res2 <- summary(mod2)
     pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
@@ -368,7 +365,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
     decision[1] <- ifelse(sum(pval2 <= Avalues)==4, "Reject", "Accept")
 
     #
-    decision_stage2 <- data.frame(decision, 
+    decision_stage2 <- data.frame(decision,
                                   row.names = levels(db_stage2$treat)[2])
 
     pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2])
