@@ -15,6 +15,7 @@
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
+#' @param analysis defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, and "x" defines a mixed model.
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
@@ -41,7 +42,7 @@
 # n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
 #sim_trial_pceind (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T)
+sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T,test="t")
   {
 
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
@@ -55,25 +56,23 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   db_stage1$diff12_0<-db_stage1$y_12m-db_stage1$y_0m
 
 
-  #Linear model
+  #interim anlysis
   #############
 
-  frame.sim <- subset(db_stage1, treat != "High")  #why do I need this?
-  LowvsC <- lm(diff6_0 ~ treat, data=subset(frame.sim, treat!="Medium")) # adjust with the baseline please
-  MedvsC <- lm(diff6_0  ~ treat , data=subset(frame.sim, treat!="Low"))
+  #frame.sim <- subset(db_stage1, treat != "High")  #why do I need this?
+  #LowvsC <- lm(diff6_0 ~ treat, data=subset(frame.sim, treat!="Medium")) # adjust with the baseline please
+  #MedvsC <- lm(diff6_0  ~ treat , data=subset(frame.sim, treat!="Low"))
 
 
   #Obtain one-sided p-value
   #########################
 
-  plow <- pt(coef(summary(LowvsC))[, 3], LowvsC$df, lower = side)[2]
-  #t.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="less")
+  #plow <- pt(coef(summary(LowvsC))[, 3], LowvsC$df, lower = side)[2]
+  plow <- t.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
 
-  pmed <- pt(coef(summary(MedvsC))[, 3], MedvsC$df, lower = side)[2]
-  #t.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="less")
+  #pmed <- pt(coef(summary(MedvsC))[, 3], MedvsC$df, lower = side)[2]
+  pmed<-t.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
   pval.surr <- c(plow, pmed)  #pvalue of surrogate endpoint stage 1
-
-
 
   #######################################
   # decisions based on pvalues from linear model at 6 month
@@ -99,20 +98,30 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   # pvalues ttest 12 months, stage 1
 
 
-  pval <- c()
+  pval1 <- c()  #12months p-value of first stage
 
+  if (test="t"){
+    p12low <- t.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
+    p12med<-t.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+    pval1<-cbind(p12low,p12med)
+    #pval
+  }
+    
+  if (test="l"){
+  
   for(j in 1:(n_arms-2)){
 
     sub1 <- subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+ (db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
-    mod1 <- lm(diff12_0 ~ treat, sub1)
+    mod1 <- lm(diff12_0 ~ treat+y_0m, sub1)
     res1 <- summary(mod1)
-    pval[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = side)
+    pval1[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = side)
   }
-  z <- qnorm(1-pval)
+  }
+  z <- qnorm(1-pval1)
 
   decision_s1 <- c()
-  decision_s1[1] = ifelse(pval[1]<alpha1, "Reject", "Accept")
-  decision_s1[2] = ifelse(pval[2]<alpha1, "Reject", "Accept")
+  decision_s1[1] = ifelse(pval1[1]<alpha1, "Reject", "Accept")
+  decision_s1[2] = ifelse(pval1[2]<alpha1, "Reject", "Accept")
 
   decision_stage1 = data.frame(decision_s1, row.names = levels(db_stage1$treat)[2:3])
 
@@ -150,14 +159,27 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   pval2 <- c()
 
+  if (test="l"){
+    
   for(j in 1:2){
 
   sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-  mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
+  mod2 <- lm(diff12_0~treat+y_0m, sub2) 
   res2 <- summary(mod2)
   pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
   }
-
+  }
+  
+          
+  if (test="t"){
+    p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+    p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+    pval2<-cbind(p12low2,p12med2)
+  }
+  
+    
+  
+  
 
   Avalues <- c(preplan@BJ[7]/2, #H123
                  preplan@BJ[6], #H12
@@ -200,10 +222,27 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   pval2 <- c()
 
-  mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
-  res2 <- summary(mod2)
-  pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+  #mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
+  #res2 <- summary(mod2)
+  #pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
 
+  if (test="l"){
+    
+      mod2 <- lm(diff12_0~treat+y_0m, db_stage2) 
+      res2 <- summary(mod2)
+      pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+    }
+  }
+  
+  
+  if (test="t"){
+    pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
+    }
+  
+  
+  
+  
+  
 
   Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
@@ -240,14 +279,26 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
       pval2 <- c()
 
-      for(j in 1:2){
-
-        sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-        mod2 <- lm(diff12_0~treat, sub2) #are we using this model or should we use individual models?
-        res2 <- summary(mod2)
-        pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+      
+      if (test="l"){
+        
+        for(j in 1:2){
+          
+          sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+          mod2 <- lm(diff12_0~treat+y_0m, sub2) 
+          res2 <- summary(mod2)
+          pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+        }
       }
-
+      
+      
+      if (test="t"){
+        p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+        p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+        pval2<-cbind(p12low2,p12med2)
+      }
+      
+      
 
       Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
@@ -288,15 +339,34 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   pval2 <- c()
 
-  for(j in 1:2)
-    {
-  sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+ (db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-  mod2 <- lm(diff12_0 ~ treat, sub2) #are we using this model or should we use individual models?
-  res2 <- summary(mod2)
-  pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+  #for(j in 1:2)
+  #  {
+  #sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+ (db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+  #mod2 <- lm(diff12_0 ~ treat, sub2) #are we using this model or should we use individual models?
+  #res2 <- summary(mod2)
+  #pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+  #  }
+
+
+  #
+  if (test="l"){
+    
+    for(j in 1:2){
+      
+      sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
+      mod2 <- lm(diff12_0~treat+y_0m, sub2) 
+      res2 <- summary(mod2)
+      pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
     }
-
-
+  }
+  
+  
+  if (test="t"){
+    p12med2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
+    p12hi2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+    pval2<-cbind(p12med2,p12hi2)
+  }
+  
 
   Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
@@ -338,7 +408,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
 
 
-  if(sc == 0){ # in that case please you should start dose 3
+  if(sc == 0){ # in that case start dose 3
 
     db_stage2 <- sim_dataind(n_arms=2, N=N2, mu_0m=mu_0m[c(1,4)], mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
 
@@ -348,10 +418,26 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
     db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
     db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
 
-    mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
-    res2 <- summary(mod2)
-    pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+    #mod2 <- lm(diff12_0 ~ treat, db_stage2) #are we using this model or should we use individual models?
+    #res2 <- summary(mod2)
+    #pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
 
+    #
+    if (test="l"){
+      
+      mod2 <- lm(diff12_0~treat+y_0m, db_stage2) 
+      res2 <- summary(mod2)
+      pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
+      }
+    }
+
+
+    if (test="t"){
+      pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
+    }
+    
+    
+    
     Avalues <- c(preplan@BJ[7], #H123
                  preplan@BJ[5], #H13
                  preplan@BJ[3], #H23
@@ -381,7 +467,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   if(sim_out==F){
     res_intersection=ifelse(decision_intersection == "Reject", 1,0)
     return(list(pval.surr=pval.surr,
-                pvalue_stage1=pval,
+                pvalue_stage1=pval1,
                 pvalue_stage2=pval2,
                 sc=sc,
                 decision_stage1=decision_stage1,

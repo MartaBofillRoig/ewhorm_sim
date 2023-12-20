@@ -6,7 +6,7 @@
 #' @param mu_6m 6-month mean response per arm (vector of length `n_arm`)
 #' @param mu_12m 12-month mean response per arm (vector of length `n_arm`)
 #' @param sigma covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
-#' @param rmonth recruitment per month (recruitment speed assumed constant over time)
+#' @param rmonth mean number of patients recruited per month (recruitment times assumed exponential distributed / number of patients follows a Poisson distribution)
 #' @returns simulated data consisting of the responses at 6 and 12 months, treatment arm, and recruitment time for each subject.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats model.matrix
@@ -22,7 +22,7 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth){
                       # sample(1:n_arms, N, replace = TRUE),
                        levels = 1:n_arms,
                        labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
-  X <- model.matrix(~ treatments - 1) 
+  X <- model.matrix(~ treatments - 1)
   y <- X %*% matrix(c(mu_0m, mu_6m, mu_12m), nrow=n_arms, byrow = F) + rmvnorm(n=N, mean = c(0,0,0), sigma = sg )
 
   # Treatment indicator for dataframe
@@ -33,7 +33,8 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth){
                labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
 
   # Recruitment
-  time = sample(1:ceiling(N/rmonth), N, replace = T)
+  # time = sample(1:ceiling(N/rmonth), N, replace = T)
+  time = rexp(N, rate=rmonth)
 
   # Output
   data = data.frame(y_0m=y[,1],y_6m=y[,2], y_12m=y[,3], treat=treat, recruit_time = time)
