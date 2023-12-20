@@ -15,7 +15,6 @@ library(mvtnorm)
 
 mn <- 650; sd <- 575
 
-
 #Reduction rate
 ###############
 
@@ -27,7 +26,6 @@ reduct_rate <- c(r0, r1, r2, r3)
 
 rho <- 0.5
 
-
 #The mean after six months from the common baseline mn
 ######################################################
 
@@ -35,30 +33,26 @@ dtmn <- as.data.frame(reduct_rate)
 
 mean_6m <- data.frame(apply(dtmn, 2, function(r){ (1 - r)*mn}))
 names(mean_6m) <- "mean_6month"
-
-
 sd0 <- sd #we assumed the same sd for all the group at the baseline only
 
+# calculate the mean for the log transformation for the baseline
+################################################################
+
 moy0 <- log(mn^2/sqrt(mn^2 + sd0^2)) # mean(log(x0))  Baseline
+
+
+# calculating sd for the log after six month
+############################################
+
 sde0 <- sqrt(log(1+(sd0^2/mn^2) )) # sd(log(x0))  Baseline
-
-
-#As we assumed that the estimated sigma for the log is the same for every other, 
-#we can deduce the sdi for each of the other group, to estimate a good mean for the log
-
-# sd06m <- mean_vec[1]*sqrt(exp(sde0) - 1) # sd((x6m)) 
-# sd16m <- mean_vec[2]*sqrt(exp(sde0) - 1) # sd((x6m)) LOW D. for twelve months
-# sd26m <- mean_vec[3]*sqrt(exp(sde0) - 1) # sd((x6m)) Medium D. for twelve months
-# sd36m <- mean_vec[4]*sqrt(exp(sde0) - 1) # sd((x6m)) HIGH for twelve months
-
-
-
-sd_6m <- data.frame(apply(dtmn, 2, function(m){ m*sqrt(exp(sde0) - 1)}))
+sd_6m <- data.frame(apply(mean_6m, 2, function(m){ m*sqrt(exp(sde0) - 1)}))
 names(sd_6m) <- "sd_6month"
 
 
-#Twelve month : THIS IS THE SAME CODE TO SIX MONTH SO I CAN SKIP THE CODE AT THIS POINT UNLESS WE HAVE NEW VALUES FOR THE REDUCTION RATE AND SD
-#############
+#Twelve month : THIS IS THE SAME CODE TO SIX MONTH SO I CAN SKIP THE CODE 
+###############AT THIS POINT UNLESS WE HAVE NEW VALUES FOR THE REDUCTION
+###############RATE AND SD
+###############
 
 #Assume also that the decrease remained the same
 ################################################
@@ -68,18 +62,18 @@ names(sd_6m) <- "sd_6month"
 
 mean_12m <- mean_6m
 names(mean_12m) <- "mean_12month"
+
 #Standard deviation of the log(X)
 #################################
 
 sd_12m <- sd_6m
+
 
 ##############################################
 # PART 2 : Setting the all for the simulation
 ##############################################
 
 #Let's start with the mean for the log: Combine mean and sd in the same data.fr
-######################################
-
 
 mean_sd_6m <- cbind(mn = mean_6m, sd = sd_6m)
 
@@ -91,7 +85,7 @@ mslg <- function(mean_6month, sd_6month){
   moy <- log(mean_6month^2/sqrt(mean_6month^2 + sd_6month^2))
   
   return(moy)
-}
+} #good!
 
 #Now apply it
 #############
@@ -100,8 +94,8 @@ mulog <- apply(mean_sd_6m, 1, function(m){
   do.call(mslg, as.list(m))
   })
 
-#Obtain the vector for each time point
-######################################
+#Obtain the vector mu for each time point
+#########################################
 
 mu0 <-  rep(moy0, 4) # since at the baseline they are the same
 mu6 <- mulog # for each arm
