@@ -40,9 +40,9 @@
 # individual observations are simulated
 
 # n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
-#sim_trial_pceind (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
+#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T,test="t")
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T,test="t")
   {
 
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
@@ -100,14 +100,14 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   pval1 <- c()  #12months p-value of first stage
 
-  if (test="t"){
+  if (test=="t"){
     p12low <- t.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     p12med<-t.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
     pval1<-cbind(p12low,p12med)
     #pval
   }
     
-  if (test="l"){
+  if (test=="l"){
   
   for(j in 1:(n_arms-2)){
 
@@ -159,7 +159,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
   pval2 <- c()
 
-  if (test="l"){
+  if (test=="l"){
     
   for(j in 1:2){
 
@@ -171,7 +171,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   }
   
           
-  if (test="t"){
+  if (test=="t"){
     p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
     p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
     pval2<-cbind(p12low2,p12med2)
@@ -226,16 +226,16 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   #res2 <- summary(mod2)
   #pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
 
-  if (test="l"){
+  if (test=="l"){
     
       mod2 <- lm(diff12_0~treat+y_0m, db_stage2) 
       res2 <- summary(mod2)
       pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
     }
-  }
   
   
-  if (test="t"){
+  
+  if (test=="t"){
     pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
     }
   
@@ -280,7 +280,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
       pval2 <- c()
 
       
-      if (test="l"){
+      if (test=="l"){
         
         for(j in 1:2){
           
@@ -292,7 +292,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
       }
       
       
-      if (test="t"){
+      if (test=="t"){
         p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
         p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
         pval2<-cbind(p12low2,p12med2)
@@ -349,7 +349,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
 
 
   #
-  if (test="l"){
+  if (test=="l"){
     
     for(j in 1:2){
       
@@ -361,7 +361,7 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
   }
   
   
-  if (test="t"){
+  if (test=="t"){
     p12med2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
     p12hi2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
     pval2<-cbind(p12med2,p12hi2)
@@ -423,16 +423,16 @@ sim_trial_pceind <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmon
     #pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
 
     #
-    if (test="l"){
+    if (test=="l"){
       
       mod2 <- lm(diff12_0~treat+y_0m, db_stage2) 
       res2 <- summary(mod2)
       pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
       }
-    }
+    
 
 
-    if (test="t"){
+    if (test=="t"){
       pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
     }
     
