@@ -15,6 +15,7 @@
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
+#' @param analysis defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, and "x" defines a mixed model.
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif

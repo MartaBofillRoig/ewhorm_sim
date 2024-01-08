@@ -195,7 +195,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
 
   decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
 
-  pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
+  pval2 <- data.frame(c(pval2), row.names = levels(db_stage2$treat)[2:3])
 
   stage2_arms <- c(1,1,0)
   simdec_output <- c(ifelse(decision[1]=="Reject", 1, 0),
@@ -259,7 +259,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
 
   decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2])
 
-  pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2])
+  pval2 <- data.frame(c(pval2), row.names = levels(db_stage2$treat)[2])
 
   stage2_arms <- c(0,0,1)
   simdec_output <- c(0, 0,  ifelse(decision[1]=="Reject", 1, 0))
@@ -314,7 +314,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
 
       decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
 
-      pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
+      pval2 <- data.frame(c(pval2), row.names = levels(db_stage2$treat)[2:3])
 
       stage2_arms <- c(1,1,0)
       simdec_output <- c(ifelse(decision[1]=="Reject", 1, 0),
@@ -395,7 +395,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     #
     decision_stage2 <- data.frame(decision, row.names = levels(db_stage2$treat)[2:3])
 
-    pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2:3])
+    pval2 <- data.frame(c(pval2), row.names = levels(db_stage2$treat)[2:3])
 
     stage2_arms <- c(0,1,1)
     simdec_output <- c(0,
@@ -454,7 +454,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     decision_stage2 <- data.frame(decision,
                                   row.names = levels(db_stage2$treat)[2])
 
-    pval2 <- data.frame(pval2, row.names = levels(db_stage2$treat)[2])
+    pval2 <- data.frame(c(pval2), row.names = levels(db_stage2$treat)[2])
 
     stage2_arms <- c(0,0,1)
     simdec_output <- c(0, 0,
