@@ -262,15 +262,15 @@ sim_it = function(x){
   
   res1 = data.frame(t(sapply(lapply(result_list, function(x) x[[1]]), #extract the first element in each list: proportion of sel
                              function(x) unlist(x)))) %>% # each element beacomes a column in a data.frame
-  mutate(Hypothesis = paste0(rep(c("H1", "H2", "H3"), b), "- rho = ", x$rho) )#, # 
-  #
-  scen = paste0("Alpha 1 = ", unique(x[, "alpha1"])) # name the scenario with alpha
+    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#, # 
+  
+  scen = c("H1", "H2", "H3") # Hypothesis: Low, medium, High
   names(res1)[1:3] = scen
   
   
   res2 = data.frame(t(sapply(lapply(result_list, function(x) x[[2]]), #extract the second element in each list: proportion of sel
                              function(x) unlist(x)))) %>% 
-    mutate(Hypothesis = paste0(rep(c("H1", "H2", "H3"), b), "- rho = ", x$rho) )#, #
+    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#
   
   
   names(res2)[1:3] = scen
