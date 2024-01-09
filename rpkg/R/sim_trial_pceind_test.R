@@ -100,11 +100,17 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
 
   pval1 <- c()  #12months p-value of first stage
 
+<<<<<<< Updated upstream
   if (test=="t"){
+=======
+  if (test="t"){
+    
+>>>>>>> Stashed changes
     p12low <- t.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     p12med<-t.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
     pval1<-cbind(p12low,p12med)
     #pval
+    
   }
     
   if (test=="l"){
@@ -117,7 +123,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     pval1[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = side)
   }
   }
+<<<<<<< Updated upstream
   z <- qnorm(1-pmax(pval1,1e-15))
+=======
+  z <- qnorm(1-pval1)#
+>>>>>>> Stashed changes
 
   decision_s1 <- c()
   decision_s1[1] = ifelse(pval1[1]<alpha1, "Reject", "Accept")

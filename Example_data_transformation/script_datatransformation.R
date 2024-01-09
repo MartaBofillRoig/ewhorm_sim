@@ -101,8 +101,6 @@ mu0 <-  rep(moy0, 4) # since at the baseline they are the same
 mu6 <- mulog # for each arm
 mu12 <- mulog
 
-
-
 # Variance-covariance matrix
 ############################
 
