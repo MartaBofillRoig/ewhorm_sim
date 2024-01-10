@@ -13,12 +13,11 @@ library(mvtnorm)
 #r0 <- 0.15; r1 <- 0.6; r2 <- 0.8; r3 <- 0.9;
 #mu_raw_0 <- 650; sd_raw_0 <- 575;N = 150; n1 = 90
 #get_mu_sigma(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5)
-
+get_mu_sigma(650, 575, 0, 0, 0, 0,.5)
 #FUNCTION 1: Do the calculation to obtain the mu and the sigma
 ##############################################################
 
-get_mu_sigma = function(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, 
-                        r3 = 0.9,  rho = 0.5)
+get_mu_sigma = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3,  rho )
 {
 
 ########################################
@@ -31,10 +30,10 @@ mu_raw_6 <- (1-reduct_rate)*mu_raw_0 ##The mean after six months from the common
 mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
 
 sd_log_0 <- sqrt(log(1+(sd_raw_0^2/mu_raw_0^2) )) # sd(log(x0))  Baseline
-sd_raw_6 <- mu_raw_6*sqrt(exp(sd_log_0) - 1)   # calculating sd for the log after six month
+sd_raw_6 <- mu_raw_6*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log after six month
 
 
-#Twelve month : THIS IS THE SAME CODE As SIX MONTHs
+#12 month : THIS IS THE SAME CODE As 6 MONTHs
 mu_raw_12<-mu_raw_6
 sd_raw_12<-sd_raw_6
 
@@ -83,11 +82,12 @@ return(list(mu_raw_0, c(mu_log_0), c(mu_log_6), c(mu_log_12), sg))
 
 # n_trials=1000; n_arms=4; N1=900;N2=60 mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); 
 #rmonth=1;alpha1=.1; alpha=0.025;
-#do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, v = c(1/2, 1/2, 0), sim_out=T,sel_scen=0, side=T,test="t")
-  
-do_pce_baseline = function(n_trials,n_arms = 4,N1 = N1 , N2 = N1, mu_0m = mu_0,   mu_6m = mu_6m, 
-                           mu_12m = mu12m,  sg = sg, rmonth, alpha1 , alpha ,
-                           v = c(1/2, 1/2, 0), sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
+#do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t")
+do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
+                                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t")
+
+do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg = sg, rmonth, alpha1 , alpha ,
+                           sim_out,sel_scen, side,test)
 {
 
   #Set the number of trials to run and other parameters for future plan
@@ -96,15 +96,16 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1 = N1 , N2 = N1, mu_0m = mu_0, 
   plan(multisession, workers = n_cores)
   
   # Run the simulations in parallel using future_map
-  
-  # First case alpha = 0.07
-  
-  #alp = alpha
-  #bdr = alpha1
-  
-  results_list <- future_map(1:n_trials, function(i) sim_trial_pceind_test(n_arms = n_arms,N1 = N1 , N2 = N2, mu_0m = mu_0m,   mu_6m = mu_6m, 
+  results_list <- future_map(1:n_trials, function(i) #sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), 
+                                                    #                        mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), 
+                                                    #                        sg=matrix(c(.57,0,0,0,.57,0,0,0,.57),3), 
+                                                    #                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t"), 
+                                          #.options=furrr_options(seed = TRUE))
+    
+    
+    sim_trial_pceind_test(n_arms = n_arms,N1 = N1 , N2 = N2, mu_0m = mu_0m,   mu_6m = mu_6m, 
                                                                           mu_12m = mu_12m,  sg = sg, rmonth=rmonth, alpha1=alpha1 , alpha =alpha,
-                                                                          v = c(1/2, 1/2, 0), sim_out=sim_out,sel_scen=sel_scen, side=side,test=test), 
+                                                                          sim_out=sim_out,sel_scen=sel_scen, side=side,test=test), 
                                                                           .options=furrr_options(seed = TRUE))
   
    # Summary results
@@ -113,26 +114,21 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1 = N1 , N2 = N1, mu_0m = mu_0, 
   # percentage of cases in which doses 1, 2 and 3 were present in the second stage
   armsel1 <- c(sum(res_stage2[,1]), sum(res_stage2[,2]), sum(res_stage2[,3]))/n_trials
   
-  
   acc <- matrix(unlist(lapply(results_list, function(element) element$simdec_output)),ncol = 3, byrow = T) 
   
-  armacc1 <- c(sum(acc[,1], na.rm = T)/sum(res_stage2[,1]), sum(acc[,2], na.rm = T)/sum(res_stage2[,2]), sum(acc[,3], na.rm = T)/sum(res_stage2[,3]))
+  armacc1 <- c(sum(acc[,1], na.rm = T)/n_trials, sum(acc[,2], na.rm = T)/n_trials, sum(acc[,3], na.rm = T)/sum(res_stage2[,3]))
   
   return(list(armsel1, armacc1))
 }
 
-
 #FUNCTION 3: function 1 AND function 2
 ########################################
 
-#simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5, n_trials=1000,n_arms = 4,N1 = 90 , N2 = 60,
-                  #   rmonth=11, alpha1=.1 , alpha=.025, v = c(1/2, 1/2, 0), sim_out=T,sel_scen=0, side=T,test="t")
   
 
-simul_res = function(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5,
-                     n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N1, rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,
-                     #v = c(1/2, 1/2, 0), 
-                     sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
+simul_res = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3 ,  rho ,
+                     n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N2, rmonth, alpha1 , alpha ,
+                     sim_out,sel_scen, side,test)
 {
   
   ##Maybe this is not optimal but
@@ -143,8 +139,7 @@ simul_res = function(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0
  
   #Compute mu et sigma
   ####################
-  v = c(1/2, 1/2, 0)
-  
+   
   val = get_mu_sigma(mu_raw_0,sd_raw_0,  r0, r1, r2, r3,  rho) # rho is the correlation coefficient
  
   
@@ -159,32 +154,49 @@ simul_res = function(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0
   #do pce and also the simulation with futur_map
   ##############################################
   
-  aa = do_pce_baseline(n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N1, mu_0m = m0,   mu_6m = m6, 
-                       mu_12m = mu12,  sg = mtr1, rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,
-                       v = c(1/2, 1/2, 0), sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
+  aa = #do_pce_baseline(n_trials=n_trials,n_arms = 4,N1 = N1, N2 = N2, mu_0m = m0,   mu_6m = m6, mu_12m = m12,  sg = mtr1, 
+      #                  rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,   sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
+        do_pce_baseline(n_trials=n_trials,n_arms = 4,N1=N1 , N=N2, mu_0m=m0, mu_6m=m6, mu_12m=m12, sg=mtr1,
+                    rmonth=rmonth, alpha1=alpha1 , alpha=alpha , sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
   
+  #return(list(mtr1,m0,m6,m12,aa))
   return(aa)
   
 }
 
-oo<-mapply(simul_res, mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = c(0.5,.7), n_trials=1000,n_arms = 4,
-       N1 = 90 , N2 = 60,  rmonth=11, alpha1=c(.1,.2,.5) , alpha=.025, sim_out=T,sel_scen=0, side=T,test="t")
+simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0, r1 = 0, r2 = 0, r3 = 0,  rho = 0.5, n_trials=10000,n_arms = 4,N1 = 60 , N2 = 90,
+                rmonth=1, alpha1=.1 , alpha=.025, sim_out=T,sel_scen=0, side=T,test="t")
+
+do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
+                rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t")
+
+
+do_pce_baseline (n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = m0,   mu_6m = m6, mu_12m = m12,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t")
+
+
+
+
+
+
+#oo<-mapply(simul_res, mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = c(0.5,.7), n_trials=1000,n_arms = 4,
+#       N1 = 90 , N2 = 60,  rmonth=11, alpha1=c(.1,.2,.5) , alpha=.025, sim_out=T,sel_scen=0, side=T,test="t")
            
-dfr<-data.frame(650, 575, 0.15, 0.6, 0.8, 0.9,  0.5, 1000,4,
-90 , 60, 11, c(.1,.5), .025, T,0, T,"t")
+#dfr<-data.frame(650, 575, 0.15, 0.6, 0.8, 0.9,  0.5, 1000,4,
+#90 , 60, 11, c(.1,.5), .025, T,0, T,"t")
 
-oo1<-mapply(simul_res, 650, 575, 0, 0, 0, 0,  c(0.5,.7,0.5,0.7), 10000,4,
-           90 , 60, 11, c(.1,.1,.5,.5), .025, T,0, T,"t")
+oo1<-mapply(simul_res, 650, 575, 0, 0, 0, 0,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
 
-par(mfrow=c(2,2))
+par(mfrow=c(1,2))
 plot(unlist(oo1[,1]),ylim=c(0,1))
-plot(unlist(oo1[,2]),ylim=c(0,1))
-plot(unlist(oo1[,3]),ylim=c(0,1))
+lines(unlist(oo1[,2]),ylim=c(0,1),type="p",col="red")
+lines(unlist(oo1[,3]),ylim=c(0,1),type="p",col="blue")
 plot(unlist(oo1[,4]),ylim=c(0,1))
+lines(unlist(oo1[,5]),ylim=c(0,1),type="p",col="red")
+lines(unlist(oo1[,6]),ylim=c(0,1),type="p",col="blue")
 
 
-oo2<-mapply(simul_res, dfr)
+#oo2<-mapply(simul_res, dfr)
 
 
 # FUNCTION 4: Do the simulation per scenario given a table x
