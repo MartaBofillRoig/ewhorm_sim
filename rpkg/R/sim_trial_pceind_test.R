@@ -42,7 +42,7 @@
 # n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
 #sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
 
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=F, sel_scen=0, side=T,test="t")
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t")
 {
   
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
@@ -128,10 +128,10 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   #preplanning adaptive conditional error
   #######################################
-  
   N=N1+N2
   graph_bh <- BonferroniHolm(3)
   
+  v = c(N1/N,N1/N,0)
   # the package assumes that wj are equal for all j
   z1 <- c(z,0)
   preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=alpha)
