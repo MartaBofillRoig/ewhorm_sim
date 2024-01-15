@@ -34,13 +34,14 @@
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
 
-
-
+library(lme4)
+library(lmerTest)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-# n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
-#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025,v = c(1/2,1/2,0), sim_out=T)
+# n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,9,8,7); mu_12m=c(10,9,8,7); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
+test="m"
+#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025, sim_out=T,test="m")
 
 sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t")
 {
@@ -117,6 +118,19 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval1[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = side)
     }
   }
+  
+  if (test=="m"){
+    db_stage1$patID<-c(1:N1)
+    db_stage1long<-reshape(data=db_stage1, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+    db_stage1long$month<-factor(db_stage1long$month,c(6,12))
+    
+    md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage1long)
+    pval1<-summary(md0)$coefficients[3:4,5]
+  }
+  
+  
+  
+  
   z <- qnorm(1-pmax(pval1,1e-15))
   
   decision_s1 <- c()
@@ -178,6 +192,14 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     }
     
     
+    if (test=="m"){
+      db_stage2$patID<-c(1:N2)
+      db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+      db_stage2long$month<-factor(db_stage2long$month,c(6,12))
+      
+      md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
+      pval2<-summary(md0)$coefficients[3:4,5]
+    }
     
     
     
@@ -240,6 +262,16 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       }
       
       
+      if (test=="m"){
+        db_stage2$patID<-c(1:N2)
+        db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+        db_stage2long$month<-factor(db_stage2long$month,c(6,12))
+        
+        md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
+        pval2<-summary(md0)$coefficients[3,5]
+      }
+      
+      
       
       
       
@@ -296,6 +328,15 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
         p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
         pval2<-cbind(p12low2,p12med2)
+      }
+      
+      if (test=="m"){
+        db_stage2$patID<-c(1:N2)
+        db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+        db_stage2long$month<-factor(db_stage2long$month,c(6,12))
+        
+        md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
+        pval2<-summary(md0)$coefficients[3:4,5]
       }
       
       
@@ -367,6 +408,15 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-cbind(p12med2,p12hi2)
     }
     
+    if (test=="m"){
+      db_stage2$patID<-c(1:N2)
+      db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+      db_stage2long$month<-factor(db_stage2long$month,c(6,12))
+      
+      md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
+      pval2<-summary(md0)$coefficients[3:4,5]
+    }
+    
     
     Avalues <- c(preplan@BJ[7]/2, #H123
                  preplan@BJ[6], #H12
@@ -436,6 +486,14 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
     }
     
+    if (test=="m"){
+      db_stage2$patID<-c(1:N2)
+      db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
+      db_stage2long$month<-factor(db_stage2long$month,c(6,12))
+      
+      md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
+      pval2<-summary(md0)$coefficients[3,5]
+    }
     
     
     Avalues <- c(preplan@BJ[7], #H123
