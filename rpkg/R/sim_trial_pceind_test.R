@@ -36,6 +36,7 @@
 
 library(lme4)
 library(lmerTest)
+library(multcomp)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
@@ -330,7 +331,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         pval2<-cbind(p12low2,p12med2)
       }
       
-      if (test=="m"){
+      if (test=="m"){#zweiseitig!!!!
         db_stage2$patID<-c(1:N2)
         db_stage2long<-reshape(data=db_stage2, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
         db_stage2long$month<-factor(db_stage2long$month,c(6,12))
@@ -521,6 +522,42 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     decision_intersection <- ifelse(sum(pval2 <= Avalues[1]) > 0, "Reject", "Accept")
   }
   
+  
+  ################################################
+  # Multi-arm trial 1
+  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = N1+N2, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
+  recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
+  
+  
+  
+  db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
+  
+  db_stage_ma1$diff6_0<-db_stage_ma1$y_6m-db_stage_ma1$y_0m
+  db_stage_ma1$diff12_0<-db_stage_ma1$y_12m-db_stage_ma1$y_0m
+  
+  mod_ma1 <- aov(diff12_0 ~ treat+y_0m, db_stage_ma1)
+  model_dunnett_ma1 = summary(glht(model = mod_ma1, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnett_ma1 = model_dunnett_ma1$test$pvalues
+  
+  decision_ma1<-(pval_dunnett_ma1<alpha)*1
+  
+  
+  ################################################
+  # Multi-arm trial 2
+  db_stage_ma2 <- sim_dataind(n_arms = n_arms, N = N1+N2, mu_0m = mu_0m, mu_6m = mu_6m, mu_12m = mu_12m, sg = sg, rmonth = rmonth)
+  recruit_time_ma2 <- max(db_stage_ma2$recruit_time)
+  
+  db_stage_ma2$treat <- relevel(db_stage_ma2$treat, ref = "Placebo")
+  
+  db_stage_ma2$diff6_0<-db_stage_ma2$y_6m-db_stage_ma2$y_0m
+  db_stage_ma2$diff12_0<-db_stage_ma2$y_12m-db_stage_ma2$y_0m
+  
+  mod_ma2 <- aov(diff12_0 ~ treat+y_0m, db_stage_ma2)
+  model_dunnett_ma2 = summary(glht(model = mod_ma2, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnett_ma2 = model_dunnett_ma2$test$pvalues
+  
+  decision_ma2<-(pval_dunnett_ma1<=alpha)*1
+  
   #######################################
   if(sim_out==F){
     res_intersection=ifelse(decision_intersection == "Reject", 1,0)
@@ -543,7 +580,9 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     return(list(stage2_arms=stage2_arms,
                 selected_dose=sel,
                 simdec_output=simdec_output,
-                res_intersection=res_intersection))
+                res_intersection=res_intersection,
+                decision_ma1=decision_ma1,
+                decision_ma2=decision_ma2))
   }
   
 }
