@@ -556,7 +556,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   model_dunnett_ma2 = summary(glht(model = mod_ma2, linfct=mcp(treat="Dunnett"), alternative = "less"))
   pval_dunnett_ma2 = model_dunnett_ma2$test$pvalues
   
-  decision_ma2<-(pval_dunnett_ma1<=alpha)*1
+  decision_ma2<-(pval_dunnett_ma2<=alpha)*1
   
   #######################################
   if(sim_out==F){
