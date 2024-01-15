@@ -13,20 +13,18 @@ library(mvtnorm)
 #r0 <- 0.15; r1 <- 0.6; r2 <- 0.8; r3 <- 0.9;
 #mu_raw_0 <- 650; sd_raw_0 <- 575;N = 150; n1 = 90
 #get_mu_sigma(mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5)
-get_mu_sigma(650, 575, 0, 0, 0, 0,.5)
+#get_mu_sigma(650, 575, 0, 0, 0, 0,.5)
 #FUNCTION 1: Do the calculation to obtain the mu and the sigma
 ##############################################################
 
-get_mu_sigma = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3,  rho )
+get_mu_sigma = function(mu_raw_0, sd_raw_0 , reductrate_6 , reductrate_12, rho )
 {
 
 ########################################
 # PART 1: defining parameters
 ########################################
 
-reduct_rate <- as.numeric(c(r0, r1, r2, r3)) #Reduction rate
-
-mu_raw_6 <- (1-reduct_rate)*mu_raw_0 ##The mean after six months from the common baseline
+mu_raw_6 <- (1-reductrate_6)*mu_raw_0 ##The mean after six months from the common baseline
 mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
 
 sd_log_0 <- sqrt(log(1+(sd_raw_0^2/mu_raw_0^2) )) # sd(log(x0))  Baseline
@@ -34,8 +32,11 @@ sd_raw_6 <- mu_raw_6*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log af
 
 
 #12 month : THIS IS THE SAME CODE As 6 MONTHs
-mu_raw_12<-mu_raw_6
-sd_raw_12<-sd_raw_6
+mu_raw_12 <- (1-reductrate_12)*mu_raw_0 ##The mean after six months from the common baseline
+#mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
+
+#sd_log_0_12 <- sqrt(log(1+(sd_raw_0^2/mu_raw_0^2) )) # sd(log(x0))  Baseline
+sd_raw_12 <- mu_raw_12*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log after six month
 
 ##############################################
 # PART 2 : Setting the all for the simulation
@@ -96,7 +97,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   plan(multisession, workers = n_cores)
   
   # Run the simulations in parallel using future_map
-  results_list <- future_map(1:n_trials, function(i) #sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), 
+  results_list <- future_map(1:n_trials, function(i)#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), 
                                                     #                        mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), 
                                                     #                        sg=matrix(c(.57,0,0,0,.57,0,0,0,.57),3), 
                                                     #                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t"), 
@@ -108,17 +109,25 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
                                                                           sim_out=sim_out,sel_scen=sel_scen, side=side,test=test), 
                                                                           .options=furrr_options(seed = TRUE))
   
-   # Summary results
-  res_stage2 <- matrix(unlist(lapply(results_list, function(element) element$stage2_arms)),ncol = 3, byrow = T) 
-  
   # percentage of cases in which doses 1, 2 and 3 were present in the second stage
-  armsel1 <- c(sum(res_stage2[,1]), sum(res_stage2[,2]), sum(res_stage2[,3]))/n_trials
+  sel_stage2 <- matrix(unlist(lapply(results_list, function(element) element$stage2_arms)),ncol = 3, byrow = T) 
+  armsel <- c(sum(sel_stage2[,1]), sum(sel_stage2[,2]), sum(sel_stage2[,3]))/n_trials
   
-  acc <- matrix(unlist(lapply(results_list, function(element) element$simdec_output)),ncol = 3, byrow = T) 
+  #conditional power
+  h_condpow <- matrix(unlist(lapply(results_list, function(element) element$simdec_output)),ncol = 3, byrow = T) 
+  disjpow<-sum(apply(h_condpow,1,sum,na.rm=TRUE)>0)/n_trials
+  condpow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/sum(sel_stage2[,3])
+  pow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/n_trials
   
-  armacc1 <- c(sum(acc[,1], na.rm = T)/n_trials, sum(acc[,2], na.rm = T)/n_trials, sum(acc[,3], na.rm = T)/sum(res_stage2[,3]))
   
-  return(list(armsel1, armacc1))
+  #power of multiarmed trials 1 and 2
+  h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 2, byrow = T)
+  h_ma2<-matrix(unlist(lapply(results_list, function(element) element$decision_ma2)),ncol = 3, byrow = T)
+  
+  pow_ma1<-apply(h_ma1,2,sum)/n_trials
+  pow_ma2<-apply(h_ma2,2,sum)/n_trials
+  
+  return(list(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2))
 }
 
 #FUNCTION 3: function 1 AND function 2
@@ -126,7 +135,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
 
   
 
-simul_res = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3 ,  rho ,
+simul_res = function(mu_raw_0, sd_raw_0 , reductrate_6, reductrate_12,  rho ,
                      n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N2, rmonth, alpha1 , alpha ,
                      sim_out,sel_scen, side,test)
 {
@@ -140,9 +149,8 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3 ,  rho ,
   #Compute mu et sigma
   ####################
    
-  val = get_mu_sigma(mu_raw_0,sd_raw_0,  r0, r1, r2, r3,  rho) # rho is the correlation coefficient
- 
-  
+  val = get_mu_sigma(mu_raw_0,sd_raw_0,  reductrate_6,reductrate_12,  rho) # rho is the correlation coefficient
+                    
   # extract the matrix and the mu for each time
   #############################################
   
@@ -164,7 +172,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0 , r1 , r2 , r3 ,  rho ,
   
 }
 
-simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0, r1 = 0, r2 = 0, r3 = 0,  rho = 0.5, n_trials=10000,n_arms = 4,N1 = 60 , N2 = 90,
+simul_res (mu_raw_0 = 650, sd_raw_0 = 575, reductrate_6 = c(0,0,0,0), reductrate_12 = c(0,.1,.2,.3), rho = 0.5, n_trials=10000,n_arms = 4,N1 = 60 , N2 = 90,
                 rmonth=1, alpha1=.1 , alpha=.025, sim_out=T,sel_scen=0, side=T,test="t")
 
 do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
@@ -186,39 +194,13 @@ do_pce_baseline (n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = m0,   mu_6
 
 #
 
-oo1<-mapply(simul_res, 650, 575, 0, 0, 0, 0,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
+#oo1<-mapply(simul_res, 650, 575, 0, 0, 0, 0,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
 
-oo2<-mapply(simul_res, 650, 575, 0.15, 0.20, 0.25, 0.3,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
+#oo2<-mapply(simul_res, 650, 575, 0.15, 0.20, 0.25, 0.3,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
-oo3<-mapply(simul_res, 650, 575, 0.15, 0.3, 0.6, 0.9,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
+#oo3<-mapply(simul_res, 650, 575, 0.15, 0.3, 0.6, 0.9,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
-par(mfrow=c(3,2))
-plot(unlist(oo1[,1]),ylim=c(0,1),label="Selection prob.H1,H2,H3,Rejection prob H1,H2,H3")
-title(expression(alpha[1]==0.1))
-lines(unlist(oo1[,2]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo1[,3]),ylim=c(0,1),type="p",col="blue")
-legend("center",legend=c(expression(rho==0),expression(rho==.5),expression(rho==1)),cex=.8,col=c(1,"red","blue"),lwd=2.5,ncol=3,bty="n")
-
-plot(unlist(oo1[,4]),ylim=c(0,1))
-title(expression(alpha[1]==0.5))
-lines(unlist(oo1[,5]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo1[,6]),ylim=c(0,1),type="p",col="blue")
-
-plot(unlist(oo2[,1]),ylim=c(0,1))
-lines(unlist(oo2[,2]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo2[,3]),ylim=c(0,1),type="p",col="blue")
-plot(unlist(oo2[,4]),ylim=c(0,1))
-lines(unlist(oo2[,5]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo2[,6]),ylim=c(0,1),type="p",col="blue")
-
-
-plot(unlist(oo3[,1]),ylim=c(0,1))
-lines(unlist(oo3[,2]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo3[,3]),ylim=c(0,1),type="p",col="blue")
-plot(unlist(oo3[,4]),ylim=c(0,1))
-lines(unlist(oo3[,5]),ylim=c(0,1),type="p",col="red")
-lines(unlist(oo3[,6]),ylim=c(0,1),type="p",col="blue")
 
 
 #oo2<-mapply(simul_res, dfr)
@@ -228,49 +210,45 @@ lines(unlist(oo3[,6]),ylim=c(0,1),type="p",col="blue")
 ###########################################################
 
 
-sim_it = function(x)
-  {
-  
-  #Do the simulation for each scenario in your table
-  ##################################################
-  
-  
-  result_list <- apply(x, 1, function(row) {
-    do.call(simul_res, as.list(row))
-  })
+#sim_it = function(x)
+#  {
+#  
+#  #Do the simulation for each scenario in your table
+#  ##################################################
+#  
+#  
+#  result_list <- apply(x, 1, function(row) {
+#    do.call(simul_res, as.list(row))
+#  })
+##}##
+#
+#  b = length(unique(x$rho))
+#  
+#  # Now extract element in each list (scenarios) wich corresponds to proportion of selection
+#  ##########################################################################################
+#  
+#  
+#  res1 = data.frame(t(sapply(lapply(result_list, function(x) x[[1]]), #extract the first element in each list: proportion of sel
+#                             function(x) unlist(x)))) %>% # each element beacomes a column in a data.frame
+#    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#, # 
+#  
+#  scen = c("H1", "H2", "H3") # Hypothesis: Low, medium, High
+#  names(res1)[1:3] = scen
+#  
+#  
+#  res2 = data.frame(t(sapply(lapply(result_list, function(x) x[[2]]), #extract the second element in each list: proportion of sel
+#                             function(x) unlist(x)))) %>% 
+#    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#
+#  
+#  
+#  names(res2)[1:3] = scen
+#  
+#  all_scenario <- list(res1, res2)
+#  
+#  return(all_scenario)
+#  
 #}
 
-  b = length(unique(x$rho))
-  
-  # Now extract element in each list (scenarios) wich corresponds to proportion of selection
-  ##########################################################################################
-  
-  
-  res1 = data.frame(t(sapply(lapply(result_list, function(x) x[[1]]), #extract the first element in each list: proportion of sel
-                             function(x) unlist(x)))) %>% # each element beacomes a column in a data.frame
-    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#, # 
-  
-  scen = c("H1", "H2", "H3") # Hypothesis: Low, medium, High
-  names(res1)[1:3] = scen
-  
-  
-  res2 = data.frame(t(sapply(lapply(result_list, function(x) x[[2]]), #extract the second element in each list: proportion of sel
-                             function(x) unlist(x)))) %>% 
-    mutate(Hypothesis = paste0(rep(unique(x[, "alpha1"]), b), "- rho = ", x$rho) )#
-  
-  
-  names(res2)[1:3] = scen
-  
-  all_scenario <- list(res1, res2)
-  
-  return(all_scenario)
-  
-}
-
-
-rh <- 0.5
-
-rh2 <- 0.7
 
 # Define manually the dataset
 #############################
@@ -279,28 +257,28 @@ rh2 <- 0.7
 #case 1:
 ########
 
-cs1 <- data.frame(mu_raw_0 = 650, sd_raw_0 = 575, r0 = rep(0.15, 3), 
-                  r1 = rep(0.65, 3), r2 = rep(0.75, 3), r3 = rep(0.90, 3), 
-                  rho = rep(rh, 3),
-                  N = rep(150, 3), n1 = rep(90, 3), alpha = rep(0.025, 3), 
-                  alpha1 = c(0.1, 0.2, 0.5))
+#cs1 <- data.frame(mu_raw_0 = 650, sd_raw_0 = 575, r0 = rep(0.15, 3), 
+#                  r1 = rep(0.65, 3), r2 = rep(0.75, 3), r3 = rep(0.90, 3), 
+#                  rho = rep(rh, 3),
+#                  N = rep(150, 3), n1 = rep(90, 3), alpha = rep(0.025, 3), 
+#                  alpha1 = c(0.1, 0.2, 0.5))#
 
-cs0 <- data.frame(mu_raw_0 = 650, sd_raw_0 = 575, r0 = rep(0.15, 3), 
-                  r1 = rep(0.65, 3), r2 = rep(0.75, 3), r3 = rep(0.90, 3), 
-                  rho = rep(rh2, 3),n_trials=10000,n_arms=4,
-                  N1 = rep(90, 3), N2 = rep(90, 3), rmonth=11, 
-                  alpha1 = c(0.1, 0.2, 0.5),alpha = rep(0.025, 3), 
-                  sim_out=T,sel_scen=0, side=T,test="t")
+#cs0 <- data.frame(mu_raw_0 = 650, sd_raw_0 = 575, r0 = rep(0.15, 3), 
+#                  r1 = rep(0.65, 3), r2 = rep(0.75, 3), r3 = rep(0.90, 3), 
+#                  rho = rep(rh2, 3),n_trials=10000,n_arms=4,
+#                  N1 = rep(90, 3), N2 = rep(90, 3), rmonth=11, 
+#                  alpha1 = c(0.1, 0.2, 0.5),alpha = rep(0.025, 3), 
+#                  sim_out=T,sel_scen=0, side=T,test="t")
 
-cs <- rbind(cs1, cs0) %>% 
-  mutate_at(vars(baseline_mean:alpha1), list(~as.numeric(.)))
+#cs <- rbind(cs1, cs0) %>% 
+#  mutate_at(vars(baseline_mean:alpha1), list(~as.numeric(.)))
 
 # Do the simulation
 
-s10 <- sim_it(cs0)
+#s10 <- sim_it(cs0)
 
 
 
-mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5,
-n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N1, rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,
-v = c(1/2, 1/2, 0), sim_out=sim_out,sel_scen=sel_scen, side=side,test=test
+#mu_raw_0 = 650, sd_raw_0 = 575, r0 = 0.15, r1 = 0.6, r2 = 0.8, r3 = 0.9,  rho = 0.5,
+#n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N1, rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,
+#v = c(1/2, 1/2, 0), sim_out=sim_out,sel_scen=sel_scen, side=side,test=test
