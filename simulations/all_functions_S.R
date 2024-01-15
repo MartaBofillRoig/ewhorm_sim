@@ -184,6 +184,8 @@ do_pce_baseline (n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = m0,   mu_6
 #dfr<-data.frame(650, 575, 0.15, 0.6, 0.8, 0.9,  0.5, 1000,4,
 #90 , 60, 11, c(.1,.5), .025, T,0, T,"t")
 
+#
+
 oo1<-mapply(simul_res, 650, 575, 0, 0, 0, 0,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
 
@@ -192,10 +194,14 @@ oo2<-mapply(simul_res, 650, 575, 0.15, 0.20, 0.25, 0.3,  c(0,0.5,1,0,0.5,1), 100
 oo3<-mapply(simul_res, 650, 575, 0.15, 0.3, 0.6, 0.9,  c(0,0.5,1,0,0.5,1), 10000,4, 60 , 90, 1, c(.1,.1,.1,.5,.5,.5), .025, T,0, T,"t")
 
 par(mfrow=c(3,2))
-plot(unlist(oo1[,1]),ylim=c(0,1))
+plot(unlist(oo1[,1]),ylim=c(0,1),label="Selection prob.H1,H2,H3,Rejection prob H1,H2,H3")
+title(expression(alpha[1]==0.1))
 lines(unlist(oo1[,2]),ylim=c(0,1),type="p",col="red")
 lines(unlist(oo1[,3]),ylim=c(0,1),type="p",col="blue")
+legend("center",legend=c(expression(rho==0),expression(rho==.5),expression(rho==1)),cex=.8,col=c(1,"red","blue"),lwd=2.5,ncol=3,bty="n")
+
 plot(unlist(oo1[,4]),ylim=c(0,1))
+title(expression(alpha[1]==0.5))
 lines(unlist(oo1[,5]),ylim=c(0,1),type="p",col="red")
 lines(unlist(oo1[,6]),ylim=c(0,1),type="p",col="blue")
 
