@@ -121,7 +121,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   
   
   #power of multiarmed trials 1 and 2
-  h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 2, byrow = T)
+  h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 3, byrow = T)
   h_ma2<-matrix(unlist(lapply(results_list, function(element) element$decision_ma2)),ncol = 3, byrow = T)
   
   pow_ma1<-c(apply(h_ma1,2,sum)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
@@ -155,6 +155,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   if (test1==0) test<-"l"
   if (test1==1) test<-"m"
   if (test1==2) test<-"t"
+  if (test1==3) test<-"w"
   
    N2<-N-N1
   
