@@ -124,10 +124,10 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 2, byrow = T)
   h_ma2<-matrix(unlist(lapply(results_list, function(element) element$decision_ma2)),ncol = 3, byrow = T)
   
-  pow_ma1<-apply(h_ma1,2,sum)/n_trials
-  pow_ma2<-apply(h_ma2,2,sum)/n_trials
+  pow_ma1<-c(apply(h_ma1,2,sum)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
+  pow_ma2<-c(apply(h_ma2,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma2,1,sum,na.rm=TRUE)>0)/n_trials)
   
-  return(list(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2))
+  return(c(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2))
 }
 
 #FUNCTION 3: function 1 AND function 2
@@ -135,9 +135,9 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
 
   
 
-simul_res = function(mu_raw_0, sd_raw_0 , reductrate_6, reductrate_12,  rho ,
-                     n_trials=n_trials,n_arms = 4,N1 = N1 , N2 = N2, rmonth, alpha1 , alpha ,
-                     sim_out,sel_scen, side,test)
+simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,
+                     n_trials,n_arms = 4,N1 , N, rmonth, alpha1 , alpha ,
+                     sim_out1,sel_scen, side1,test1)
 {
   
   ##Maybe this is not optimal but
@@ -145,10 +145,24 @@ simul_res = function(mu_raw_0, sd_raw_0 , reductrate_6, reductrate_12,  rho ,
 #  sz = as.numeric(N)
 #  n1 = as.numeric(n1)
 #  r0 = as.numeric(r0)
- 
+
+  #sim_out<-ifelse(sim_out1==F,0,1)
+  #if (sim_out1==1) sim_out=="T"
+  if (sim_out1==1) sim_out<-T
+  if (sim_out1==0) sim_out<-F
+  if (side1==1) side<-T
+  if (side1==0) side<-F
+  if (test1==0) test<-"l"
+  if (test1==1) test<-"m"
+  if (test1==2) test<-"t"
+  
+   N2<-N-N1
+  
   #Compute mu et sigma
   ####################
-   
+  reductrate_6<-c(r0_6,r1_6,r2_6,r3_6) 
+  reductrate_12<-c(r0_12,r1_12,r2_12,r3_12) 
+  
   val = get_mu_sigma(mu_raw_0,sd_raw_0,  reductrate_6,reductrate_12,  rho) # rho is the correlation coefficient
                     
   # extract the matrix and the mu for each time
@@ -172,8 +186,12 @@ simul_res = function(mu_raw_0, sd_raw_0 , reductrate_6, reductrate_12,  rho ,
   
 }
 
-simul_res (mu_raw_0 = 650, sd_raw_0 = 575, reductrate_6 = c(0,0,0,0), reductrate_12 = c(0,.1,.2,.3), rho = 0.5, n_trials=10000,n_arms = 4,N1 = 60 , N2 = 90,
-                rmonth=1, alpha1=.1 , alpha=.025, sim_out=T,sel_scen=0, side=T,test="t")
+simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0_6=0, r1_6=0,r2_6=0,r3_6=0,r0_12=0,r1_12=0,r2_12=0,r3_12=0, rho = 0.5, 
+           n_trials=10000,n_arms = 4,N1 = 60 , N = 150,
+                rmonth=1, alpha1=.1 , alpha=.025, sim_out1=1,sel_scen=0, side1=1,test1=2)
+
+simul_res (650, 575, 0, 0,0,0,0,0,0,0, 0.5,10000,4, 60 , 150,1, .1 , .025, 1,0, 1,2)
+
 
 do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
                 rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t")
