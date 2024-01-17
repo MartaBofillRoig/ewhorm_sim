@@ -129,6 +129,12 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     pval1<-summary(md0)$coefficients[3:4,5]
   }
   
+  if (test=="w"){
+    p12low <- wilcox.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
+    p12med<-wilcox.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+    pval1<-cbind(p12low,p12med)
+    #pval
+  }
   
   
   
@@ -202,6 +208,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-summary(md0)$coefficients[3:4,5]
     }
     
+    if (test=="w"){
+      p12low2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+      p12med2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+      pval2<-cbind(p12low2,p12med2)
+    }
     
     
     Avalues <- c(preplan@BJ[7]/2, #H123
@@ -272,6 +283,9 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         pval2<-summary(md0)$coefficients[3,5]
       }
       
+      if (test=="w"){
+        pval2 <- wilcox.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
+      }
       
       
       
@@ -340,6 +354,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         pval2<-summary(md0)$coefficients[3:4,5]
       }
       
+      if (test=="w"){
+        p12low2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+        p12med2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+        pval2<-cbind(p12low2,p12med2)
+      }
       
       
       Avalues <- c(preplan@BJ[7]/2, #H123
@@ -416,6 +435,12 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       
       md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage2long)
       pval2<-summary(md0)$coefficients[3:4,5]
+    }
+    
+    if (test=="w"){
+      p12med2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
+      p12hi2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+      pval2<-cbind(p12med2,p12hi2)
     }
     
     
@@ -496,6 +521,10 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-summary(md0)$coefficients[3,5]
     }
     
+    if (test=="w"){
+      pval2 <- wilcox.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
+    }
+    
     
     Avalues <- c(preplan@BJ[7], #H123
                  preplan@BJ[5], #H13
@@ -525,10 +554,10 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   ################################################
   # Multi-arm trial 1
-  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = N1+N2, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
+  ####
+  #Part 1 for low and median dose
+  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = N/5*3, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
   recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
-  
-  
   
   db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
   
@@ -539,8 +568,20 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   model_dunnett_ma1 = summary(glht(model = mod_ma1, linfct=mcp(treat="Dunnett"), alternative = "less"))
   pval_dunnett_ma1 = model_dunnett_ma1$test$pvalues
   
-  decision_ma1<-(pval_dunnett_ma1<alpha)*1
+  #decision_ma1<-(pval_dunnett_ma1<=(alpha/3*2))*1
   
+  #Part 2 for high dose
+  db_stage_ma1 <- sim_dataind(n_arms = 2, N = N/5*2, mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth)
+  recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
+  
+  db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
+  
+  db_stage_ma1$diff6_0<-db_stage_ma1$y_6m-db_stage_ma1$y_0m
+  db_stage_ma1$diff12_0<-db_stage_ma1$y_12m-db_stage_ma1$y_0m
+  
+  pval2_ma1 <- t.test(db_stage_ma1$diff12_0~db_stage_ma1$treat,alternative="greater")$p.value
+  
+  decision_ma1<-c((pval_dunnett_ma1<=(alpha/3*2))*1,(pval2_ma1<=(alpha/3))*1)
   
   ################################################
   # Multi-arm trial 2
