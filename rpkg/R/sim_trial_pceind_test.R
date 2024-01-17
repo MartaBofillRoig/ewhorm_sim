@@ -109,7 +109,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     #pval
   }
   
-  if (test=="l"){
+  if (test=="l"){  #two individual models, due to robustness in case of different variances
     
     for(j in 1:(n_arms-2)){
       
