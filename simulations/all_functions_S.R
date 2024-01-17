@@ -116,7 +116,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   #conditional power
   h_condpow <- matrix(unlist(lapply(results_list, function(element) element$simdec_output)),ncol = 3, byrow = T) 
   disjpow<-sum(apply(h_condpow,1,sum,na.rm=TRUE)>0)/n_trials
-  condpow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/sum(sel_stage2[,3])
+  condpow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/(armsel*n_trials)#sum(sel_stage2[,3])
   pow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/n_trials
   
   
