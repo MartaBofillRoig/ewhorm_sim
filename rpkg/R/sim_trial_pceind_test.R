@@ -15,7 +15,8 @@
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param sim_out Option for simplified output for simulations (if `sim_out=TRUE` simplified version, the value is `FALSE` by default)
 #' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
-#' @param analysis defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, and "x" defines a mixed model.
+#' @param analysis defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, and "m" defines a mixture model, "w" Wilcoxon test of differences
+#' @param dropout dropoutrate, between 0 and 1
 #' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, and the time at which the last patient was recruited in stage 1 and 2.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
@@ -44,9 +45,9 @@ library(multcomp)
 test="m"
 #sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025, sim_out=T,test="m")
 
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t")
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t",dropout=0)
 {
-  
+  N1<-floor(N1/(1+dropout))
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
   recruit_time1 <- max(db_stage1$recruit_time)
   
@@ -168,7 +169,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   
   if(sc==2){  # Arm A and B continue to stage 2
-    
+    N2<-floor(N2/(1+dropout))
     db_stage2 <- sim_dataind(n_arms=3, N = N2, mu_0m =mu_0m[c(1,2,3)], mu_6m =mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sg=sg, rmonth=rmonth)
     levels(db_stage2$treat) <- levels(db_stage1$treat)[c(1,2,3)]
     recruit_time2 <- max(db_stage2$recruit_time)
@@ -244,6 +245,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   if(sc == 1 ){# this means that low dose was the only promising in the interim analysis
     
     if(sel_scen == 0){ #so we drop both low and median doses and start with high dose only in the second stage.
+      N2<-floor(N2/(1+dropout))
       
       db_stage2 <- sim_dataind(n_arms=2, N = N2, mu_0m = mu_0m[c(1,4)],mu_6m = mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
       
@@ -315,6 +317,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     
     if(sel_scen == 1){ #continue with low and median doses
       
+      N2<-floor(N2/(1+dropout))
       db_stage2 <- sim_dataind(n_arms=3, N = N2, mu_0m =mu_0m[c(1,2,3)], mu_6m =mu_6m[c(1,2,3)], mu_12m=mu_12m[c(1,2,3)], sg=sg, rmonth=rmonth)
       levels(db_stage2$treat) <- levels(db_stage1$treat)[c(1,2,3)]
       recruit_time2 <- max(db_stage2$recruit_time)
@@ -389,6 +392,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   if(sc == 3){
     
+    N2<-floor(N2/(1+dropout))
     db_stage2 <- sim_dataind(n_arms=3, N=N2, mu_0m=mu_0m[c(1,3,4)], mu_6m=mu_6m[c(1,3,4)], mu_12m=mu_12m[c(1,3,4)], sg=sg, rmonth=rmonth)
     
     levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1,3)],"High")
@@ -486,6 +490,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   if(sc == 0){ # in that case start dose 3
     
+    N2<-floor(N2/(1+dropout))
     db_stage2 <- sim_dataind(n_arms=2, N=N2, mu_0m=mu_0m[c(1,4)], mu_6m=mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rmonth=rmonth)
     
     levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1)],"High")
@@ -556,7 +561,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   # Multi-arm trial 1
   ####
   #Part 1 for low and median dose
-  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = N/5*3, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
+  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = floor((N/5*3)/(1+dropout)), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth)
   recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
   
   db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
@@ -571,7 +576,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   #decision_ma1<-(pval_dunnett_ma1<=(alpha/3*2))*1
   
   #Part 2 for high dose
-  db_stage_ma1 <- sim_dataind(n_arms = 2, N = N/5*2, mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth)
+  db_stage_ma1 <- sim_dataind(n_arms = 2, N = floor((N/5*2)/(1+dropout)), mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth)
   recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
   
   db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
@@ -585,7 +590,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   ################################################
   # Multi-arm trial 2
-  db_stage_ma2 <- sim_dataind(n_arms = n_arms, N = N1+N2, mu_0m = mu_0m, mu_6m = mu_6m, mu_12m = mu_12m, sg = sg, rmonth = rmonth)
+  db_stage_ma2 <- sim_dataind(n_arms = n_arms, N = floor(N/(1+dropout)), mu_0m = mu_0m, mu_6m = mu_6m, mu_12m = mu_12m, sg = sg, rmonth = rmonth)
   recruit_time_ma2 <- max(db_stage_ma2$recruit_time)
   
   db_stage_ma2$treat <- relevel(db_stage_ma2$treat, ref = "Placebo")
