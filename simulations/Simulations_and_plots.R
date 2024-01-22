@@ -34,14 +34,15 @@ r1_12hi=0.6
 r2_12hi=0.6
 r3_12hi=0.6
 
-pdf(file ="Scenarios.pdf", width = 8, height = 8, pointsize = 12, paper = "special")
-plot(1:3,c(r1_6lo,r2_6lo,r3_6lo),type="b",lty=2,ylim=c(0,1),ylab="reduction rate",xlab="Doses",lwd=2)
-legend("top",legend=c("6 months","6 months","6 months","12 months     scenario 1","12 months     scenario 2","12 months     scenario 3"),lwd=2,col=c(1,2,3),bty="n",lty=c(2,1,2,1,2,1),ncol=2)
+pdf(file ="Scenarios.pdf", width = 10, height = 10, pointsize = 12, paper = "special")
+plot(1:3,c(r1_6lo,r2_6lo,r3_6lo),type="b",lty=2,ylim=c(0,1),ylab="reduction rate",xlab="Doses",lwd=2,xaxt="n")
+axis(1,c(1:3),c("low dose","medium dose","high dose"),cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1)
+legend("topleft",legend=c("6 months","6 months","6 months","12 months scenario 1 - only high dose effective","12 months scenario 2 - Trend","12 months scenario 3 - all effective"),lwd=2,col=c(1,2,"blue"),bty="n",lty=c(2,1,2,1,2,1),ncol=2,cex=1.1)
 lines(1:3,c(r1_12lo,r2_12lo,r3_12lo),type="b",lty=1,lwd=2)
 lines(1:3,c(r1_12me,r2_12me,r3_12me),type="b",lty=1,lwd=2,col=2)
 lines(1:3,c(r1_6me,r2_6me,r3_6me),type="b",lty=2,lwd=2,col=2)            
-lines(1:3,c(r1_12hi,r2_12hi,r3_12hi),type="b",lty=1,lwd=2,col=3)
-lines(1:3,c(r1_6hi,r2_6hi,r3_6hi),type="b",lty=2,lwd=2,col=3)            
+lines(1:3,c(r1_12hi,r2_12hi,r3_12hi),type="b",lty=1,lwd=2,col="blue")
+lines(1:3,c(r1_6hi,r2_6hi,r3_6hi),type="b",lty=2,lwd=2,col="blue")            
 dev.off()
 
 
