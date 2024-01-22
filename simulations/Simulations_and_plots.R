@@ -112,7 +112,7 @@ par (mfrow=c(3,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 #lines(1:3,oncho_no_effect[15,1:3],type="b",lwd=2,col=5,lty=2)
 
 #plot(1:3,oncho_no_effect[8,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-#mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+#mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 #lines(1:3,oncho_no_effect[8,4:6],type="b",lwd=2,col=2)
 #lines(1:3,oncho_no_effect[12,1:3],type="b",lwd=2,col=3,lty=2)
 #lines(1:3,oncho_no_effect[16,1:3],type="b",lwd=2,col=5,lty=2)
@@ -141,7 +141,7 @@ lines(1:3,oncho_low_effect[11,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,oncho_low_effect[15,1:3],type="b",lwd=2,col=5,lty=2)
 
 plot(1:3,oncho_low_effect[8,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_low_effect[8,4:6],type="b",lwd=2,col=2)
 lines(1:3,oncho_low_effect[12,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,oncho_low_effect[16,1:3],type="b",lwd=2,col=5,lty=2)
@@ -228,7 +228,7 @@ mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_no_effect[1,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_no_effect[2,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_no_effect[2,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_no_effect[3,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -292,7 +292,7 @@ par (mfrow=c(3,3), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 #lines(1:3,oncho_no_effect[4,4:6],type="b",lwd=2,col=2)
 
 #plot(1:3,oncho_no_effect[5,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-#mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+#mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 #lines(1:3,oncho_no_effect[5,4:6],type="b",lwd=2,col=2)
 
 #plot(1:3,oncho_no_effect[6,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -310,7 +310,7 @@ mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
 lines(1:3,oncho_low_effect[4,4:6],type="b",lty=1,lwd=2,col=2)
 
 plot(1:3,oncho_low_effect[5,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_low_effect[5,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_low_effect[6,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -413,7 +413,7 @@ par (mfrow=c(3,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 #lines(1:3,oncho_no_effect_test[15,1:3],type="b",lwd=2,col=5,lty=2)
 
 #plot(1:3,oncho_no_effect_test[8,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-#mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+#mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 #lines(1:3,oncho_no_effect_test[8,4:6],type="b",lwd=2,col=2)
 #lines(1:3,oncho_no_effect_test[12,1:3],type="b",lwd=2,col=3,lty=2)
 #lines(1:3,oncho_no_effect_test[16,1:3],type="b",lwd=2,col=5,lty=2)#
@@ -442,7 +442,7 @@ lines(1:3,oncho_low_effect_test[11,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,oncho_low_effect_test[15,1:3],type="b",lwd=2,col=5,lty=2)
 
 plot(1:3,oncho_low_effect_test[8,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_low_effect_test[8,4:6],type="b",lwd=2,col=2)
 lines(1:3,oncho_low_effect_test[12,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,oncho_low_effect_test[16,1:3],type="b",lwd=2,col=5,lty=2)
@@ -529,7 +529,7 @@ mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_no_effect_test[1,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_no_effect_test[2,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_no_effect_test[2,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_no_effect_test[3,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -593,7 +593,7 @@ par (mfrow=c(3,3), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 #lines(1:3,oncho_no_effect_test[4,4:6],type="b",lwd=2,col=2)
 
 #plot(1:3,oncho_no_effect_test[5,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-#mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+#mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 #lines(1:3,oncho_no_effect_test[5,4:6],type="b",lwd=2,col=2)
 
 #plot(1:3,oncho_no_effect_test[6,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -610,7 +610,7 @@ mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
 lines(1:3,oncho_low_effect_test[4,4:6],type="b",lty=1,lwd=2,col=2)
 
 plot(1:3,oncho_low_effect_test[5,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_low_effect_test[5,4:6],type="b",lwd=2,col=2)
 
 plot(1:3,oncho_low_effect_test[6,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
@@ -671,7 +671,7 @@ axis(1,c(1:3),c("0.1","0.2","0.3"),padj=-0.3,cex.axis=1)#,c("Selection","condPow
 mtext(side=1,expression(alpha[1]),cex=1,line=2)#,line=2.2)
 
 plot(1:3,oncho_no_effect[8,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,0.05),lwd=2,col=1)
-mtext(side=3,"Intermediate Dose",cex=1.3)#,line=2.2)
+mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
 lines(1:3,oncho_no_effect[8,4:6],type="b",lwd=2,col=2)
 lines(1:3,oncho_no_effect[12,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,oncho_no_effect[16,1:3],type="b",lwd=2,col=5,lty=2)
