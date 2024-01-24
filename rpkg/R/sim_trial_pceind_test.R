@@ -42,9 +42,8 @@ library(multcomp)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-# n_arms=4; N1=100; mu_0m =c(10,10,10,10); mu_6m =c(10,9,8,7); mu_12m=c(10,9,8,7); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1
-test="m"
-#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1, alpha1 = 0.1, alpha = 0.025, sim_out=T,test="m")
+#n_arms = 4; N1=120; N=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; sim_out=T;test="w";dropout=0.1;rr=c(0,.2,.4,.6)
+#sim_trial_pceind_test (n_arms, N1 , N, mu_0m, mu_6m, mu_12m, sg=, rmonth, alpha1, alpha, sim_out,sel_scen,side,test,dropout,rr)
 
 sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t",dropout=0,rr=c(0,0,0,0))
 {
@@ -76,7 +75,21 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   #pmed <- pt(coef(summary(MedvsC))[, 3], MedvsC$df, lower = side)[2]
   pmed<-t.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+  
+  
+  if (test=="w"){
+    plow <- wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
+    pmed<-wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+    }
+  
+  if (test=="w1"){
+    plow <- wilcox.test(db_stage1$y_6m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
+    pmed<-wilcox.test(db_stage1$y_6m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+  }
+  
   pval.surr <- c(plow, pmed)  #pvalue of surrogate endpoint stage 1
+  
+  
   
   #######################################
   # decisions based on pvalues from linear model at 6 month
@@ -138,6 +151,12 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     #pval
   }
   
+  if (test=="w1"){
+    p12low <- wilcox.test(db_stage1$y_12m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
+    p12med<-wilcox.test(db_stage1$y_12m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+    pval1<-cbind(p12low,p12med)
+    #pval
+  }
   
   
   z <- qnorm(1-pmax(pval1,1e-15))
@@ -216,6 +235,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-cbind(p12low2,p12med2)
     }
     
+    if (test=="w1"){
+      p12low2 <- wilcox.test(db_stage2$y_12m[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+      p12med2<-wilcox.test(db_stage2$y_12m[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+      pval2<-cbind(p12low2,p12med2)
+    }
     
     Avalues <- c(preplan@BJ[7]/2, #H123
                  preplan@BJ[6], #H12
@@ -290,7 +314,9 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         pval2 <- wilcox.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
       }
       
-      
+      if (test=="w1"){
+        pval2 <- wilcox.test(db_stage2$y_12m~db_stage2$treat,alternative="greater")$p.value
+      }      
       
       
       
@@ -364,6 +390,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         pval2<-cbind(p12low2,p12med2)
       }
       
+      if (test=="w1"){
+        p12low2 <- wilcox.test(db_stage2$y_12m[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+        p12med2<-wilcox.test(db_stage2$y_12m[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
+        pval2<-cbind(p12low2,p12med2)
+      }
       
       Avalues <- c(preplan@BJ[7]/2, #H123
                    preplan@BJ[6], #H12
@@ -448,6 +479,11 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-cbind(p12med2,p12hi2)
     }
     
+    if (test=="w1"){
+      p12med2 <- wilcox.test(db_stage2$y_12m[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
+      p12hi2<-wilcox.test(db_stage2$y_12m[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
+      pval2<-cbind(p12med2,p12hi2)
+    }
     
     Avalues <- c(preplan@BJ[7]/2, #H123
                  preplan@BJ[6], #H12
@@ -531,6 +567,9 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2 <- wilcox.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
     }
     
+    if (test=="w1"){
+      pval2 <- wilcox.test(db_stage2$y_12m~db_stage2$treat,alternative="greater")$p.value
+    }
     
     Avalues <- c(preplan@BJ[7], #H123
                  preplan@BJ[5], #H13
@@ -629,8 +668,16 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                 simdec_output=simdec_output,
                 res_intersection=res_intersection,
                 decision_ma1=decision_ma1,
-                decision_ma2=decision_ma2))
+                decision_ma2=decision_ma2,
+                recruit_time1=recruit_time1,
+                recruit_time2=recruit_time2))
   }
-  
+  #par(mfrow=c(2,3))
+  #boxplot(db_stage1$y_0m~db_stage1$treat)
+  #boxplot(db_stage1$diff12_0~db_stage1$treat)
+  #boxplot(db_stage1$y_12m~db_stage1$treat)
+  #boxplot(db_stage2$y_0m~db_stage2$treat)
+  #boxplot(db_stage2$diff12_0~db_stage2$treat)
+  #boxplot(db_stage2$y_12m~db_stage2$treat)
 }
 

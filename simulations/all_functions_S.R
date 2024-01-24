@@ -17,73 +17,14 @@ library(mvtnorm)
 #FUNCTION 1: Do the calculation to obtain the mu and the sigma
 ##############################################################
 
-get_mu_sigma = function(mu_raw_0, sd_raw_0 , reductrate_6 , reductrate_12, rho )
-{
-
-########################################
-# PART 1: defining parameters
-########################################
-
-mu_raw_6 <- (1-reductrate_6)*mu_raw_0 ##The mean after six months from the common baseline
-mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
-
-sd_log_0 <- sqrt(log(1+(sd_raw_0^2/mu_raw_0^2) )) # sd(log(x0))  Baseline
-sd_raw_6 <- mu_raw_6*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log after six month
-
-
-#12 month : THIS IS THE SAME CODE As 6 MONTHs
-mu_raw_12 <- (1-reductrate_12)*mu_raw_0 ##The mean after six months from the common baseline
-#mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
-
-#sd_log_0_12 <- sqrt(log(1+(sd_raw_0^2/mu_raw_0^2) )) # sd(log(x0))  Baseline
-sd_raw_12 <- mu_raw_12*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log after six month
-
-##############################################
-# PART 2 : Setting the all for the simulation
-##############################################
-#Obtain the vector mu for each time point
-#########################################
-
-mu_log_0<-rep(mu_log_0,4)
-mu_log_6<-log(mu_raw_6^2/sqrt(mu_raw_6^2 + sd_raw_6^2))
-mu_log_12<-log(mu_raw_12^2/sqrt(mu_raw_12^2 + sd_raw_12^2))
-
-
-# Variance-covariance matrix
-############################
-
-#1. Elements of the matrix
-
-
-var0 <- sd_log_0^2 # cov(log(X0)
-var6 <- sd_log_0^2 # cov(log(X06m) 
-var12<- sd_log_0^2 # cov(log(X12m)
-
-#cov_X0_X0 <- var0
-cov_X0_X6m <- rho*sd_log_0^2 # cov(log(X0), log(X6m)) 
-cov_X0_X12m <- rho^2*sd_log_0^2 #cov(log(X0), log(X12m)) 
-cov_X6_X0 <- rho*sd_log_0^2 # cov(log(X6), log(X0m)) 
-#cov_X6_X6 <- var6
-cov_X6_X12m <- rho*sd_log_0^2 #cov(log(X6), log(X12m)) 
-cov_X12m_X0 <- rho^2*sd_log_0^2 #cov(log(X12m), log(X0)) 
-cov_X12m_X6 <- rho*sd_log_0^2 #cov(log(X12m), log(X6m)) 
-#cov_X12m_X12m <- var12  #cov(log(X12m), log(X12m)) 
-
-
-#2. Matrix: not the correlation matrix but the variance covariance matrix
-sg <- matrix(c(var0, cov_X0_X6m, cov_X0_X12m, cov_X6_X0, var6, cov_X6_X12m,cov_X12m_X0, cov_X12m_X6, var12), ncol=3)
-
-
-return(list(mu_raw_0, c(mu_log_0), c(mu_log_6), c(mu_log_12), sg))
-}
-
+#get_mu_sigma
 
 #FUNCTION 2: Using mu and sigma obtained above then run the function below
 ##########################################################################
 
 # n_trials=1000; n_arms=4; N1=900;N2=60 mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); 
 #rmonth=1;alpha1=.1; alpha=0.025;
-#do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t")
+do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
 do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
                                         rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
 
@@ -125,8 +66,15 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   
   pow_ma1<-c(apply(h_ma1,2,sum)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
   pow_ma2<-c(apply(h_ma2,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma2,1,sum,na.rm=TRUE)>0)/n_trials)
+
+  #recruittime
+  recruit1 <- matrix(unlist(lapply(results_list, function(element) element$recruit_time1)),ncol = 1, byrow = T) 
+  recruittime1<-sum(recruit1, na.rm = T)/n_trials
+  recruit2 <- matrix(unlist(lapply(results_list, function(element) element$recruit_time2)),ncol = 1, byrow = T) 
+  recruittime2<-sum(recruit2, na.rm = T)/n_trials
+
   
-  return(c(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2))
+  return(c(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2,recruittime1,recruittime2))
 }
 
 #FUNCTION 3: function 1 AND function 2
@@ -155,6 +103,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   if (test1==1) test<-"m"
   if (test1==2) test<-"t"
   if (test1==3) test<-"w"
+  if (test1==4) test<-"w1"
   
    N2<-N-N1
   

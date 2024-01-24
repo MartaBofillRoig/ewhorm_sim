@@ -62,4 +62,4 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth,rr){
   return(data)
 }
 
-#sim_dataind (n_arms = 4, N=60,  mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1,c(.1,.2,.3,.4))
+#sim_dataind (n_arms = 4, N=120,  mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1,c(.1,.2,.3,.4))
