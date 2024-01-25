@@ -23,11 +23,11 @@ r3_hi=0.6
 
 
 
-sim_trial_Trichuris <- function(n_arms = 4, N , mu,sigma,reductrate rmonth, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t",dropout=0,rr=c(0,0,0,0))
+sim_trial_Trichuris <- function(n_arms = 4, N , mu,sigma,reductrate, rmonth, alpha = 0.025, side=T,test="t",dropout=0,rr=c(0,0,0,0))
 {
   N1<-floor(N1/(1+dropout))
   val<-get_mu_sigma(mu,sigma, reductrate_6=reductrate,reductrate_12 = reductrate, rho=.5) # rho is the correlation coefficient
-  db_stage1 <- sim_dataind(n_arms = n_arms, N = N1, mu_0m = val[[2]], mu_6m = val[[3]], mu_12m = val[[4]], sg = val[[5]], rmonth = rmonth,rr=rr)
+  db_stage1 <- sim_dataind(n_arms = n_arms, N = N1, mu_0m = val[[2]][1:n_arms], mu_6m = val[[3]][1:n_arms], mu_12m = val[[4]][1:n_arms], sg = val[[5]], rmonth = rmonth,rr=rr[1:n_arms])
   recruit_time1 <- max(db_stage1$recruit_time)
   
   
@@ -83,4 +83,7 @@ sim_trial_Trichuris <- function(n_arms = 4, N , mu,sigma,reductrate rmonth, alph
   }
   
   p.adjust(pval1,method="holm")
-  
+}
+
+sim_trial_Trichuris(n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="t",dropout=0,rr=c(0,0,0,0))
+n_arms = 3; N=150; mu=50;sigma=1;reductrate=c(0,0,1,1); rmonth=3; alpha = 0.025; side=T;test="t";dropout=0;rr=c(0,0,0,0);
