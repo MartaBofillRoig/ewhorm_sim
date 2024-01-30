@@ -96,7 +96,7 @@ sim_trial_Trichuris <- function(n_arms , N , mu,sigma,reductrate, rmonth, alpha 
 }
 
 sim_trial_Trichuris(n_arms = 4, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
-n_arms = 3; N=150; mu=50;sigma=1;reductrate=c(r0_me,r1_me,r2_me,r3_me); rmonth=3; alpha = 0.025; side=T;test="t";dropout=0;rr=c(0,0,0,0);
+#n_arms = 3; N=150; reductrate=c(r0_me,r1_me,r2_me,r3_me); rmonth=3; alpha = 0.025; side=T;test="t";dropout=0;rr=c(0,0,0,0);
 
 
 
@@ -133,7 +133,7 @@ do_Trichuris = function(n_trials,n_arms , N , mu,sigma,reductrate0,reductrate1,r
   return(pow)
 }
 
-do_Trichuris(n_trials=1000,n_arms = 4, N=150 , mu=50,sigma=50,reductrate0=r0_hi,reductrate1=r1_hi,reductrate2=r2_hi,reductrate3=0, rmonth=3, alpha = 0.025, side1=T,test1="w1",dropout=0,rr0=0,rr1=0,rr2=0,rr3=0)
+do_Trichuris(n_trials=1000,n_arms = 4, N=150 , mu=50,sigma=50,reductrate0=0,reductrate1=0,reductrate2=0,reductrate3=0.1, rmonth=3, alpha = 0.025, side1=T,test1="w1",dropout=0,rr0=0,rr1=0,rr2=0,rr3=0)
 #do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
 #do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
 #do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
@@ -143,7 +143,7 @@ do_Trichuris(n_trials=1000,n_arms = 4, N=150 , mu=50,sigma=50,reductrate0=r0_hi,
 #Trich
 
 mu<-1000
-sigma<-1500
+sigma<-2000
 rmonth=1
 
 
@@ -249,7 +249,6 @@ Trichuris_high_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0
 
 #Power
 pdf(file ="Trichuris_Pow.pdf", width = 12, height = 3, pointsize = 12, paper = "special")
-
 par (mfrow=c(1,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 plot(1:9,Trichuris_no_effect[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col="white")
 legend("center",legend=c("Scenario high dose effective","Scenario Trend","Scenario all effective"),lwd=2,col=c(2,3,5),lty=c(1,1,2,2),bty="n",cex=1.3)
@@ -281,10 +280,11 @@ mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)
 lines(1:9,Trichuris_low_effect[4,],type="b",lwd=2,col=2)
 lines(1:9,Trichuris_med_effect[4,],type="b",lwd=2,col=3,lty=2)
 lines(1:9,Trichuris_high_effect[4,],type="b",lwd=2,col=5,lty=2)
+#legend("top",legend=c("selection strategy 1","selection strategy 0","MA1","MA2"),lwd=2,col=c(1,2,3,4),lty=c(1,1,2,2),bty="n",cex=1.3)
 
 #mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 #axis(1,c(1:3),c("0.1","0.2","0.3"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
-axis(1,c(1:9),seq(0,0.8,0.1),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+#axis(1,c(1:9),seq(0,0.8,0.1),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 dev.off()
 
@@ -301,38 +301,37 @@ Trichuris_tests_resp_me<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_me
 
 
 pdf("Trichuris_Pow_resp.pdf", width = 12, height = 3, pointsize = 12, paper = "special")
-
 par (mfrow=c(1,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 plot(1:4,Trichuris_tests_resp_lo[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=2)
 lines(1:4,Trichuris_tests_resp_me[1,],type="b",lty=1,lwd=2,col=3)
 lines(1:4,Trichuris_tests_resp_hi[1,],type="b",lty=1,lwd=2,col=4)
 mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
 mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
-axis(1,c(1:4),c("lm","t-test","non par.diff","non par.val"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+axis(1,c(1:4),c("lm","t-test","Wilc (diff)","Wilc (val)"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 plot(1:4,Trichuris_tests_resp_lo[2,],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=2)
 lines(1:4,Trichuris_tests_resp_me[2,],type="b",lty=1,lwd=2,col=3)
 lines(1:4,Trichuris_tests_resp_hi[2,],type="b",lty=1,lwd=2,col=4)
 mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
-axis(1,c(1:4),c("lm","t-test","non par.diff","non par.val"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+axis(1,c(1:4),c("lm","t-test","Wilc (diff)","Wilc (val)"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 plot(1:4,Trichuris_tests_resp_lo[3,],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=2)
 lines(1:4,Trichuris_tests_resp_me[3,],type="b",lty=1,lwd=2,col=3)
 lines(1:4,Trichuris_tests_resp_hi[3,],type="b",lty=1,lwd=2,col=4)
 mtext(side=3,"High Dose",cex=1.3)#,line=2.2)
 #mtext(side=4,"Global null hypothesis",cex=1,line=1)#,line=2.2)
-axis(1,c(1:4),c("lm","t-test","non par.diff","non par.val"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+axis(1,c(1:4),c("lm","t-test","Wilc (diff)","Wilc (val)"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 plot(1:4,Trichuris_tests_resp_lo[4,],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=2)
 lines(1:4,Trichuris_tests_resp_me[4,],type="b",lty=1,lwd=2,col=3)
 lines(1:4,Trichuris_tests_resp_hi[4,],type="b",lty=1,lwd=2,col=4)
 mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)
-axis(1,c(1:4),c("lm","t-test","non par.diff","non par.val"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+axis(1,c(1:4),c("lm","t-test","Wilc (diff)","Wilc (val)"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 #axis(1,c(1:3),c("0.1","0.2","0.3"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,expression(alpha[1]),cex=1,line=2)#,line=2.2)
-axis(1,c(1:4),c("lm","t-test","non par.diff","non par.val"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+axis(1,c(1:4),c("lm","t-test","Wilc (diff)","Wilc (val)"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 
 dev.off()
 
