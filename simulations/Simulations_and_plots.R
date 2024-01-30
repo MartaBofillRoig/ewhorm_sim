@@ -1,8 +1,8 @@
 ###################################################################
 #oncho
 
-mu<-20
-sigma<-28
+mu<-19
+sigma<-30
 rmonth=1
 
 
@@ -59,6 +59,13 @@ lines(1:3,c(r1_12hi,r2_12hi,r3_12hi),type="b",lty=1,lwd=2,col="blue")
 lines(1:3,c(r1_6hi,r2_6hi,r3_6hi),type="b",lty=2,lwd=2,col="blue")            
 dev.off()
 
+pdf(file ="Scenarios_Trichuris.pdf", width = 10, height = 10, pointsize = 12, paper = "special")
+plot(1:3,c(r1_12lo,r2_12lo,r3_12lo),type="b",lty=1,ylim=c(0,1),ylab="Reduction rate",xlab="Doses",lwd=2,xaxt="n",cex.lab=1.5,cex.axis=1.3)
+axis(1,c(1:3),c("low dose","medium dose","high dose"),cex.axis=1.3,cex=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
+legend("topleft",legend=c("Only high dose effective","Trend","All doses effective"),lwd=2,col=c(1,2,"blue"),bty="n",lty=c(1,1,1),ncol=1,cex=1.3)
+lines(1:3,c(r1_12me,r2_12me,r3_12me),type="b",lty=1,lwd=2,col=2)
+lines(1:3,c(r1_12hi,r2_12hi,r3_12hi),type="b",lty=1,lwd=2,col="blue")
+dev.off()
 
 
 

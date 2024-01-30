@@ -114,6 +114,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   
   rr<-c(rr0,rr1,rr2,rr3) 
   
+  if (geom==0)
   val = get_mu_sigma(mu_raw_0,sd_raw_0,  reductrate_6,reductrate_12,  rho) # rho is the correlation coefficient
                     
   # extract the matrix and the mu for each time
@@ -140,6 +141,8 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
 simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0_6=0, r1_6=0,r2_6=0,r3_6=0,r0_12=0,r1_12=0,r2_12=0,r3_12=0, rho = 0.5, 
            n_trials=10000,n_arms = 4,N1 = 60 , N = 150,
                 rmonth=1, alpha1=.1 , alpha=.025, sim_out1=1,sel_scen=0, side1=1,test1=2,dropout=.1,rr0=0,rr1=0,rr2=0,rr3=0)
+
+r0_6=0; r1_6=0;r2_6=0;r3_6=0;r0_12=0;r1_12=0;r2_12=0;r3_12=0 rho = 0.5, 
 
 simul_res (650, 575, 0, 0,0,0,0,0,0,0, 0.5,10000,4, 60 , 150,1, .1 , .025, 1,0, 1,2,.1,,rr0=0,rr1=0,rr2=0,rr3=0)
 
