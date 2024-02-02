@@ -220,11 +220,12 @@ rr1=0
 rr2=0
 rr3=0
 
-#reduct0<-0
-#reduct1<-0
-#reduct2<-0
-#reduct3<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-#Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
+reduct0<-0
+reduct1<-0
+reduct2<-0
+reduct3<-0
+n_trials<-100000
+Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
 
 reduct0<-0
 reduct1<-0
@@ -289,20 +290,20 @@ lines(1:9,Trichuris_high_effect[4,],type="b",lwd=2,col=5,lty=2)
 dev.off()
 
 
-test1=c(0,2,3,4)
-rr0=0.1
-rr1=.5
-rr2=.5
-rr3=.5
-Trichuris_tests_resp_hi<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_hi,r1_hi,r2_hi,r3_hi, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
-Trichuris_tests_resp_lo<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_lo,r1_lo,r2_lo,r3_lo, rmonth, alpha, side1,test1,dropout,rr0,.1,.1,rr3)
-Trichuris_tests_resp_me<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_me,r1_me,r2_me,r3_me, rmonth, alpha, side1,test1,dropout,rr0,.1,rr2,rr3)
+#test1=c(0,2,3,4)
+#rr0=0.1
+#rr1=.5
+#rr2=.5
+#rr3=.5
+#Trichuris_tests_resp_hi<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_hi,r1_hi,r2_hi,r3_hi, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
+#Trichuris_tests_resp_lo<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_lo,r1_lo,r2_lo,r3_lo, rmonth, alpha, side1,test1,dropout,rr0,.1,.1,rr3)
+#Trichuris_tests_resp_me<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,r0_me,r1_me,r2_me,r3_me, rmonth, alpha, side1,test1,dropout,rr0,.1,rr2,rr3)
 
 
 
-pdf("Trichuris_Pow_resp.pdf", width = 12, height = 3, pointsize = 12, paper = "special")
-par (mfrow=c(1,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
-plot(1:4,Trichuris_tests_resp_lo[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=2)
+#pdf("Trichuris_Pow_resp.pdf", width = 12, height = 3, pointsize = 12, paper = "special")
+#par (mfrow=c(1,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
+#plot(1:4,Trichuris_tests_resp_lo[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=2)
 lines(1:4,Trichuris_tests_resp_me[1,],type="b",lty=1,lwd=2,col=3)
 lines(1:4,Trichuris_tests_resp_hi[1,],type="b",lty=1,lwd=2,col=4)
 mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
