@@ -601,7 +601,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   # Multi-arm trial 1
   ####
   #Part 1 for low and median dose
-  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = floor((N/5*3)/(1+dropout)), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth,rr=rr)
+  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = floor((N/5*3)/(1+dropout)), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth,rr=rr[1:n_arms-1])
   recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
   
   db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
@@ -616,7 +616,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   #decision_ma1<-(pval_dunnett_ma1<=(alpha/3*2))*1
   
   #Part 2 for high dose
-  db_stage_ma1 <- sim_dataind(n_arms = 2, N = floor((N/5*2)/(1+dropout)), mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth,rr=rr)
+  db_stage_ma1 <- sim_dataind(n_arms = 2, N = floor((N/5*2)/(1+dropout)), mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth,rr=rr[c(1,n_arms)])
   recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
   
   db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")

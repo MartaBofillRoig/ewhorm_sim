@@ -64,7 +64,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 3, byrow = T)
   h_ma2<-matrix(unlist(lapply(results_list, function(element) element$decision_ma2)),ncol = 3, byrow = T)
   
-  pow_ma1<-c(apply(h_ma1,2,sum)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
+  pow_ma1<-c(apply(h_ma1,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
   pow_ma2<-c(apply(h_ma2,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma2,1,sum,na.rm=TRUE)>0)/n_trials)
 
   #recruittime
