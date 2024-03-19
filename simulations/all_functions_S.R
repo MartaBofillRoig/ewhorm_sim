@@ -24,9 +24,12 @@ library(mvtnorm)
 
 # n_trials=1000; n_arms=4; N1=900;N2=60 mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); 
 #rmonth=1;alpha1=.1; alpha=0.025;
-do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
+#do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
 do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
                                         rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
+
+do_pce_baseline(n_trials=n_trials,n_arms = n_arms, N1=N1 , N2=N2, mu_0m=mu_0m, mu_6m=mu_6m, mu_12m=mu_12m, sg=sg, 
+                rmonth=rmonth, alpha1 = alpha1, alpha = alpha,sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=.1,rr=rep(0,4))
 
 do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg, rmonth, alpha1 , alpha , sim_out,sel_scen, side,test,dropout,rr)
 {
@@ -37,7 +40,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   plan(multisession, workers = n_cores)
   
   # Run the simulations in parallel using future_map
-  results_list <- future_map(1:n_trials, function(i)#sim_trial_pceind_test (n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), 
+  results_list <- future_map(1:n_trials, function(i)#sim_trial_pceind_test (n_arms = 4, N1=60 , N2=90, mu_0m=rep(6.18,4), 
                                                     #                        mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), 
                                                     #                        sg=matrix(c(.57,0,0,0,.57,0,0,0,.57),3), 
                                                     #                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t"), 
@@ -83,7 +86,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   
 
 simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,
-                     n_trials,n_arms = 4,N1 , N, rmonth, alpha1 , alpha ,
+                     n_trials,n_arms = 4,N1 , N2, rmonth, alpha1 , alpha ,
                      sim_out1,sel_scen, side1,test1,dropout,rr0,rr1,rr2,rr3)
 {
   
@@ -105,7 +108,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   if (test1==3) test<-"w"
   if (test1==4) test<-"w1"
   
-   N2<-N-N1
+   #N2<-N-N1
   
   #Compute mu et sigma
   ####################
@@ -114,7 +117,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   
   rr<-c(rr0,rr1,rr2,rr3) 
   
-  if (geom==0)
+  #if (geom==0)
   val = get_mu_sigma(mu_raw_0,sd_raw_0,  reductrate_6,reductrate_12,  rho) # rho is the correlation coefficient
                     
   # extract the matrix and the mu for each time
@@ -130,7 +133,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   
   aa = #do_pce_baseline(n_trials=n_trials,n_arms = 4,N1 = N1, N2 = N2, mu_0m = m0,   mu_6m = m6, mu_12m = m12,  sg = mtr1, 
       #                  rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,   sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
-        do_pce_baseline(n_trials=n_trials,n_arms = 4,N1=N1 , N=N2, mu_0m=m0, mu_6m=m6, mu_12m=m12, sg=mtr1,
+        do_pce_baseline(n_trials=n_trials,n_arms = 4,N1=N1 , N2=N2, mu_0m=m0, mu_6m=m6, mu_12m=m12, sg=mtr1,
                     rmonth=rmonth, alpha1=alpha1 , alpha=alpha , sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=dropout,rr=rr)
   
   #return(list(mtr1,m0,m6,m12,aa))
@@ -139,7 +142,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
 }
 
 simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0_6=0, r1_6=0,r2_6=0,r3_6=0,r0_12=0,r1_12=0,r2_12=0,r3_12=0, rho = 0.5, 
-           n_trials=10000,n_arms = 4,N1 = 60 , N = 150,
+           n_trials=10000,n_arms = 4,N1 = 60 , N2 = 150,
                 rmonth=1, alpha1=.1 , alpha=.025, sim_out1=1,sel_scen=0, side1=1,test1=2,dropout=.1,rr0=0,rr1=0,rr2=0,rr3=0)
 
 r0_6=0; r1_6=0;r2_6=0;r3_6=0;r0_12=0;r1_12=0;r2_12=0;r3_12=0 rho = 0.5, 

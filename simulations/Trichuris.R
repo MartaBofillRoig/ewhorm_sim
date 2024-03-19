@@ -125,8 +125,8 @@ do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate0=0,redu
 
 
 
-mu<-1000
-sigma<-2000
+mu<-900#1000
+sigma<-3500#2000
 rmonth=1
 
 
@@ -671,7 +671,7 @@ dropout=.1
 #rr0=0
 #rr1=.50
 #rr2=.5
-n_trials<-100000
+n_trials<-10000#0
 rmonth=3
 #no_effect
 
@@ -969,7 +969,7 @@ Trichuris_high_effect4<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct
 
 
 #Power
-pdf(file ="Trichuris_PowV2_120.pdf", width = 9, height = 6, pointsize = 12, paper = "special")
+pdf(file ="Trichuris_PowV2_120_x.pdf", width = 9, height = 6, pointsize = 12, paper = "special")
 par (mfrow=c(2,3), mar=c(1, 1, 1, 1) + 0.1, oma=c(3, 3, 1, 1))
 plot(1:9,Trichuris_no_effect[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col="black")
 legend(x=0.3,y=0.9,legend=c("Reduction rate low dose", "0","0.2","0.4","0.6"),lwd=2,col=c("white","black",2,3,5),lty=1,bty="n",cex=1.3)

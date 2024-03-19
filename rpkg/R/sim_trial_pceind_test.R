@@ -42,9 +42,9 @@ library(multcomp)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-#n_arms = 4; N1=120; N=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; sim_out=T;test="w";dropout=0.1;rr=c(0,.2,.4,.6)
-#sim_trial_pceind_test (n_arms, N1 , N, mu_0m, mu_6m, mu_12m, sg=, rmonth, alpha1, alpha, sim_out,sel_scen,side,test,dropout,rr)
-
+#n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; sim_out=T;test="w";dropout=0.1;rr=c(0,.2,.4,.6)
+sim_trial_pceind_test (n_arms, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1, alpha, sim_out,sel_scen,side,test,dropout,rr)
+#sim_trial_pceind_test(n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="l",dropout=.1,rr=rep(0,4))
 sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t",dropout=0,rr=c(0,0,0,0))
 {
   N1<-floor(N1/(1+dropout))
@@ -601,32 +601,71 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   # Multi-arm trial 1
   ####
   #Part 1 for low and median dose
-  db_stage_ma1 <- sim_dataind(n_arms = n_arms-1, N = floor((N/5*3)/(1+dropout)), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth,rr=rr[1:n_arms-1])
-  recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
+  db_stage_ma1a <- sim_dataind(n_arms = n_arms-1, N = floor((N/5*3)/(1+dropout)), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth,rr=rr[1:n_arms-1])
+  #recruit_time_ma1a <- max(db_stage_ma1$recruit_timea)
   
-  db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
+  db_stage_ma1a$treat <- relevel(db_stage_ma1a$treat, ref = "Placebo")
   
-  db_stage_ma1$diff6_0<-db_stage_ma1$y_6m-db_stage_ma1$y_0m
-  db_stage_ma1$diff12_0<-db_stage_ma1$y_12m-db_stage_ma1$y_0m
+  db_stage_ma1a$diff6_0<-db_stage_ma1a$y_6m-db_stage_ma1a$y_0m
+  db_stage_ma1a$diff12_0<-db_stage_ma1a$y_12m-db_stage_ma1a$y_0m
   
-  mod_ma1 <- aov(diff12_0 ~ treat+y_0m, db_stage_ma1)
-  model_dunnett_ma1 = summary(glht(model = mod_ma1, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnett_ma1 = model_dunnett_ma1$test$pvalues
-  
-  #decision_ma1<-(pval_dunnett_ma1<=(alpha/3*2))*1
   
   #Part 2 for high dose
-  db_stage_ma1 <- sim_dataind(n_arms = 2, N = floor((N/5*2)/(1+dropout)), mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth,rr=rr[c(1,n_arms)])
-  recruit_time_ma1 <- max(db_stage_ma1$recruit_time)
+  db_stage_ma1b <- sim_dataind(n_arms = 2, N = floor((N/5*2)/(1+dropout)), mu_0m = mu_0m[c(1,n_arms)], mu_6m = mu_6m[c(1,n_arms)], mu_12m = mu_12m[c(1,n_arms)], sg = sg, rmonth = rmonth,rr=rr[c(1,n_arms)])
+  recruit_time_ma1b <- max(db_stage_ma1b$recruit_time)
   
-  db_stage_ma1$treat <- relevel(db_stage_ma1$treat, ref = "Placebo")
+  db_stage_ma1b$treat <- relevel(db_stage_ma1b$treat, ref = "Placebo")
   
-  db_stage_ma1$diff6_0<-db_stage_ma1$y_6m-db_stage_ma1$y_0m
-  db_stage_ma1$diff12_0<-db_stage_ma1$y_12m-db_stage_ma1$y_0m
+  db_stage_ma1b$diff6_0<-db_stage_ma1b$y_6m-db_stage_ma1b$y_0m
+  db_stage_ma1b$diff12_0<-db_stage_ma1b$y_12m-db_stage_ma1b$y_0m
   
-  pval2_ma1 <- t.test(db_stage_ma1$diff12_0~db_stage_ma1$treat,alternative="greater")$p.value
   
-  decision_ma1<-c((pval_dunnett_ma1<=(alpha/3*2))*1,(pval2_ma1<=(alpha/3))*1)
+  
+  if (test=="l")
+  {
+  mod_ma1a <- aov(diff12_0 ~ treat+y_0m, db_stage_ma1a)
+  model_dunnett_ma1a = summary(glht(model = mod_ma1a, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnett_ma1a = model_dunnett_ma1a$test$pvalues
+  
+  #part2
+  mod_ma1b <- aov(diff12_0 ~ treat+y_0m, db_stage_ma1b)
+  model_dunnett_ma1b = summary(glht(model = mod_ma1b, linfct=mcp(treat="Dunnett"), alternative = "less"))
+  pval_dunnett_ma1b = model_dunnett_ma1b$test$pvalues
+  
+  decision_ma1<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(pval_dunnett_ma1b<=(alpha/3))*1)
+  }
+  
+  if (test=="t"){
+    pma1loa<-t.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
+    pma1mea<-t.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Low"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Low"],alternative="greater")$p.value
+    pvalma1a<-cbind(pma1loa,pma1mea)
+    
+    pma1hi<-t.test(db_stage_ma1b$diff12_0~db_stage_ma1b$treat,alternative="greater")$p.value
+    #decision_ma1<-c((pvalma1a<=(alpha/3*2))*1,(pma1hi<=(alpha/3))*1)
+    decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+    
+  }
+  
+  if (test=="w"){
+    pma1loa<-wilcox.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
+    pma1mea<-wilcox.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Low"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Low"],alternative="greater")$p.value
+    pvalma1a<-cbind(pma1loa,pma1mea)
+    
+    pma1hi<-wilcox.test(db_stage_ma1b$diff12_0~db_stage_ma1b$treat,alternative="greater")$p.value
+    
+    decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+  }
+  
+  
+  if (test=="w1"){
+    pma1loa<-wilcox.test(db_stage_ma1a$y_12m[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
+    pma1mea<-wilcox.test(db_stage_ma1a$y_12m[db_stage_ma1a$treat!="Low"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Low"],alternative="greater")$p.value
+    pvalma1a<-cbind(pma1loa,pma1mea)
+    
+    pma1hi<-wilcox.test(db_stage_ma1b$y_12m~db_stage_ma1b$treat,alternative="greater")$p.value
+    
+    decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+  }
   
   ################################################
   # Multi-arm trial 2
@@ -638,11 +677,41 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   db_stage_ma2$diff6_0<-db_stage_ma2$y_6m-db_stage_ma2$y_0m
   db_stage_ma2$diff12_0<-db_stage_ma2$y_12m-db_stage_ma2$y_0m
   
+  if (test=="l")
+  {
   mod_ma2 <- aov(diff12_0 ~ treat+y_0m, db_stage_ma2)
   model_dunnett_ma2 = summary(glht(model = mod_ma2, linfct=mcp(treat="Dunnett"), alternative = "less"))
   pval_dunnett_ma2 = model_dunnett_ma2$test$pvalues
   
   decision_ma2<-(pval_dunnett_ma2<=alpha)*1
+  }
+  
+  if (test=="t"){
+    pma1loa<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$p.value
+    pma1mea<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
+    pma1hia<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$p.value
+                                                                                                                                                                                                    pvalma1a<-cbind(pma1loa,pma1mea)
+                                                                                                                                                                                                    pvalma1a
+    decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
+    
+  }
+  
+  if (test=="w"){
+    pma1loa<-wilcox.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$p.value
+    pma1mea<-wilcox.test(db_stage_ma2$diff12_0[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
+    pma1hia<-wilcox.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$p.value
+    decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
+                                                                                                                                                                                                                                                                                                          
+  }
+  
+  if (test=="w1"){
+    pma1loa<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$p.value
+    pma1mea<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
+    pma1hia<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$p.value
+    decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
+    
+  }
+  
   
   #######################################
   if(sim_out==F){
