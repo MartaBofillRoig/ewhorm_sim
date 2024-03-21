@@ -1,7 +1,7 @@
 ###################################################################
 #loa
 
-mu<-4000
+mu<-5000
 sigma<-4000
 rmonth=1
 
@@ -32,7 +32,7 @@ r3_12lo=0.6
 
 r0_6me=0
 r1_6me=0
-r2_6me=0.3
+r2_6me=0.4
 r3_6me=0.5
 r0_12me=0
 r1_12me=0
@@ -65,7 +65,7 @@ N = 200-N1
 alpha1<-c(.1,.2,.3,.1,.2,.3)
 alpha=.025
 sim_out1=1
-sel_scen=0
+sel_scen=1#0
 side1=1
 test1=0
 dropout=.1
@@ -141,7 +141,8 @@ par (mfrow=c(3,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 
 
 plot(1:3,loa_low_effect[7,1:3],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
-legend("top",legend=c(expression(N[1]==80),expression(N[1]==120),"MA1","MA2"),lwd=2,col=c(1,2,3,4,"white","white"),lty=c(1,1,2,2),bty="n",cex=1.3)
+#legend("top",legend=c(expression(N[1]==80),expression(N[1]==120),"MA1","MA2"),lwd=2,col=c(1,2,3,4,"white","white"),lty=c(1,1,2,2),bty="n",cex=1.3)
+legend("top",legend=c(expression(N[1]==80),expression(N[1]==120),"MA1","MA1a","MA2"),lwd=2,col=c(1,2,3,"grey",5,"white","white"),lty=c(1,1,2,3,2),bty="n",cex=1.3)
 mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
 mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 lines(1:3,loa_low_effect[7,4:6],type="b",lty=1,lwd=2,col=2)
@@ -159,12 +160,14 @@ mtext(side=3,"High Dose",cex=1.3)#,line=2.2)
 lines(1:3,loa_low_effect[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_low_effect[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_low_effect[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_low_effect[21,1:3],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:3,loa_low_effect[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 lines(1:3,loa_low_effect[10,4:6],type="b",lwd=2,col=2)
 mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)lines(1:3,loa_low_effect[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_low_effect[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_low_effect[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_low_effect[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario high dose eff.",cex=1,line=1)#,line=2.2)
 
 
@@ -183,11 +186,13 @@ plot(1:3,loa_med_effect[9,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=
 lines(1:3,loa_med_effect[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_med_effect[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_med_effect[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_med_effect[21,1:3],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:3,loa_med_effect[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 lines(1:3,loa_med_effect[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_med_effect[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_med_effect[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_med_effect[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario Trend",cex=1,line=1)#,line=2.2)
 
 plot(1:3,loa_high_effect[7,1:3],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
@@ -209,6 +214,7 @@ plot(1:3,loa_high_effect[9,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col
 lines(1:3,loa_high_effect[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_high_effect[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_high_effect[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_high_effect[21,1:3],type="b",lwd=2,col="grey",lty=3)
 axis(1,c(1:3),c("0.1","0.2","0.3"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,expression(alpha[1]),cex=1,line=2)#,line=2.2)
 
@@ -216,6 +222,7 @@ plot(1:3,loa_high_effect[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,co
 lines(1:3,loa_high_effect[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_high_effect[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_high_effect[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_high_effect[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 axis(1,c(1:3),c("0.1","0.2","0.3"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,expression(alpha[1]),cex=1,line=2)#,line=2.2)
@@ -381,7 +388,7 @@ N1<-120
 N<-200-N1
 alpha1<-.3
 sel_scen=c(0,0,0,1,1,1)
-test1=c(0,2,3,0,2,3)
+test1=c(0,3,4,0,3,4)
 
 #no_effect
 
@@ -447,7 +454,8 @@ par (mfrow=c(3,4), mar=c(1, 1, 1, 1), oma=c(3, 3, 1, 1))
 
 
 plot(1:3,loa_low_effect_test[7,1:3],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
-legend("top",legend=c("Selection strategy B","Selection strategy A","MA1","MA2"),lwd=2,col=c(1,2,3,4),lty=c(1,1,2,2),bty="n",cex=1.3)
+#legend("top",legend=c("Selection strategy B","Selection strategy A","MA1","MA2"),lwd=2,col=c(1,2,3,4),lty=c(1,1,2,2),bty="n",cex=1.3)
+legend("top",legend=c("Selection strategy B","Selection strategy A","MA1","MA1a","MA2"),lwd=2,col=c(1,2,3,"grey",5),lty=c(1,1,2,3,2),bty="n",cex=1.3)
 mtext(side=2,"Proportion",cex=1,line=2.1)#,line=2.2)
 mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 lines(1:3,loa_low_effect_test[7,4:6],type="b",lty=1,lwd=2,col=2)
@@ -465,12 +473,14 @@ mtext(side=3,"High Dose",cex=1.3)#,line=2.2)
 lines(1:3,loa_low_effect_test[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_low_effect_test[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_low_effect_test[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_low_effect_test[21,1:3],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:3,loa_low_effect_test[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)
 lines(1:3,loa_low_effect_test[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_low_effect_test[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_low_effect_test[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_low_effect_test[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario high dose eff.",cex=1,line=1)#,line=2.2)
 
 
@@ -489,11 +499,13 @@ plot(1:3,loa_med_effect_test[9,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2
 lines(1:3,loa_med_effect_test[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_med_effect_test[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_med_effect_test[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_med_effect_test[21,1:3],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:3,loa_med_effect_test[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 lines(1:3,loa_med_effect_test[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_med_effect_test[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_med_effect_test[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_med_effect_test[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario Trend",cex=1,line=1)#,line=2.2)
 
 plot(1:3,loa_high_effect_test[7,1:3],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
@@ -515,6 +527,7 @@ plot(1:3,loa_high_effect_test[9,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=
 lines(1:3,loa_high_effect_test[9,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_high_effect_test[13,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_high_effect_test[17,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_high_effect_test[21,1:3],type="b",lwd=2,col="grey",lty=3)
 axis(1,c(1:3),c("lm","t","cc"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)
 
@@ -522,6 +535,7 @@ plot(1:3,loa_high_effect_test[10,1:3],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd
 lines(1:3,loa_high_effect_test[10,4:6],type="b",lwd=2,col=2)
 lines(1:3,loa_high_effect_test[14,1:3],type="b",lwd=2,col=3,lty=2)
 lines(1:3,loa_high_effect_test[18,1:3],type="b",lwd=2,col=5,lty=2)
+lines(1:3,loa_high_effect_test[22,1:3],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 axis(1,c(1:3),c("lm","t","cc"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)
@@ -781,7 +795,7 @@ dev.off()
 #
 
 
-sel_scen=0#c(0,0,0)
+sel_scen=1#0#c(0,0,0)
 test1=c(0,2,3,4)
 rr0<-.1
 rr1<-.1
@@ -875,7 +889,8 @@ mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_resp[7,4:6],type="b",lty=1,lwd=2,col=2)
 lines(1:4,loa_low_effect_resp[11,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_resp[15,1:4],type="b",lwd=2,col=5,lty=2)
-legend("top",legend=c("Adaptive design","MA1","MA2"),lwd=2,col=c(1,3,4),lty=c(1,2,2),bty="n",cex=1.3)
+#legend("top",legend=c("Adaptive design","MA1","MA2"),lwd=2,col=c(1,3,4),lty=c(1,2,2),bty="n",cex=1.3)
+legend("top",legend=c("Adaptive design","MA1","MA1a","MA2"),lwd=2,col=c(1,3,"grey",4),lty=c(1,2,3,2),bty="n",cex=1.3)
 
 plot(1:4,loa_low_effect_resp[8,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
@@ -888,12 +903,14 @@ mtext(side=3,"High Dose",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_resp[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_low_effect_resp[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_resp[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_low_effect_resp[21,1:4],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:4,loa_low_effect_resp[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_resp[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_low_effect_resp[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_resp[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_low_effect_resp[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario high dose eff.",cex=1,line=1)#,line=2.2)
 
 
@@ -912,11 +929,13 @@ plot(1:4,loa_med_effect_resp[9,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2
 #lines(1:4,loa_med_effect_resp[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_med_effect_resp[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_med_effect_resp[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_med_effect_resp[21,1:4],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:4,loa_med_effect_resp[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 #lines(1:4,loa_med_effect_resp[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_med_effect_resp[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_med_effect_resp[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_med_effect_resp[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario Trend",cex=1,line=1)#,line=2.2)
 
 plot(1:4,loa_high_effect_resp[7,1:4],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
@@ -938,6 +957,7 @@ plot(1:4,loa_high_effect_resp[9,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=
 #lines(1:4,loa_high_effect_resp[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_high_effect_resp[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_high_effect_resp[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_high_effect_resp[21,1:4],type="b",lwd=2,col="grey",lty=3)
 axis(1,c(1:4),c("lm","t","cc","c"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)
 
@@ -945,6 +965,7 @@ plot(1:4,loa_high_effect_resp[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd
 #lines(1:4,loa_high_effect_resp[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_high_effect_resp[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_high_effect_resp[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_high_effect_resp[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 axis(1,c(1:4),c("lm","t","cc","c"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)
@@ -1171,11 +1192,11 @@ dev.off()
 #
 #
 
-mu_raw_0 = 3000
-sd_raw_0 = 5000  
+mu_raw_0 = 5000
+sd_raw_0 = 4000  
 
 
-sel_scen=0#c(0,0,0)
+sel_scen=1#0#c(0,0,0)
 test1=c(0,2,3,4)
 rr0<-.1
 rr1<-.1
@@ -1269,7 +1290,9 @@ mtext(side=3,"Low Dose",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_respB[7,4:6],type="b",lty=1,lwd=2,col=2)
 lines(1:4,loa_low_effect_respB[11,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_respB[15,1:4],type="b",lwd=2,col=5,lty=2)
-legend("top",legend=c("Adaptive design","MA1","MA2"),lwd=2,col=c(1,3,4),lty=c(1,2,2),bty="n",cex=1.3)
+#legend("top",legend=c("Adaptive design","MA1","MA2"),lwd=2,col=c(1,3,4),lty=c(1,2,2),bty="n",cex=1.3)
+legend("top",legend=c("Adaptive design","MA1","MA1a","MA2"),lwd=2,col=c(1,3,"grey",4),lty=c(1,2,3,2),bty="n",cex=1.3)
+
 
 plot(1:4,loa_low_effect_respB[8,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 mtext(side=3,"Medium Dose",cex=1.3)#,line=2.2)
@@ -1282,12 +1305,14 @@ mtext(side=3,"High Dose",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_respB[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_low_effect_respB[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_respB[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_low_effect_respB[21,1:4],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:4,loa_low_effect_respB[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 mtext(side=3,"Disjunctive",cex=1.3)#,line=2.2)
 #lines(1:4,loa_low_effect_respB[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_low_effect_respB[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_low_effect_respB[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_low_effect_respB[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario high dose eff.",cex=1,line=1)#,line=2.2)
 
 
@@ -1306,11 +1331,13 @@ plot(1:4,loa_med_effect_respB[9,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=
 #lines(1:4,loa_med_effect_respB[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_med_effect_respB[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_med_effect_respB[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_med_effect_respB[21,1:4],type="b",lwd=2,col="grey",lty=3)
 
 plot(1:4,loa_med_effect_respB[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd=2,col=1)
 #lines(1:4,loa_med_effect_respB[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_med_effect_respB[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_med_effect_respB[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_med_effect_respB[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario Trend",cex=1,line=1)#,line=2.2)
 
 plot(1:4,loa_high_effect_respB[7,1:4],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col=1,cex.axis=1.3)
@@ -1332,6 +1359,7 @@ plot(1:4,loa_high_effect_respB[9,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lwd
 #lines(1:4,loa_high_effect_respB[9,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_high_effect_respB[13,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_high_effect_respB[17,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_high_effect_respB[21,1:4],type="b",lwd=2,col="grey",lty=3)
 axis(1,c(1:4),c("lm","t","cc","c"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)
 
@@ -1339,6 +1367,7 @@ plot(1:4,loa_high_effect_respB[10,1:4],type="b",xaxt="n",yaxt="n",ylim=c(0,1),lw
 #lines(1:4,loa_high_effect_respB[10,4:6],type="b",lwd=2,col=2)
 lines(1:4,loa_high_effect_respB[14,1:4],type="b",lwd=2,col=3,lty=2)
 lines(1:4,loa_high_effect_respB[18,1:4],type="b",lwd=2,col=5,lty=2)
+lines(1:4,loa_high_effect_respB[22,1:4],type="b",lwd=2,col="grey",lty=3)
 mtext(side=4,"Scenario all dose eff.",cex=1,line=1)#,line=2.2)
 axis(1,c(1:4),c("lm","t","cc","c"),padj=-0.3,cex.axis=1.3)#,c("Selection","condPow","Pow"),padj=-0.3,cex.axis=1.3)
 mtext(side=1,"Analysis",cex=1,line=2)#,line=2.2)

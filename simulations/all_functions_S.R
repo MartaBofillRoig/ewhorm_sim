@@ -25,11 +25,11 @@ library(mvtnorm)
 # n_trials=1000; n_arms=4; N1=900;N2=60 mu_0m =c(10,10,10,10); mu_6m =c(10,10,10,10); mu_12m=c(10,10,10,10); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); 
 #rmonth=1;alpha1=.1; alpha=0.025;
 #do_pce_baseline(n_trials=10000,n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
-do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
-                                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
+#do_pce_baseline(n_trials=10000,n_arms = 4, N1=60 , N=90, mu_0m=rep(6.18,4), mu_6m=rep(6.18,4), mu_12m=rep(6.18,4), sg=matrix(c(.57,.28,.14,.28,.57,.28,.14,.28,.57),3), 
+#                                        rmonth=1, alpha1 = 0.1, alpha = 0.025,sim_out=T,sel_scen=0, side=T,test="t",dropout=.1,rr=rep(0,4))
 
-do_pce_baseline(n_trials=n_trials,n_arms = n_arms, N1=N1 , N2=N2, mu_0m=mu_0m, mu_6m=mu_6m, mu_12m=mu_12m, sg=sg, 
-                rmonth=rmonth, alpha1 = alpha1, alpha = alpha,sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=.1,rr=rep(0,4))
+#do_pce_baseline(n_trials=n_trials,n_arms = n_arms, N1=N1 , N2=N2, mu_0m=mu_0m, mu_6m=mu_6m, mu_12m=mu_12m, sg=sg, 
+#                rmonth=rmonth, alpha1 = alpha1, alpha = alpha,sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=.1,rr=rep(0,4))
 
 do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg, rmonth, alpha1 , alpha , sim_out,sel_scen, side,test,dropout,rr)
 {
@@ -66,9 +66,11 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   #power of multiarmed trials 1 and 2
   h_ma1<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1)),ncol = 3, byrow = T)
   h_ma2<-matrix(unlist(lapply(results_list, function(element) element$decision_ma2)),ncol = 3, byrow = T)
+  h_ma1a<-matrix(unlist(lapply(results_list, function(element) element$decision_ma1a)),ncol = 3, byrow = T)
   
   pow_ma1<-c(apply(h_ma1,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma1,1,sum,na.rm=TRUE)>0)/n_trials)
   pow_ma2<-c(apply(h_ma2,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma2,1,sum,na.rm=TRUE)>0)/n_trials)
+  pow_ma1a<-c(apply(h_ma1a,2,sum,na.rm=TRUE)/n_trials,sum(apply(h_ma2,1,sum,na.rm=TRUE)>0)/n_trials)
 
   #recruittime
   recruit1 <- matrix(unlist(lapply(results_list, function(element) element$recruit_time1)),ncol = 1, byrow = T) 
@@ -77,7 +79,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   recruittime2<-sum(recruit2, na.rm = T)/n_trials
 
   
-  return(c(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2,recruittime1,recruittime2))
+  return(c(armsel, condpow,pow,disjpow,pow_ma1,pow_ma2,pow_ma1a,recruittime1,recruittime2))
 }
 
 #FUNCTION 3: function 1 AND function 2

@@ -43,9 +43,9 @@ library(multcomp)
 # individual observations are simulated
 
 #n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; sim_out=T;test="w";dropout=0.1;rr=c(0,.2,.4,.6)
-sim_trial_pceind_test (n_arms, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1, alpha, sim_out,sel_scen,side,test,dropout,rr)
+#sim_trial_pceind_test (n_arms, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1, alpha, sim_out,sel_scen,side,test,dropout,rr)
 #sim_trial_pceind_test(n_arms = 4,N1 = 90 , N2 = 60, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025, sim_out=T,sel_scen=0, side=T,test="l",dropout=.1,rr=rep(0,4))
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 = 0.1, alpha = 0.025, sim_out=F, sel_scen=0, side=T,test="t",dropout=0,rr=c(0,0,0,0))
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, rmonth, alpha1 , alpha = 0.025, sim_out=F, sel_scen, side=T,test,dropout,rr)
 {
   N1<-floor(N1/(1+dropout))
   db_stage1 <- sim_dataind(n_arms = n_arms-1, N = N1, mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rmonth = rmonth,rr=rr)
@@ -633,6 +633,8 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   pval_dunnett_ma1b = model_dunnett_ma1b$test$pvalues
   
   decision_ma1<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(pval_dunnett_ma1b<=(alpha/3))*1)
+  
+  decision_ma1a<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((pval_dunnett_ma1b<=(alpha/3))*1))
   }
   
   if (test=="t"){
@@ -644,6 +646,8 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     #decision_ma1<-c((pvalma1a<=(alpha/3*2))*1,(pma1hi<=(alpha/3))*1)
     decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
     
+    decision_ma1a<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((p.adjust(pma1hi,"holm")<=(alpha/3))*1))
+    
   }
   
   if (test=="w"){
@@ -654,6 +658,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     pma1hi<-wilcox.test(db_stage_ma1b$diff12_0~db_stage_ma1b$treat,alternative="greater")$p.value
     
     decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+    decision_ma1a<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((p.adjust(pma1hi,"holm")<=(alpha/3))*1))
   }
   
   
@@ -665,6 +670,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     pma1hi<-wilcox.test(db_stage_ma1b$y_12m~db_stage_ma1b$treat,alternative="greater")$p.value
     
     decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+    decision_ma1a<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((p.adjust(pma1hi,"holm")<=(alpha/3))*1))
   }
   
   ################################################
@@ -738,6 +744,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                 res_intersection=res_intersection,
                 decision_ma1=decision_ma1,
                 decision_ma2=decision_ma2,
+                decision_ma1a=decision_ma1a,
                 recruit_time1=recruit_time1,
                 recruit_time2=recruit_time2))
   }
