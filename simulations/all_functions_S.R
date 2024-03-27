@@ -31,7 +31,7 @@ library(mvtnorm)
 #do_pce_baseline(n_trials=n_trials,n_arms = n_arms, N1=N1 , N2=N2, mu_0m=mu_0m, mu_6m=mu_6m, mu_12m=mu_12m, sg=sg, 
 #                rmonth=rmonth, alpha1 = alpha1, alpha = alpha,sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=.1,rr=rep(0,4))
 
-do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg, rmonth, alpha1 , alpha , sim_out,sel_scen, side,test,dropout,rr)
+do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg, rmonth, alpha1 , alpha , sim_out,sel_scen, side,test,dropout,rr,bound)
 {
 
   #Set the number of trials to run and other parameters for future plan
@@ -49,7 +49,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
     
     sim_trial_pceind_test(n_arms = n_arms,N1 = N1 , N2 = N2, mu_0m = mu_0m,   mu_6m = mu_6m, 
                                                                           mu_12m = mu_12m,  sg = sg, rmonth=rmonth, alpha1=alpha1 , alpha =alpha,
-                                                                          sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=dropout,rr=rr), 
+                                                                          sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=dropout,rr=rr,bound=bound), 
                                                                           .options=furrr_options(seed = TRUE))
   
   # percentage of cases in which doses 1, 2 and 3 were present in the second stage
@@ -60,7 +60,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
   h_condpow <- matrix(unlist(lapply(results_list, function(element) element$simdec_output)),ncol = 3, byrow = T) 
   disjpow<-sum(apply(h_condpow,1,sum,na.rm=TRUE)>0)/n_trials
   condpow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/(armsel*n_trials)#sum(sel_stage2[,3])
-  pow <- c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/n_trials
+  pow <-     c(sum(h_condpow[,1], na.rm = T), sum(h_condpow[,2], na.rm = T), sum(h_condpow[,3], na.rm = T))/n_trials
   
   
   #power of multiarmed trials 1 and 2
@@ -89,7 +89,7 @@ do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg
 
 simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,
                      n_trials,n_arms = 4,N1 , N2, rmonth, alpha1 , alpha ,
-                     sim_out1,sel_scen, side1,test1,dropout,rr0,rr1,rr2,rr3)
+                     sim_out1,sel_scen, side1,test1,dropout,rr0,rr1,rr2,rr3,bound)
 {
   
   ##Maybe this is not optimal but
@@ -109,6 +109,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   if (test1==2) test<-"t"
   if (test1==3) test<-"w"
   if (test1==4) test<-"w1"
+  if (test1==5) test<-"f"
   
    #N2<-N-N1
   
@@ -136,7 +137,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
   aa = #do_pce_baseline(n_trials=n_trials,n_arms = 4,N1 = N1, N2 = N2, mu_0m = m0,   mu_6m = m6, mu_12m = m12,  sg = mtr1, 
       #                  rmonth=rmonth, alpha1=alpha1 , alpha=alpha ,   sim_out=sim_out,sel_scen=sel_scen, side=side,test=test)
         do_pce_baseline(n_trials=n_trials,n_arms = 4,N1=N1 , N2=N2, mu_0m=m0, mu_6m=m6, mu_12m=m12, sg=mtr1,
-                    rmonth=rmonth, alpha1=alpha1 , alpha=alpha , sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=dropout,rr=rr)
+                    rmonth=rmonth, alpha1=alpha1 , alpha=alpha , sim_out=sim_out,sel_scen=sel_scen, side=side,test=test,dropout=dropout,rr=rr,bound=bound)
   
   #return(list(mtr1,m0,m6,m12,aa))
   return(aa)
@@ -145,7 +146,7 @@ simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12
 
 simul_res (mu_raw_0 = 650, sd_raw_0 = 575, r0_6=0, r1_6=0,r2_6=0,r3_6=0,r0_12=0,r1_12=0,r2_12=0,r3_12=0, rho = 0.5, 
            n_trials=10000,n_arms = 4,N1 = 60 , N2 = 150,
-                rmonth=1, alpha1=.1 , alpha=.025, sim_out1=1,sel_scen=0, side1=1,test1=2,dropout=.1,rr0=0,rr1=0,rr2=0,rr3=0)
+                rmonth=1, alpha1=.1 , alpha=.025, sim_out1=1,sel_scen=0, side1=1,test1=2,dropout=.1,rr0=0,rr1=0,rr2=0,rr3=0,bound=0)
 
 r0_6=0; r1_6=0;r2_6=0;r3_6=0;r0_12=0;r1_12=0;r2_12=0;r3_12=0 rho = 0.5, 
 

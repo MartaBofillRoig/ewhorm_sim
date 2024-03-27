@@ -18,9 +18,8 @@ sim_trial_Trichuris <- function(n_arms , N , mu,sigma,reductrate, rmonth, alpha 
 {
   N<-floor(N/(1+dropout))
   val<-get_mu_sigma(mu,sigma, reductrate_6=reductrate,reductrate_12 = reductrate, rho=rho) # rho is the correlation coefficient
-  db_stage1 <- sim_dataind(n_arms = n_arms, N = N, mu_0m = val[[2]][1:n_arms], mu_6m = val[[3]][1:n_arms], mu_12m = val[[4]][1:n_arms], sg = val[[5]], rmonth = rmonth,rr=rr[1:n_arms])
+  db_stage1 <- sim_dataind(n_arms = n_arms, N = N, mu_0m = val[[2]][1:n_arms], mu_6m = val[[3]][1:n_arms], mu_12m = val[[4]][1:n_arms], sg = val[[5]], rmonth = rmonth,rr=rr[1:n_arms],bound=0)
   recruit_time1 <- max(db_stage1$recruit_time)
-  
   
   
   db_stage1$treat <- relevel(db_stage1$treat, ref = "Placebo")
@@ -36,8 +35,7 @@ sim_trial_Trichuris <- function(n_arms , N , mu,sigma,reductrate, rmonth, alpha 
     p12low <- t.test(db_stage1$diff6_0[db_stage1$treat %in% c("Low","Placebo")]~db_stage1$treat[db_stage1$treat %in% c("Low","Placebo")],alternative="greater")$p.value
     p12med<-t.test(db_stage1$diff6_0[db_stage1$treat %in% c("Medium","Placebo")]~db_stage1$treat[db_stage1$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
     pval1<-cbind(p12low,p12med)
-    #pval
-  }
+    }
   
   if (test=="l"){  #two individual models, due to robustness in case of different variances
     
@@ -51,14 +49,6 @@ sim_trial_Trichuris <- function(n_arms , N , mu,sigma,reductrate, rmonth, alpha 
     }
   }
   
-  #if (test=="m"){
-  #  db_stage1$patID<-c(1:N1)
-  #  db_stage1long<-reshape(data=db_stage1, direction = "long",v.names="diffmf", idvar = "patID", times=c(6,12),varying=c("diff6_0","diff12_0"),timevar="month")
-  #  db_stage1long$month<-factor(db_stage1long$month,c(6,12))
-  #  
-  #  md0 <- lmer(diffmf ~ y_0m + treat+ month+(1 | patID), data = db_stage1long)
-  #  pval1<-summary(md0)$coefficients[3:4,5]
-  #}
   
   if (test=="w"){
     p12low <- wilcox.test(db_stage1$diff6_0[db_stage1$treat %in% c("Low","Placebo")]~db_stage1$treat[db_stage1$treat %in% c("Low","Placebo")],alternative="greater")$p.value
@@ -70,12 +60,10 @@ sim_trial_Trichuris <- function(n_arms , N , mu,sigma,reductrate, rmonth, alpha 
     p12low <- wilcox.test(db_stage1$y_6m[db_stage1$treat %in% c("Low","Placebo")]~db_stage1$treat[db_stage1$treat %in% c("Low","Placebo")],alternative="greater")$p.value
     p12med<-wilcox.test(db_stage1$y_6m[db_stage1$treat %in% c("Medium","Placebo")]~db_stage1$treat[db_stage1$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
     pval1<-cbind(p12low,p12med)
-    #pval
   }
   
   p.adjust(pval1,method="holm")
 }
-
 
 
 
@@ -116,12 +104,6 @@ do_Trichuris = function(n_trials,n_arms , N , mu,sigma,reductrate0,reductrate1,r
 }
 
 #do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate0=0,reductrate1=0,reductrate2=0, rmonth=3, alpha = 0.025, side1=T,test1="w1",dropout=0,rr0=0,rr1=0,rr2=0)
-#do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
-#do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
-#do_Trichuris(n_trials=1000,n_arms = 3, N=150 , mu=50,sigma=50,reductrate=c(r0_hi,r1_hi,r2_hi,r3_hi), rmonth=3, alpha = 0.025, side=T,test="w1",dropout=0,rr=c(0,0,0,0))
-
-
-
 
 
 mu<-1000
@@ -193,34 +175,26 @@ n_trials<-10000#0
 rmonth=3
 #no_effect
 
-#simulation.global.null<-c(mu_raw_0, sd_raw_0, r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,   #data.matrix(expand.grid
-#            n_trials,n_arms,N1 , N, rmonth, alpha1 , alpha,  sim_out1,sel_scen, side1, test1)#)
 
 test1=0
 rr0=0
 rr1=0
 rr2=0
-
-
 reduct0<-0
-reduct1<-0
 reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
+
+
+reduct1<-0
 
 Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.2
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
 Trichuris_low_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.4
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
 Trichuris_med_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.6
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
 Trichuris_high_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
 ##############################################################################################
@@ -232,50 +206,32 @@ Trichuris_high_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0
 #
 #       Total responder rho=0.5
 test1=0
-
-
-#reduct0<-0
-#reduct1<-0
-#reduct2<-0
-n_trials<-10000#0
-#Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
-
 reduct0<-0
-reduct1<-0
 reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
 rr0<-0.1
+rr2<-c(0.1,.1,.1,.3-0.2,.4-0.2,.5-0.2,.6-0.2,.7-0.2,.8-0.2)
+
+n_trials<-10000#0
+
+reduct1<-0
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
 
 Trichuris_no_effect0<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.2
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
 
 Trichuris_low_effect0<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.4
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
-rr1<-0.3
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
+rr1<-.2
 
 
 Trichuris_med_effect0<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.6
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
+rr1<-.4#0.5
 
-rr0<-0.1
-rr1<-0.5
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
 
 Trichuris_high_effect0<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
@@ -289,48 +245,23 @@ Trichuris_high_effect0<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct
 test1=4
 
 
-#reduct0<-0
-#reduct1<-0
-#reduct2<-0
-n_trials<-10000#0
-#Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
-
-reduct0<-0
 reduct1<-0
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
 
 Trichuris_no_effect4<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.2
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
 
 Trichuris_low_effect4<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.4
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
-rr1<-0.3
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
+rr1<-0.2#3
 
 Trichuris_med_effect4<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.6
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-
-rr0<-0.1
-rr1<-0.5
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
+rr1<-0.4#5
 
 Trichuris_high_effect4<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
@@ -354,50 +285,29 @@ test1=0
 rho<-0.25
 mu<-500
 sigma<-4000#2000
-
-
-#reduct0<-0
-#reduct1<-0
-#reduct2<-0
-n_trials<-10000#0
-#Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
-
 reduct0<-0
-reduct1<-0
 reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
 rr0<-0.1
+rr2<-c(0.1,.1,.1,.3-0.2,.4-0.2,.5-0.2,.6-0.2,.7-0.2,.8-0.2)
+
+
+reduct1<-0
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
 
 Trichuris_no_effect0r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.2
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
 
 Trichuris_low_effect0r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.4
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
-rr1<-0.3
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
+rr1<-0.2#3
 
 Trichuris_med_effect0r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.6
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-
-rr0<-0.1
-rr1<-0.5
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
+rr1<-0.4#5
 
 Trichuris_high_effect0r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
@@ -410,59 +320,33 @@ Trichuris_high_effect0r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduc
 
 test1=4
 
-
-#reduct0<-0
-#reduct1<-0
-#reduct2<-0
-n_trials<-10000#0
-#Trichuris_no_effect<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2,reduct3, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rr3)
-
-reduct0<-0
 reduct1<-0
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
 
 Trichuris_no_effect4r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.2
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
 rr1<-0.1
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
 
 Trichuris_low_effect4r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.4
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-rr0<-0.1
-rr1<-0.3
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
-
+rr1<-0.2
 
 Trichuris_med_effect4r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
-reduct0<-0
 reduct1<-.6
-reduct2<-c(0,.1,.2,.3,.4,.5,.6,.7,.8)
-
-rr0<-0.1
-rr1<-0.5
-rr2<-c(0.1,.1,.2-0.1,.3-0.1,.4-0.1,.5-0.1,.6-0.1,.7-0.1,.8-0.1)
+rr1<-0.4
 
 Trichuris_high_effect4r<-mapply(do_Trichuris,n_trials,n_arms, N , mu,sigma,reduct0,reduct1,reduct2, rmonth, alpha, side1,test1,dropout,rr0,rr1,rr2,rho)
 
 
 
-
+setwd("X:\\")
 
 
 #Power
-pdf(file ="Trichuris_PowV2_120_x.pdf", width = 9, height = 9, pointsize = 12)
+pdf(file ="Trichuris_PowV2_120_2x.pdf", width = 9, height = 9, pointsize = 12)
 par (mfrow=c(3,3), mar=c(1, 1, 1, 1) + 0.1, oma=c(3, 3, 1, 1))
 plot(1:9,Trichuris_no_effect[1,],type="b",xaxt="n",ylim=c(0,1),lty=1,lwd=2,col="black")
 legend(x=0.3,y=0.75,legend=c("Reduction rate low dose", "0","0.2","0.4","0.6"),lwd=2,col=c("white","black",2,3,5),lty=1,bty="n",cex=1.3)
@@ -597,10 +481,27 @@ dev.off()
 
 
 
+round(Trichuris_no_effect4[1,5:7]*100,0)
+round(Trichuris_no_effect4[2,5:7]*100,0)
+round(Trichuris_no_effect4[3,5:7]*100,0)
+round(Trichuris_no_effect4[1,5:7]*100,0)
+round(Trichuris_no_effect4[2,5:7]*100,0)
+round(Trichuris_no_effect4[3,5:7]*100,0)
+
+round(Trichuris_med_effect4[1,5:7]*100,0)
+round(Trichuris_med_effect4[2,5:7]*100,0)
+round(Trichuris_med_effect4[3,5:7]*100,0)
+round(Trichuris_med_effect4[1,5:7]*100,0)
+round(Trichuris_med_effect4[2,5:7]*100,0)
+round(Trichuris_med_effect4[3,5:7]*100,0)
 
 
-
-
+round(Trichuris_high_effect4[1,5:7]*100,0)
+round(Trichuris_high_effect4[2,5:7]*100,0)
+round(Trichuris_high_effect4[3,5:7]*100,0)
+round(Trichuris_high_effect4[1,5:7]*100,0)
+round(Trichuris_high_effect4[2,5:7]*100,0)
+round(Trichuris_high_effect4[3,5:7]*100,0)
 
 
 

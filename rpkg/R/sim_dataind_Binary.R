@@ -17,7 +17,7 @@
 
 # n_arms=4; N=100; mu_0m =c(0,0,0,0); mu_6m =c(1,2,3,4); mu_12m=c(1,2,3,4); sg=matrix(c(1,0,0,0,1,0,0,0,1), ncol=3); rmonth=1;rr=c(0,0.3,0.5,0.7)
 
-sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth,rr){
+sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth,rr,bound){
 
   
   treatments <- factor(c(sample(rep(1:n_arms, floor(N/n_arms))), sample(1:n_arms, N-floor(N/n_arms)*n_arms, replace=T)),
@@ -32,22 +32,16 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth,rr){
   # Treatment indicator for dataframe
   max_col_indices <- apply(X, 1, get_max_col_index)
   treat = unname(max_col_indices)
-
-  ######################################
-  #new for total responder;
-  #list of patients for each treatment
-  listpat<-lapply(c(1:n_arms), function(i) which(treat==i))
-  #include zero value in follow-up for total responder for random patients;
-  sizes <- c(floor(rr*N/n_arms))
-  #sample_set <- lapply(listpat, #sizes, function(i) sample(listpat, i))
-  #o[i]<-lapply(listpat,function(x) sample(x[[i]],sizes[i]))
   
-  resp<-c()
-  for (i in 1:n_arms)  
-     resp[[i]]<-sample(listpat[[i]],size=sizes[i])
-  resp<-sort(unlist(resp))
-  y[c(resp),c(2:3)]<-0                     
-  ###################################                       
+  totalresp<-rbinom(length(treat),1,rr[treat])
+  
+  y[,2]<-ifelse(totalresp==1,bound,y[,2])#y[,2]*(1-totalresp)#-10^6
+  y[,3]<-ifelse(totalresp==1,bound,y[,3])#y[,3]*(1-totalresp)
+  
+  y[,1]<-pmax(bound,y[,1])
+  y[,2]<-pmax(bound,y[,2])
+  y[,3]<-pmax(bound,y[,3])
+     ###################################                       
                        
   treat = factor(treat, levels = 1:n_arms,
                labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
@@ -62,4 +56,4 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rmonth,rr){
   return(data)
 }
 
-#sim_dataind (n_arms = 4, N=120,  mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1,rr=c(0,0.3,0.5,0.7))
+sim_dataind (n_arms = 4, N=120,  mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rmonth=1,rr=c(0,0.3,0.5,0.7),bound=-3)
