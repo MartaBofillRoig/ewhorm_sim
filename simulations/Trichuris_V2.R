@@ -505,3 +505,9 @@ round(Trichuris_high_effect4[3,5:7]*100,0)
 
 
 
+
+Trichuris_no_effect[3,1]
+Trichuris_no_effect0[3,1]
+Trichuris_no_effect4[3,1]
+Trichuris_no_effect0r[3,1]
+Trichuris_no_effect4r[3,1]
