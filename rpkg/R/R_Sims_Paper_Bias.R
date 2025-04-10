@@ -82,7 +82,8 @@ wrap<-function(d,scen,n_trials=50000)
                 "M1Pow.Low","M1Pow.Me","M1Pow.Hi","M1Pow.Disj","M1Pow.cond","M2Pow.Low","M2Pow.Me","M2Pow.Hi","M2Pow.Disj","M2Pow.cond",
                 "TrueC.Low","TrueC.Me","TrueC.Hi","C.Low","C.Me","C.Hi","sdC.Low","sdC.Me","sdC.Hi","Bias.Low","Bias.Me","Bias.Hi",
                 "M1C.Low","M1C.Me","M1C.Hi","CIupC.Low","CIupC.Me","CIupC.Hi","CICov.Low","CICov.Me","CICov.Hi","Ccond.Low","Ccond.Me","Ccond.Hi",
-                "biasCcond.Low","biasCcond.Me","biasCcond.Hi","CICovBH.Low","CICovBH.Me","CICovBH.Hi","CICovcond.Low","CICovcond.Me","CICovcond.Hi",
+                "biasCcond.Low","biasCcond.Me","biasCcond.Hi",#"CICovBH.Low","CICovBH.Me","CICovBH.Hi",
+                "CICovcond.Low","CICovcond.Me","CICovcond.Hi",
                 "CImeaninvnorm.Low","CImeaninvnorm.Me","CImeaninvnorm.Hi","CICovinvnorm.Low","CICovinvnorm.Me","CICovinvnorm.Hi",
                 "CImeancond.Low","CImeancond.Me","CImeancond.Hi","meanCinv.Low","meanCinv.Me","meanCinv.Hi","biasinv.Low","biasinv.Me","biasinv.H")
   d.1
