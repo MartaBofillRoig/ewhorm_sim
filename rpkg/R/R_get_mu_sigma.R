@@ -6,6 +6,7 @@
 #' @param reductrate_6 vector of reduction rates after 6 months for each dose (between 0 and 1)
 #' @param reductrate_12 vector of reduction rates after 12 months for each dose (between 0 and 1)
 #' @param rho correlation between baseline and 6 months follow-up observations and between 6 months and 12 months follow-up observations
+#' @keywords internal
 #' @returns list of mean values and variance covariance matrix
 #' @export
 #' @details eWHORM simulations

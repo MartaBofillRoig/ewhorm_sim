@@ -2,6 +2,7 @@
 #' @description Function to get the column index of the maximum value in a row
 #'
 #' @param row selected row 
+#' @keywords internal 
 #' @returns maximum value in a row
 #' @export
 #' @details eWHORM simulations
