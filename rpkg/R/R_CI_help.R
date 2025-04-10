@@ -6,6 +6,7 @@
 #' @param N1 sample size of stage 1
 #' @param N2 sample size of stage 2
 #' @param alpha significance level
+#' @keywords internal
 #' @export
 #' @details eWHORM simulations
 #' @author Sonja Zehetmayer

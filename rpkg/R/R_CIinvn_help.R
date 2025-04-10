@@ -7,6 +7,7 @@
 #' @param N1 sample size of group 1
 #' @param N2 sample size of group 2
 #' @param value quantile - significance level or median
+#' @keywords internal
 #' @returns variance of concordance
 #' @export
 #' @details eWHORM simulations
