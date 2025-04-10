@@ -41,7 +41,7 @@ library(gMCP)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-#bound=0;n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; test="w1";dropout=0.1;rr=c(0,.2,.4,.6)
+#bound=0;n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); alpha1 = 0.1; alpha = 0.025; test="w1";dropout=0.1;rr=c(0,.2,.4,.6)
 sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
 {
   N1orig<-N1
@@ -739,4 +739,4 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
 }
 
-#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)
+#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg,  alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)

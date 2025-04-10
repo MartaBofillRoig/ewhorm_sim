@@ -4,6 +4,7 @@
 #' @param theta concordance
 #' @param m sample size of group 1
 #' @param n sample size of group 2
+#' @keywords internal
 #' @returns variance of concordance
 #' @export
 #' @details eWHORM simulations
