@@ -3,6 +3,7 @@
 #'
 #' @param n_hypothesis num elementary hypotheses
 #' @param selected_hypothesis selected hypothesis for closed test
+#' @keywords internal
 #' @returns maximum value in a row
 #' @export
 #' @details eWHORM simulations
