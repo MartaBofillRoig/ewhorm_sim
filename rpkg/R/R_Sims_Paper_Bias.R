@@ -44,6 +44,7 @@ simulation.scenario<-function(d,i,n_trials,j,t,l,k,scen)
   #N2<-80
   scen.e<-scen
   N2<-200-N1.v[k]
+  set.seed(2412)#######NEU!!!!!!!!!!!!!
   
     res<-mapply(simul_res,scen.d$mu_raw_0[d], scen.d$sd_raw_0[d] , scen.e$r0_6[i],scen.e$r1_6[i],scen.e$r2_6[i],scen.e$r3_6[i], scen.e$r0_12[i],
                                             scen.e$r1_12[i],scen.e$r2_12[i],scen.e$r3_12[i],  rho.v[l] ,
@@ -53,14 +54,14 @@ simulation.scenario<-function(d,i,n_trials,j,t,l,k,scen)
   
     unlist(c(d,i,scen.e[i,],alpha1.v[j],N1.v[k],rho.v[l],test.v[t],#round(
              c(res[7],res[8],res[9],res[6],res[10],res[1],res[2],res[3],
-               res[c(19:22)],NA,res[(15:18)],NA,res[c(25:72)])#,2)*100
+               res[c(19:22)],NA,res[(15:18)],NA,res[c(23:67)])#res[c(25:72)])#,2)*100
              ))
 }
   
 
 wrap<-function(d,scen,n_trials=50000)
 {
-  d.1<-matrix(nrow=75,ncol=(17+15+6+4+1+10+12+3+3+3+6))#(#))
+  d.1<-matrix(nrow=75,ncol=(77))#17+15+6+4+1+10+12+3+3+3+6))#(#))
 
   h<-0
   
@@ -82,7 +83,7 @@ wrap<-function(d,scen,n_trials=50000)
                 "M1Pow.Low","M1Pow.Me","M1Pow.Hi","M1Pow.Disj","M1Pow.cond","M2Pow.Low","M2Pow.Me","M2Pow.Hi","M2Pow.Disj","M2Pow.cond",
                 "TrueC.Low","TrueC.Me","TrueC.Hi","C.Low","C.Me","C.Hi","sdC.Low","sdC.Me","sdC.Hi","Bias.Low","Bias.Me","Bias.Hi",
                 "M1C.Low","M1C.Me","M1C.Hi","CIupC.Low","CIupC.Me","CIupC.Hi","CICov.Low","CICov.Me","CICov.Hi","Ccond.Low","Ccond.Me","Ccond.Hi",
-                "biasCcond.Low","biasCcond.Me","biasCcond.Hi",#"CICovBH.Low","CICovBH.Me","CICovBH.Hi",
+                "biasCcond.Low","biasCcond.Me","biasCcond.Hi",#"CICovBH.Low","CICovBH.Me","CICovBH.Hi",60-62 weg!
                 "CICovcond.Low","CICovcond.Me","CICovcond.Hi",
                 "CImeaninvnorm.Low","CImeaninvnorm.Me","CImeaninvnorm.Hi","CICovinvnorm.Low","CICovinvnorm.Me","CICovinvnorm.Hi",
                 "CImeancond.Low","CImeancond.Me","CImeancond.Hi","meanCinv.Low","meanCinv.Me","meanCinv.Hi","biasinv.Low","biasinv.Me","biasinv.H")
