@@ -41,8 +41,8 @@ library(gMCP)
 # Function to simulate trial data (2-stages, with dose selection)
 # individual observations are simulated
 
-#bound=0;n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; test="w1";dropout=0.1;rr=c(0,.2,.4,.6)
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
+#bound=0;n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); alpha1 = 0.1; alpha = 0.025; test="w1";dropout=0.1;rr=c(0,.2,.4,.6)
+sim_trial_pceind_test_example <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
 {
   N1orig<-N1
   N1<-floor(N1*(1-dropout))
@@ -55,9 +55,9 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   
   #interim anlysis
-
+  
   #Obtain one-sided p-value
-
+  
   plow <- t.test(db_stage1$y_6m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
   pmed<-t.test(db_stage1$y_6m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
   
@@ -65,14 +65,14 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   if (test=="w"){
     plow <- wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     pmed<-wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
-    }
+  }
   
   if (test=="w1"){
     plow <- wilcox.test(db_stage1$y_6m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     pmed<-wilcox.test(db_stage1$y_6m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
   }
   
-    pval.surr <- c(plow, pmed)  #pvalue of surrogate endpoint stage 1
+  pval.surr <- c(plow, pmed)  #pvalue of surrogate endpoint stage 1
   
   
   
@@ -128,7 +128,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   }
   
   conc1 <- vector(length=3)  
-    
+  
   if (test=="w1"){
     p12low <- wilcox.test(db_stage1$y_12m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     p12med<-wilcox.test(db_stage1$y_12m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
@@ -138,7 +138,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     conc1<-cbind(conc1low,conc1med,NA)
   }
   
- 
+  
   z <- qnorm(1-pmax(pval1,1e-15))
   
   decision_s1 <- c()
@@ -157,7 +157,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   # the package assumes that wj are equal for all j
   z1 <- c(z,0)
   preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=alpha)
-
+  
   #######################################
   # stage2
   # sc=2 --> Arm A and B continue to stage 2
@@ -176,7 +176,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     db_stage2$diff6_0<-db_stage2$y_6m-db_stage2$y_0m
     db_stage2$diff12_0<-db_stage2$y_12m-db_stage2$y_0m
     
-
+    
     pval2 <- c()
     
     if (test=="l"){
@@ -196,14 +196,14 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2<-cbind(p12low2,p12med2)
     }
     
-       
+    
     if (test=="w"){
       p12low2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
       p12med2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
       pval2<-cbind(p12low2,p12med2)
     }
     
-
+    
     if (test=="w1"){
       p12low2 <- wilcox.test(db_stage2$y_12m[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
       p12med2<-wilcox.test(db_stage2$y_12m[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
@@ -213,7 +213,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       conc2<-cbind(conc2low,conc2med,NA)
     }
     
-
+    
     #Avalues <- c(preplan@BJ[7], #H123
     #             preplan@BJ[6], #H12
     #             preplan@BJ[5], #H13
@@ -242,18 +242,18 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     dec1<-min(pval2[1]<preplan@BJ[4],dec123,dec12,dec13)
     #H2
     dec2<-min(pval2[2]<preplan@BJ[2],dec123,dec12,dec23)
-
+    
     stage2_arms <- c(1,1,0)
     simdec_output <- c(dec1,dec2,NA)
     
     decision_intersection = dec123
   }
   
-
+  
   if(sc == 1 ){# this means that low dose was the only promising in the interim analysis
     
     if(sel_scen == 0){ #so we drop both low and median doses and start with high dose only in the second stage.
-
+      
       N2<-floor(N2/(1+dropout))
       db_stage2 <- sim_dataind(n_arms=2, N = N2, mu_0m = mu_0m[c(1,4)],mu_6m = mu_6m[c(1,4)], mu_12m=mu_12m[c(1,4)], sg=sg, rr=rr[c(1,4)],bound=bound)
       levels(db_stage2$treat) <- c(levels(db_stage1$treat)[c(1)],"High") # c(levels(db_stage1$treat)[c(1,sel)],"High")
@@ -362,7 +362,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       dec1<-min(pval2[1]<preplan@BJ[4],dec123,dec12,dec13)
       #H2
       dec2<-min(pval2[2]<preplan@BJ[2],dec123,dec12,dec23)
-
+      
       stage2_arms <- c(1,1,0)
       simdec_output <- c(dec1,dec2,NA)
       
@@ -441,8 +441,8 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     simdec_output <- c(0,dec2,dec3)
     
     decision_intersection = dec123
-    }
-
+  }
+  
   
   if(sc == 0){ # in that case start dose 3
     
@@ -461,7 +461,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
     }
     
-
+    
     if (test=="t"){
       pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
     }
@@ -482,7 +482,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     dec23<-max(pval2[1]<preplan@BJ[3])
     #H1
     dec3<-min(pval2[1]<preplan@BJ[1],dec123,dec13,dec23)
-
+    
     stage2_arms <- c(0,0,1)
     simdec_output <- c(0,0,dec3)
     
@@ -502,7 +502,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   {
     if (sc==2) 
     {            
-      conc    <-c((conc1[1:2]*N1/3+conc2[1:2]*N2/3)/(N1/3+N2/3),NA) #low and medium
+      conc<-c((conc1[1:2]*N1/3+conc2[1:2]*N2/3)/(N1/3+N2/3),NA) #low and medium
       conccond<-c((conc1[1:2]*N1/3+conc2[1:2]*N2/3)/(N1/3+N2/3),NA) #low and medium
       concCI<-c(uniroot(CI2_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[1],alpha=alpha,N1=N1,N2=N2)$root, 
                 uniroot(CI2_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[2],alpha=alpha,N1=N1,N2=N2)$root, 
@@ -512,16 +512,16 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                             thetahat1=conc1[1],thetahat2=conc2[1],value=alpha,N1=N1,N2=N2orig)$root,
                     uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
                             thetahat1=conc1[2],thetahat2=conc2[2],value=alpha,N1=N1,N2=N2orig)$root,
-                NA)
+                    NA)
       #Median estimate:
       concinvn<-c(uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
                           thetahat1=conc1[1],thetahat2=conc2[1],value=0.5,N1=N1,N2=N2orig)$root,
-                    uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
-                            thetahat1=conc1[2],thetahat2=conc2[2],value=0.5,N1=N1,N2=N2orig)$root,
-                    NA)
+                  uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
+                          thetahat1=conc1[2],thetahat2=conc2[2],value=0.5,N1=N1,N2=N2orig)$root,
+                  NA)
       
     }
-  
+    
     if (sc==1) 
     { 
       conc<-c((conc1[1:2]*N1/3+conc2[1:2]*N2/3)/(N1/3+N2/3),NA) #low and medium
@@ -534,16 +534,16 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                             thetahat1=conc1[1],thetahat2=conc2[1],value=alpha,N1=N1,N2=N2orig)$root,
                     uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
                             thetahat1=conc1[2],thetahat2=conc2[2],value=alpha,N1=N1,N2=N2orig)$root,
-                       NA)
+                    NA)
       #Median estimate:
       concinvn<-c(uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
                           thetahat1=conc1[1],thetahat2=conc2[1],value=0.5,N1=N1,N2=N2orig)$root,
                   uniroot(CIinvn_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,
                           thetahat1=conc1[2],thetahat2=conc2[2],value=0.5,N1=N1,N2=N2orig)$root,
                   NA)
-
+      
     }
-  
+    
     if (sc==3) 
     {            
       conc<-c(conc1[1],(conc1[2]*N1/3+conc2[2]*N2/3)/(N1/3+N2/3),conc2[3]) #medium and high
@@ -565,17 +565,17 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                   conc2[3])#uniroot(CI_help, lower = 0, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[3],N1=N2,N2=N2,alpha=alpha)$root)
       
     }
-  
+    
     if (sc==0) 
     {            
       conc<-c(conc1[1:2],conc2[3]) #high
       conccond<-c(NA,NA,conc2[3]) #high
       concCI<-c(uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[1],N1=N1,N2=N1,alpha=alpha)$root,
-               uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[2],N1=N1,N2=N1,alpha=alpha)$root,
-               uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[3],N1=N2,N2=N2,alpha=alpha)$root)
+                uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[2],N1=N1,N2=N1,alpha=alpha)$root,
+                uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[3],N1=N2,N2=N2,alpha=alpha)$root)
       concCIcond<-c(NA,
-                NA,
-                uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[3],N1=N2,N2=N2,alpha=alpha)$root)  
+                    NA,
+                    uniroot(CI_help, lower = .01, upper = .99, tol = .Machine$double.eps^0.25, maxiter = 10000,thetahat=conc[3],N1=N2,N2=N2,alpha=alpha)$root)  
       concCIinvn<-concCIcond
       concinvn<-conccond
     }
@@ -587,7 +587,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   ####
   #Part 1 for low and median dose
   db_stage_ma1a <- sim_dataind(n_arms = n_arms-1, N = floor((N1+N2)/5*3), mu_0m = mu_0m[1:n_arms-1], mu_6m = mu_6m[1:n_arms-1], mu_12m = mu_12m[1:n_arms-1], sg = sg, rr=rr[1:n_arms-1],bound=bound)
-
+  
   db_stage_ma1a$treat <- relevel(db_stage_ma1a$treat, ref = "Placebo")
   
   db_stage_ma1a$diff6_0<-db_stage_ma1a$y_6m-db_stage_ma1a$y_0m
@@ -606,18 +606,18 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   if (test=="l")
   {
-  mod_ma1a <- aov(y_12m ~ treat+y_0m, db_stage_ma1a)
-  model_dunnett_ma1a = summary(glht(model = mod_ma1a, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnett_ma1a = model_dunnett_ma1a$test$pvalues
-  
-  #part2
-  mod_ma1b <- aov(y_12m ~ treat+y_0m, db_stage_ma1b)
-  model_dunnett_ma1b = summary(glht(model = mod_ma1b, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnett_ma1b = model_dunnett_ma1b$test$pvalues
-  
-  decision_ma1<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(pval_dunnett_ma1b<=(alpha/3))*1)
-  
-  decision_ma1a<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((pval_dunnett_ma1b<=(alpha/3))*1))
+    mod_ma1a <- aov(y_12m ~ treat+y_0m, db_stage_ma1a)
+    model_dunnett_ma1a = summary(glht(model = mod_ma1a, linfct=mcp(treat="Dunnett"), alternative = "less"))
+    pval_dunnett_ma1a = model_dunnett_ma1a$test$pvalues
+    
+    #part2
+    mod_ma1b <- aov(y_12m ~ treat+y_0m, db_stage_ma1b)
+    model_dunnett_ma1b = summary(glht(model = mod_ma1b, linfct=mcp(treat="Dunnett"), alternative = "less"))
+    pval_dunnett_ma1b = model_dunnett_ma1b$test$pvalues
+    
+    decision_ma1<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(pval_dunnett_ma1b<=(alpha/3))*1)
+    
+    decision_ma1a<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((pval_dunnett_ma1b<=(alpha/3))*1))
   }
   
   if (test=="t"){
@@ -677,7 +677,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     mod_ma2 <- aov(y_12m ~ treat+y_0m, db_stage_ma2)
     model_dunnett_ma2 = summary(glht(model = mod_ma2, linfct=mcp(treat="Dunnett"), alternative = "less"))
     pval_dunnett_ma2 = model_dunnett_ma2$test$pvalues
-  
+    
     decision_ma2<-(pval_dunnett_ma2<=alpha)*1
   }
   
@@ -685,7 +685,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     pma1loa<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$p.value
     pma1mea<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
     pma1hia<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$p.value
-                                                                                                                                                                                                    
+    
     pvalma1a<-cbind(pma1loa,pma1mea)
     pvalma1a
     decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
@@ -705,7 +705,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
   }
   
-
+  
   concMAlo<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$statistic/(floor((N1+N2)/4)*floor((N1+N2)/4))
   concMAme<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$statistic/(floor((N1+N2)/4)*floor((N1+N2)/4))
   concMAhi<-wilcox.test(db_stage_ma2$y_12m[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$statistic/(floor((N1+N2)/4)*floor((N1+N2)/4))
@@ -714,29 +714,31 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   #######################################
   
-    res_intersection=ifelse(decision_intersection == "Reject", 1,0)
-    return(list(stage2_arms=stage2_arms,
-                selected_dose=sel,
-                simdec_output=simdec_output,
-                res_intersection=res_intersection,
-                decision_ma1=decision_ma1,
-                decision_ma2=decision_ma2,
-                decision_ma1a=decision_ma1a,
-                #recruit_time1=recruit_time1,
-                #recruit_time2=recruit_time2,
-                conc1=conc1,
-                conc2=conc2,
-                conc=conc,
-                concMA1=concMA1,
-                concMA2=concMA2,
-                concCI=concCI,
-                conccond=conccond,
-                #concCIBH=concCIBH,
-                concCIcond=concCIcond,
-                concCIinvn=concCIinvn,
-                concinvn=concinvn
-                ))
+  res_intersection=ifelse(decision_intersection == "Reject", 1,0)
+  return(list(stage2_arms=stage2_arms,
+              selected_dose=sel,
+              simdec_output=simdec_output,
+              res_intersection=res_intersection,
+              decision_ma1=decision_ma1,
+              decision_ma2=decision_ma2,
+              decision_ma1a=decision_ma1a,
+              conc1=conc1,
+              conc2=conc2,
+              conc=conc,
+              concMA1=concMA1,
+              concMA2=concMA2,
+              concCI=concCI,
+              conccond=conccond,
+              concCIcond=concCIcond,
+              concCIinvn=concCIinvn,
+              concinvn=concinvn,
+              pval.surr=pval.surr, ###ACHTUNG, nur fuer numerical example
+              pval1=pval1,  ###ACHTUNG, nur fuer numerical example
+              pval2=pval2,   ###ACHTUNG, nur fuer numerical example
+              db_stage1=db_stage1,
+              db_stage2=db_stage2
+  ))
   
 }
 
-#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)
+#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg,  alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)
