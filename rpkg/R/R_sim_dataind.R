@@ -8,6 +8,7 @@
 #' @param sg covariance matrix between 6- and 12-month responses assumed equal across arms (matrix of dim 2x2)
 #' @param rr responder rate for each dose, which gives the proportion of patients with value 0 at follow-up
 #' @param bound lower bound to define total responder in simulation study
+#' @keywords internal
 #' @returns simulated data consisting of the responses at 6 and 12 months, treatment arm, for each subject.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats model.matrix
