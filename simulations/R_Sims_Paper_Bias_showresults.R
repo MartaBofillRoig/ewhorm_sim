@@ -384,75 +384,21 @@ dev.off()
 
 w1I.Bias<-w1I[w1I$test==4,]
 
-#o1<-w1I.Bias[,c(2,11,14,33:35,42:44,51:53,36:38)][1:25,]
-
-###
-#Concordance
-#oC<-cbind(o1[,c(2,13:15)],rep(1:5,5))
-#round(oC[oC[,5]==3,],2)
-
-###
-#Bias averaged over all scenarios.
-#o<-o1[,7:9]
-#max(o)
-#min(o)
-#round(apply(o,2,mean),5)
-
-
-#fuer alle scenarios feur alpha1=0.3
-#oo<-cbind(o,rep(1:5,5))
-#oo<-data.frame(oo)
-#colnames(oo)<-c("low","median","high","scen")
-#oo[oo$scen==3,]
-
-#####
-#averages over alpha1: 
-#oo<-cbind(o,sort(rep(1:5,5)))
-#oo<-data.frame(oo)
-#colnames(oo)<-c("low","median","high","scen")
-#round(
-#  cbind(tapply(oo$low,oo$scen,mean),
-#        tapply(oo$median,oo$scen,mean),
-#        tapply(oo$high,oo$scen,mean)),
-#  4)
-
-
-
-####additional
-#o1<-w1I.Bias[c(3,8,13,18,23),]
-#o1$CIupC.Me
-##[1] 0.3752666 0.3761158 0.3751011 0.3758440 0.6056002
-#o1$CImeaninvnorm.Me
-#o1$CImeancond.Me
 
 
 alph1<-rep(1:5,5)
 o11<-cbind(w1I.Bias,alph1)
 o13<-round(o11[o11$alph1==3,],3)
 
-##Bias
-#cbind(o13$Bias.Low,o13$Bias.Me,o13$Bias.Hi)
-#cbind(o13$biasCcond.Low,o13$biasCcond.Me,o13$biasCcond.Hi)
-#cbind(o13$biasinv.Low,o13$biasinv.Me,o13$biasinv.H)
+#True Concordance
+o13$TrueC.Low
+o13$TrueC.Me
+o13$TrueC.Hi
 
-##CI
-#cbind(o13$CICov.Low,o13$CICov.Me,o13$CICov.Hi)
-##Bias cond
-#cbind(o13$CICovcond.Low,o13$CICovcond.Me,o13$CICovcond.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
-#cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)
-#cov invnorm
-#cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
-
-#o13
-
-#table:
-cbind(o13$Bias.Low,o13$biasCcond.Low,o13$biasinv.Low,o13$Bias.Me,o13$biasCcond.Me,o13$biasinv.Me,o13$Bias.Hi)
-cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
-
-
-#table: #Bias inverse normal;
+#Table 4
+#Bias inverse normal;
 cbind(o13$biasinv.Low,o13$biasinv.Me,o13$Bias.Hi)
-#table #CI inverse normal
+#CI inverse normal
 cbind(o13$CImeaninvnorm.Low,o13$CImeaninvnorm.Me,o13$CImeaninvnorm.Hi)
 #Coverage inverse normal;
 cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
@@ -461,9 +407,9 @@ cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)*cbind(o13$Se
 
 #SUPPL
 #uncond
-#table: #Bias uncond;
+#Bias uncond;
 cbind(o13$Bias.Low,o13$Bias.Me,o13$Bias.Hi)
-#table #CI uncond
+#CI uncond
 cbind(o13$CIupC.Low,o13$CIupC.Me,o13$CIupC.Hi)
 #Coverage uncond;
 cbind(o13$CICov.Low,o13$CICov.Me,o13$CICov.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
@@ -472,9 +418,9 @@ cbind(o13$CICov.Low,o13$CICov.Me,o13$CICov.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1
 
 #SUPPL
 #cond
-#table: #Bias cond;
+#Bias cond;
 cbind(o13$biasCcond.Low,o13$biasCcond.Me,o13$biasCcond.Hi)
-#table #CI cond
+#CI cond
 cbind(o13$CImeancond.Low,o13$CImeancond.Me,o13$CImeancond.Hi)
 #Coverage cond;
 cbind(o13$CICovcond.Low,o13$CICovcond.Me,o13$CICovcond.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
