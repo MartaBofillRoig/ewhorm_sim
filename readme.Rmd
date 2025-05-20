@@ -14,7 +14,12 @@ Simulation study on the design of a randomized, placebo-controlled, double-blind
 This repository contains the main code and R-functions to reproduce results of the simulation study in "An Adaptive Phase II Basket Trial Design for Dose Selection and Addition in Microfilarial Infections". It includes:
 
 - R package `ewhorm` with functions to simulate and analyse adaptive basket trials as outlined in the manuscript.
-- R scripts to perform simulations
+- R scripts to perform simulations: First run Sims_Paper.R to generate the simulated data; Second run Sims_Paper_showresults.R to generate the Figures and Tables for the simulated data.
+
+
+## System requirements
+
+
 
 
 ---
