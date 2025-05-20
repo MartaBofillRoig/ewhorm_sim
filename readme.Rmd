@@ -9,11 +9,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Statistical considerations for the e-WHORM trial design
 
-Simulation study on the design of a randomized, placebo-controlled, double-blind, parallel-group phase-II study to investigate the efficacy and safety of oxfendazole (OXF) in subjects with onchocerciasis, loiasis, mansonellosis and/or soil-transmitted helminth.
+Simulation study on the design of a randomized, placebo-controlled, double-blind, parallel-group phase-II study to investigate the efficacy and safety of oxfendazole (OXF) in subjects with onchocerciasis, loiasis, and/or mansonellosis.
 
-This repository includes:
+This repository contains the main code and R-functions to reproduce results of the simulation study in "An Adaptive Phase II Basket Trial Design for Dose Selection and Addition in Microfilarial Infections". It includes:
 
-- R package `ewhorm` with functions to simulate and analyse adaptive basket trials
+- R package `ewhorm` with functions to simulate and analyse adaptive basket trials as outlined in the manuscript.
 - R scripts to perform simulations
 
 
@@ -21,7 +21,9 @@ This repository includes:
 
 **Funding**
 
-[e-WHORM](https://ewhorm.org/) Project Launched to Eliminate Worm Infections in Sub Saharan Africa
+[e-WHORM](https://ewhorm.org/) Project Launched to Eliminate Worm Infections in Sub Saharan Africa. 
+
+The eWHORM project (No 101103053) supported by the Global Health EDCTP3 Joint Undertaking and its members as well as the Swiss Confederation. Views and opinions expressed are those of the author(s) only and do not necessarily reflect those of the European Union or the Global Health European and Developing Countries Clinical Trials Partnership (EDCTP3). Neither the European Union nor the granting authority can be held responsible for them
 
 
 ![ ](./figures/logo.svg){width=30%}
