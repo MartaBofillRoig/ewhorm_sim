@@ -17,8 +17,7 @@ This repository contains the main code and R-functions to reproduce results of t
 - R scripts to perform simulations: First run Sims_Paper.R to generate the simulated data; Second run Sims_Paper_showresults.R to generate the Figures and Tables for the simulated data.
 
 
-## System requirements
-
+System requirements: Linux
 
 
 
