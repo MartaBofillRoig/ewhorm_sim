@@ -1,5 +1,5 @@
-#' Simulate data from a multi-arm multi-stage trial with shared control and two initial doses, where an additional dose could be added after the interim analysis
-#' @description Function to simulate trial data (2-stages, with dose selection). The analyses are performed using partial conditional error.
+#' Simulate data from a multi-arm multi-stage trial with shared control and two initial doses, where an additional dose could be added after the interim analysis; individual observations are simulated
+#' @description Function to simulate trial data (2-stages, with dose selection). The analyses are performed using partial conditional error rates.
 #'
 #' @param n_arms number of arms (including control)
 #' @param N1 sample size stage 1
@@ -16,7 +16,7 @@
 #' @param dropout dropoutrate, between 0 and 1
 #' @param rr responder rate for each dose (vector of length `n_arm`), which gives the proportion of patients with value 0 at follow-up
 #' @param bound lower bound to define total responder in simulation study
-#' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1.
+#' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, concordance values, corresponding bias and confidence limits.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
 #' @importFrom stats pnorm
@@ -38,10 +38,10 @@
 #library(lmerTest)
 library(multcomp)
 library(gMCP)
-# Function to simulate trial data (2-stages, with dose selection)
-# individual observations are simulated
+# 
 
-#bound=0;n_arms = 4; N1=120; N2=80; mu_0m=c(6.9,6.9,6.9,6.9); mu_6m=c(6.9,5.9,5.9,5.9); mu_12m=c(6.9,5.9,5.9,5.9); sg=matrix(c(1,.6,.4,0.6,1,.6,0.4,0.6,1),3); rmonth=1; alpha1 = 0.1; alpha = 0.025; test="w1";dropout=0.1;rr=c(0,.2,.4,.6)
+
+
 sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
 {
   N1orig<-N1
@@ -722,8 +722,6 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                 decision_ma1=decision_ma1,
                 decision_ma2=decision_ma2,
                 decision_ma1a=decision_ma1a,
-                #recruit_time1=recruit_time1,
-                #recruit_time2=recruit_time2,
                 conc1=conc1,
                 conc2=conc2,
                 conc=conc,
@@ -731,7 +729,6 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
                 concMA2=concMA2,
                 concCI=concCI,
                 conccond=conccond,
-                #concCIBH=concCIBH,
                 concCIcond=concCIcond,
                 concCIinvn=concCIinvn,
                 concinvn=concinvn
@@ -739,4 +736,4 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
 }
 
-#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg, rmonth=1, alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)
+

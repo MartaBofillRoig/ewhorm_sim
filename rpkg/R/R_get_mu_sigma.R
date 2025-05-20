@@ -20,7 +20,7 @@ get_mu_sigma = function(mu_raw_0, sd_raw_0 , reductrate_6 , reductrate_12, rho )
 {
   
   
-  # PART 1: define parameters
+  # define parameters
   mu_raw_6 <- (1-reductrate_6)*mu_raw_0 #mean value six months after baseline
   mu_log_0 <- log(mu_raw_0^2/sqrt(mu_raw_0^2 + sd_raw_0^2))  # calculate the mean for the log transformation for the baseline
   
@@ -33,8 +33,6 @@ get_mu_sigma = function(mu_raw_0, sd_raw_0 , reductrate_6 , reductrate_12, rho )
   sd_raw_12 <- mu_raw_12*sqrt(exp(sd_log_0^2) - 1)   # calculating sd for the log after 12 month
   
   
-  
-  #PART 2 : Setting the all for the simulation
   
   #Obtain the vector mu for each time point
   mu_log_0<-rep(mu_log_0,4)

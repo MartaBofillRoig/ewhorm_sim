@@ -18,7 +18,7 @@
 #' @param rr responder rate for each dose (vector of length `n_arm`), which gives the proportion of patients with value 0 at follow-up
 #' @param bound lower bound to define total responder in simulation study
 #' @keywords internal
-#' @returns A vector consisting of summary measures for data simulation with n_trials repetetitions: frequency selected for stage 2, conditional power, power ,disunctive power, power of MA1, power of MA2, power of ma1a, concordances
+#' @returns A vector consisting of summary measures for data simulation with n_trials repetitions: frequency selected for stage 2, conditional power, power, disunctive power, power of MA1, power of MA2, power of ma1a, concordances
 #' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig
