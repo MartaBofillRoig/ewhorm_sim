@@ -1,9 +1,12 @@
-#define baseline-parameters
+#The following codes generates simulations for the eWHORM trial for onchocerciasis, mansonellosis, and loiasis for simulations S1-S5 as described in the manuscript.
+#Plots and tables can be found in function R_Sims_Paper_Bias_showresults.R
 
+
+#define baseline-parameters for onchocerciasis, mansonellosis, loiasis.
 scen.d<-data.frame(disease=c("onchocerciasis","mansonellosis","loiasis"),mu_raw_0=c(19,1838,5000), sd_raw_0=c(30,2565,4000),bound=c(-2.05,0,0))
 
 
-#define scenarios of reduction rates for 6 and 12 months
+#define scenarios of reduction rates for 6 and 12 months (standard scenario)
 scen.eI<-data.frame(r0_6=c(0,0,0,0,0,0,0,0),
                     r1_6=c(0,0,0,0,0,0,.4,0.5),
                     r2_6=c(0,0,0,.2,.3,.4,.4,.5),
@@ -16,15 +19,22 @@ scen.eI<-data.frame(r0_6=c(0,0,0,0,0,0,0,0),
 scen.eI<-scen.eI[c(-3,-4,-8),]
 
 
-scen.eII<-data.frame(r0_6=c(0,0,0,0,0,0,0,0),r1_6=c(0,0,0,0,0,0,.3,0.4),r2_6=c(0,0,0,.1,.2,.3,.3,.4),r3_6=c(0,.4,.5,.4,.4,.4,.3,.4),
-                    r0_12=c(0,0,0,0,0,0,0,0),r1_12=c(0,0,0,0,0,0,.5,0.6),r2_12=c(0,0,0,.3,.4,.5,.5,.6),r3_12=c(0,.6,.7,.6,.6,.6,.5,.6))
+#define scenarios of reduction rates for 6 and 12 months (modified scenario)
+scen.eII<-data.frame(r0_6=c(0,0,0,0,0,0,0,0),
+                     r1_6=c(0,0,0,0,0,0,.3,0.4),
+                     r2_6=c(0,0,0,.1,.2,.3,.3,.4),
+                     r3_6=c(0,.4,.5,.4,.4,.4,.3,.4),
+                    r0_12=c(0,0,0,0,0,0,0,0),
+                    r1_12=c(0,0,0,0,0,0,.5,0.6),
+                    r2_12=c(0,0,0,.3,.4,.5,.5,.6),
+                    r3_12=c(0,.6,.7,.6,.6,.6,.5,.6))
 
 scen.eII<-scen.eII[c(-3,-4,-8),]
 
 
 
-
-f.rr<-function(r) #function for total responder
+#help function for total responder
+f.rr<-function(r) 
 {
   max(r-0.2,.1)
 }
@@ -33,18 +43,13 @@ f.rr<-function(r) #function for total responder
 simulation.scenario<-function(d,i,n_trials,j,t,l,k,scen)
 {
   n_arms<-4
-  #rmonth<-1
   alpha<-.025
-  #sim_out1<-1
   sel_scen<-1
   side1<-1
   dropout<-.1
-  #rho<-.5
-  #N1<-120
-  #N2<-80
   scen.e<-scen
   N2<-200-N1.v[k]
-  set.seed(2412)#######NEU!!!!!!!!!!!!!
+  set.seed(2412)
   
     res<-mapply(simul_res,scen.d$mu_raw_0[d], scen.d$sd_raw_0[d] , scen.e$r0_6[i],scen.e$r1_6[i],scen.e$r2_6[i],scen.e$r3_6[i], scen.e$r0_12[i],
                                             scen.e$r1_12[i],scen.e$r2_12[i],scen.e$r3_12[i],  rho.v[l] ,
@@ -92,26 +97,22 @@ wrap<-function(d,scen,n_trials=50000)
 
 
 
-#####Simulation Start
+#####Start Simulations 
 
 
 
 alpha1.v<-seq(0.1,0.5,.1)
-N1.v<-120#c(80,120)
-rho.v<-.5#c(0.4,0.5)
+N1.v<-120
+rho.v<-.5
 test.v<-c(0,3,4)
 
 
-#test and alpha1
+#S1
 
 set.seed(1234)
 w1I<-wrap(1,scen.eI) #disease 1
-w1I
-save(w1I,file="w1ICI.RData")
 w2I<-wrap(2,scen.eI) #disease 2
-w2I
 w3I<-wrap(3,scen.eI) #disease 3
-w3I
 
 #
 save(w1I,file="w1I.RData")
@@ -122,35 +123,11 @@ load("w2I.RData")
 load("w3I.RData")
 
 
-#####nur Wilcoxon wegen concordance;
-#alpha1.v<-seq(0.1,0.5,.1)
-#N1.v<-120
-#rho.v<-.5
-#test.v<-4
-
-#test and alpha1
-
-#w1IW<-wrap(1,scen.eI) #disease 1
-#w1IW
-#w2IW<-wrap(2,scen.eI) #disease 2
-#w2IW
-#w3IW<-wrap(3,scen.eI) #disease 3
-#w3IW
-
-#save(w1IW,file="w1IW.RData")
-#save(w2IW,file="w2IW.RData")
-#save(w3IW,file="w3IW.RData")
-#load("w1IW.RData")
-#load("w2IW.RData")
-#load("w3IW.RData")
-
+#S2
 
 w1II<-wrap(1,scen.eII) #disease 1
-w1II
 w2II<-wrap(2,scen.eII) #disease 2
-w2II
 w3II<-wrap(3,scen.eII) #disease 3
-w3II
 
 save(w1I,file="w1II.RData")
 save(w2I,file="w2II.RData")
@@ -160,18 +137,16 @@ load("w2II.RData")
 load("w3II.RData")
 
 
-#rho and test
-alpha1.v<-.3#seq(0.1,0.5,.1)
-N1.v<-120#c(80,120)
+#S3
+
+alpha1.v<-.3
+N1.v<-120
 rho.v<-c(0.4,0.5,0.6)
 test.v<-c(0,3,4)
 
 w1I.rho<-wrap(1,scen.eI) #disease 1
-w1I.rho
 w2I.rho<-wrap(2,scen.eI) #disease 2
-w2I.rho
 w3I.rho<-wrap(3,scen.eI) #disease 3
-w3I.rho
 
 save(w1I.rho,file="w1I.rho.RData")
 save(w2I.rho,file="w2I.rho.RData")
@@ -180,18 +155,15 @@ load("w1I.rho.RData")
 load("w2I.rho.RData")
 load("w3I.rho.RData")
 
-#N1 and test
-alpha1.v<-.3#seq(0.1,0.5,.1)
+#S4
+alpha1.v<-.3
 N1.v<-c(80,100,120)
-rho.v<-.5#c(0.4,0.5,0.6)
+rho.v<-.5
 test.v<-c(0,3,4)
 
 w1I.N1<-wrap(1,scen.eI) #disease 1
-w1I.N1
 w2I.N1<-wrap(2,scen.eI) #disease 2
-w2I.N1
 w3I.N1<-wrap(3,scen.eI) #disease 3
-w3I.N1
 
 save(w1I.N1,file="w1I.N1.RData")
 save(w2I.N1,file="w2I.N1.RData")
@@ -201,22 +173,19 @@ load("w2I.N1.RData")
 load("w3I.N1.RData")
 
 
+
+#S5
+
 scen.d<-data.frame(disease=c("onchocerciasis","mansonellosis","loiasis"),mu_raw_0=c(15,1000,4000), sd_raw_0=c(40,3500,5000),bound=c(-2.05,0,0))
 
-
 alpha1.v<-seq(0.1,0.5,.1)
-N1.v<-120#c(80,120)
-rho.v<-.5#c(0.4,0.5)
+N1.v<-120
+rho.v<-.5
 test.v<-c(0,3,4)
 
-#test and alpha1
-
 w1I.worst<-wrap(1,scen.eI) #disease 1
-w1I.worst
 w2I.worst<-wrap(2,scen.eI) #disease 2
-w2I.worst
 w3I.worst<-wrap(3,scen.eI) #disease 3
-w3I.worst
 
 save(w1I.worst,file="w1I.worst.RData")
 save(w2I.worst,file="w2I.worst.RData")

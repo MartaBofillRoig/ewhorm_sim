@@ -16,7 +16,7 @@
 #' @param dropout dropoutrate, between 0 and 1
 #' @param rr responder rate for each dose (vector of length `n_arm`), which gives the proportion of patients with value 0 at follow-up
 #' @param bound lower bound to define total responder in simulation study
-#' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, concordance values, corresponding bias and confidence limits.
+#' @returns A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, concordance values, corresponding bias and confidence limits and corresponding values on the multi-armed trials.
 #' @importFrom mvtnorm rmvnorm
 #' @importFrom stats runif
 #' @importFrom stats pnorm

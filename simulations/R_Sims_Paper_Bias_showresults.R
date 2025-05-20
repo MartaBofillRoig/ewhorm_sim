@@ -1,13 +1,14 @@
 
 
-#Plot fuer Power
+#Plot of all Figures from Manuscript and Supplementary material ()
 
-#make long for single power values and for MA1, MA2 and adaptive.
+
+#functions to make long data sets for depiction in Figures
+
 dat_reshape<-function(dat)
 {
   dat<-dat[!is.na(dat$disease),]
   
-  #im folgenden werden Pow.Low Pow.Me Pow.Hi, Pow.cond und Pow.disj. untereinander gestellt, damit es fuer jeden sep. Plot gibt.
   dat.a<-reshape(data = dat,
                  #idvar= "id",
                  varying = matrix(c(15:19,23,24,25,27,26,28,29,30,32,31),nrow=3,byrow=TRUE), #We need to specify here the columns to be reshaped
@@ -20,7 +21,6 @@ dat_reshape<-function(dat)
   
   dat.a<-dat.a[,-ncol(dat.a)] #clear id
   
-  #im folgenden werden Pow.Low Pow.Me Pow.Hi, Pow.cond und Pow.disj. untereinander gestellt, damit es fuer jeden sep. Plot gibt.
   dat<-reshape(data = dat.a,
                #idvar= "id",
                varying = matrix(c("Pow","PowMa1","PowMa2"),nrow=1),#We need to specify here the columns to be reshaped
@@ -51,7 +51,6 @@ dat_reshape_selP<-function(dat)
 {
   dat<-dat[!is.na(dat$disease),]
   
-  #im folgenden werden selection prob.und Pow.cond untereinander gestellt, damit es fuer jeden sep. Plot gibt.
   dat<-reshape(data = dat,
                #idvar= "id",
                varying = c(20:22,18), #We need to specify here the columns to be reshaped
@@ -71,6 +70,8 @@ dat_reshape_selP<-function(dat)
   dat
 }
 
+
+#generate long data sets from each simulation data set
 w1I.long.selP<-dat_reshape_selP(w1I)
 w1II.long.selP<-dat_reshape_selP(w1II)
 w1I.rho.long.selP<-dat_reshape_selP(w1I.rho)
@@ -140,8 +141,8 @@ w3I.worst.long$scenario1<-factor(w3I.worst.long$scenario,labels=c("No effect","E
 
 
 
-#Power values
-#plot as function of alpha1;
+#Functions to generate ggplots from generated data (long format)
+#plot power as function of alpha1;
 library(ggplot2)
 plotpow.alpha1<-function(dat)
 {
@@ -162,7 +163,7 @@ plotpow.alpha1<-function(dat)
 plotpow.alpha1(w1I.long)
 dat<-w1I.long
 
-#plot as function of rho;
+#plot power as function of rho;
 plotpow.rho<-function(dat)
 {
   plotpow<-ggplot(dat[which((dat$scenario>1)&(dat$H %in% c("Low dose","Medium dose","High dose","Disjunctive"))),]# %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -180,7 +181,7 @@ plotpow.rho<-function(dat)
   plot1
 }
 
-#plot as function of rho;
+#plot power as function of N1;
 plotpow.N1<-function(dat)
 {
   plotpow<-ggplot(dat[which((dat$scenario>1)&(dat$H %in% c("Low dose","Medium dose","High dose","Disjunctive"))),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -198,7 +199,7 @@ plotpow.N1<-function(dat)
   plot1
 }
 
-#ERror values
+#Plot type I error as function of alpha1
 plotpow.alpha1.error<-function(dat)
 {
   plotpow<-ggplot(dat[which((dat$scenario==1)&(dat$H %in% c("Low dose","Medium dose","High dose","Disjunctive"))),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -217,7 +218,7 @@ plotpow.alpha1.error<-function(dat)
 }
 
 
-
+#Plot type I error as function of rho
 plotpow.rho.error<-function(dat)
 {
   plotpow<-ggplot(dat[which((dat$scenario==1)&(dat$H %in% c("Low dose","Medium dose","High dose","Disjunctive"))),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -237,6 +238,7 @@ plotpow.rho.error<-function(dat)
 plotpow.rho.error(w1I.rho.long)
 
 
+#Plot type I error as function of N1
 plotpow.N1.error<-function(dat)
 {
   plotpow<-ggplot(dat[which((dat$scenario==1)&(dat$H %in% c("Low dose","Medium dose","High dose","Disjunctive"))),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -257,8 +259,7 @@ plotpow.N1.error<-function(dat)
 
 
 
-#Selection prob.
-#plot as function of alpha1;
+#Plot selection prob. as function of alpha1
 plotpow.alpha1.selP<-function(dat)
 {
   plotpow<-ggplot(dat#[which(dat$scenario>1),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -278,7 +279,7 @@ plotpow.alpha1.selP<-function(dat)
 plotpow.alpha1.selP(w3I.long.selP)
 #w3I.worst.long.selP$SelP.dose
 
-#plot as function of rho;
+#Plot selection prob. as function of rho
 plotpow.rho.selP<-function(dat)
 {
   plotpow<-ggplot(dat[which(dat$scenario>1),]# %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -295,7 +296,7 @@ plotpow.rho.selP<-function(dat)
   plot1
 }
 
-#plot as function of rho;
+#Plot selection prob. as function of N1
 plotpow.N1.selP<-function(dat)
 {
   plotpow<-ggplot(dat[which(dat$scenario>1),]##[which(w1I.long$scenario %in% c(2,5,6,7,8)),]#[which(w1I$xx %in% c("r", "f")),]
@@ -312,19 +313,20 @@ plotpow.N1.selP<-function(dat)
   plot1
 }
 
+#Generate the individual plots
 
 pdf("plot_onchoR.pdf")
-print(plotpow.alpha1(w1I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1(w1I.long)) 
 print(plotpow.alpha1(w1II.long))
 print(plotpow.alpha1(w1I.worst.long))
 print(plotpow.rho(w1I.rho.long))
 print(plotpow.N1(w1I.N1.long))
-print(plotpow.alpha1.error(w1I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.error(w1I.long))
 print(plotpow.alpha1.error(w1II.long))
 print(plotpow.alpha1.error(w1I.worst.long))
 print(plotpow.rho.error(w1I.rho.long))
 print(plotpow.N1.error(w1I.N1.long))
-print(plotpow.alpha1.selP(w1I.long.selP))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.selP(w1I.long.selP)) 
 print(plotpow.alpha1.selP(w1II.long.selP))
 print(plotpow.alpha1.selP(w1I.worst.long.selP))
 print(plotpow.rho.selP(w1I.rho.long.selP))
@@ -333,17 +335,17 @@ dev.off()
 
 
 pdf("plot_mansR.pdf")
-print(plotpow.alpha1(w2I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1(w2I.long))     
 print(plotpow.alpha1(w2II.long))
 print(plotpow.alpha1(w2I.worst.long))
 print(plotpow.rho(w2I.rho.long))
 print(plotpow.N1(w2I.N1.long))
-print(plotpow.alpha1.error(w2I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.error(w2I.long))   
 print(plotpow.alpha1.error(w2II.long))
 print(plotpow.alpha1.error(w2I.worst.long))
 print(plotpow.rho.error(w2I.rho.long))
 print(plotpow.N1.error(w2I.N1.long))
-print(plotpow.alpha1.selP(w2I.long.selP))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.selP(w2I.long.selP))  
 print(plotpow.alpha1.selP(w2II.long.selP))
 print(plotpow.alpha1.selP(w2I.worst.long.selP))
 print(plotpow.rho.selP(w2I.rho.long.selP))
@@ -352,17 +354,17 @@ dev.off()
 
 
 pdf("plot_loaR.pdf")
-print(plotpow.alpha1(w3I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1(w3I.long))
 print(plotpow.alpha1(w3II.long))
 print(plotpow.alpha1(w3I.worst.long))
 print(plotpow.rho(w3I.rho.long))
 print(plotpow.N1(w3I.N1.long))
-print(plotpow.alpha1.error(w3I.long))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.error(w3I.long))   
 print(plotpow.alpha1.error(w3II.long))
 print(plotpow.alpha1.error(w3I.worst.long))
 print(plotpow.rho.error(w3I.rho.long))
 print(plotpow.N1.error(w3I.N1.long))
-print(plotpow.alpha1.selP(w3I.long.selP))     # Plot 1 --> in the first page of PDF
+print(plotpow.alpha1.selP(w3I.long.selP))  
 print(plotpow.alpha1.selP(w3II.long.selP))
 print(plotpow.alpha1.selP(w3I.worst.long.selP))
 print(plotpow.rho.selP(w3I.rho.long.selP))
@@ -378,9 +380,10 @@ dev.off()
 
 
 ###############################################
-#
-#   Bias
-#
+
+
+
+#Reproduce tables of Bias and confidence limit of concordance in Manuscript and supplementary material
 
 w1I.Bias<-w1I[w1I$test==4,]
 
@@ -406,21 +409,19 @@ cbind(o13$CICovinvnorm.Low,o13$CICovinvnorm.Me,o13$CICovinvnorm.Hi)*cbind(o13$Se
 
 
 #SUPPL
-#uncond
-#Bias uncond;
+#Bias unconditional;
 cbind(o13$Bias.Low,o13$Bias.Me,o13$Bias.Hi)
-#CI uncond
+#CI unconditional
 cbind(o13$CIupC.Low,o13$CIupC.Me,o13$CIupC.Hi)
-#Coverage uncond;
+#Coverage unconditional;
 cbind(o13$CICov.Low,o13$CICov.Me,o13$CICov.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
 
 
 
 #SUPPL
-#cond
-#Bias cond;
+#Bias conditional;
 cbind(o13$biasCcond.Low,o13$biasCcond.Me,o13$biasCcond.Hi)
-#CI cond
+#CI conditional
 cbind(o13$CImeancond.Low,o13$CImeancond.Me,o13$CImeancond.Hi)
-#Coverage cond;
+#Coverage conditional;
 cbind(o13$CICovcond.Low,o13$CICovcond.Me,o13$CICovcond.Hi)*cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1))+(1-cbind(o13$SelP.Lo,o13$SelP.Me,c(1,1,1,1,1)))
