@@ -30,16 +30,22 @@
 #' @keywords internal
 #' @returns A vector consisting of summary measures for data simulation with n_trials repetitions: frequency selected for stage 2, conditional power, power ,disjunctive power, power of MA1, power of MA2, power of ma1a, concordances
 #' @export
+#' @import dplyr
+#' @import tidyr
+#' @import future
+#' @import furrr
+#' @import gMCP
+#' @import mvtnorm
 #' @details eWHORM simulations
-#' @author Marta Bofill Roig
+#' @author Marta Bofill Roig, Sonja Zehetmayer
 
 
-library(dplyr)
-library(tidyr)
-library(future)
-library(furrr)
-library(gMCP)
-library(mvtnorm)
+# library(dplyr)
+# library(tidyr)
+# library(future)
+# library(furrr)
+# library(gMCP)
+# library(mvtnorm)
 
 
 simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,

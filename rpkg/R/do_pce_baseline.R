@@ -20,16 +20,22 @@
 #' @keywords internal
 #' @returns A vector consisting of summary measures for data simulation with n_trials repetitions: frequency selected for stage 2, conditional power, power, disunctive power, power of MA1, power of MA2, power of ma1a, concordances
 #' @export
+#' @import dplyr
+#' @import tidyr
+#' @import future
+#' @import furrr
+#' @import gMCP
+#' @import mvtnorm
 #' @details eWHORM simulations
-#' @author Marta Bofill Roig
+#' @author Marta Bofill Roig, Sonja Zehetmayer
 
 
-library(dplyr)
-library(tidyr)
-library(future)
-library(furrr)
-library(gMCP)
-library(mvtnorm)
+# library(dplyr)
+# library(tidyr)
+# library(future)
+# library(furrr)
+# library(gMCP)
+# library(mvtnorm)
 
 
 do_pce_baseline = function(n_trials,n_arms = 4,N1, N2, mu_0m, mu_6m, mu_12m,  sg, alpha1 , alpha , sel_scen, side,test,dropout,rr,bound)

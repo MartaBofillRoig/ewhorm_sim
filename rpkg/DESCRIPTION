@@ -2,9 +2,9 @@ Package: ewhorm
 Title: Statistical Considerations for Designing e-WHORM Adaptive Trial
 Version: 0.1
 Author: Marta Bofill Roig [aut, cre] (<https://orcid.org/0000-0002-4400-7541>), Martin Posch [aut], Sonja Zehetmayer [aut]
-Maintainer: Marta Bofill Roig <marta.bofillroig@meduniwien.ac.at>
+Maintainer: Marta Bofill Roig <marta.bofill.roig@upc.edu>
 Authors@R: 
-    c(person("Marta", "Bofill Roig", email = "marta.bofillroig@meduniwien.ac.at", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4400-7541")),
+    c(person("Marta", "Bofill Roig", email = "marta.bofill.roig@upc.edu", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-4400-7541")),
     person("Martin", "Posch", email = "martin.posch@meduniwien.ac.at", role = c("aut")),
     person("Sonja", "Zehetmayer", email = "sonja.zehetmayer@meduniwien.ac.at", role = c("aut")))
 Description: 
@@ -16,9 +16,13 @@ Imports:
   stats, 
   multcomp,
   gMCP,
-  gtools
+  gtools,
+  dplyr,
+  tidyr,
+  future,
+  furrr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.1
+RoxygenNote: 7.3.2
 Suggests: 
     knitr,
     rmarkdown

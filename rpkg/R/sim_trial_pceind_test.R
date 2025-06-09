@@ -26,18 +26,24 @@
 #' @importFrom stats coef
 #' @importFrom stats lm
 #' @importFrom stats pt
+#' @importFrom stats relevel
+#' @importFrom stats rbinom
+#' @importFrom stats sd
+#' @importFrom stats uniroot
+#' @importFrom stats wilcox.test
+#' @importFrom stats p.adjust
 #' @importFrom multcomp glht
 #' @importFrom multcomp mcp
 #' @importFrom gMCP doInterim
 #' @importFrom gMCP BonferroniHolm
 #' @export
 #' @details eWHORM simulations
-#' @author Marta Bofill Roig
+#' @author Marta Bofill Roig, Sonja Zehetmayer
 
 #library(lme4)
 #library(lmerTest)
-library(multcomp)
-library(gMCP)
+# library(multcomp)
+# library(gMCP)
 # 
 
 

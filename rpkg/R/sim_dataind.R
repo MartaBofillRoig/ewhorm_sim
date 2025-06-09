@@ -10,13 +10,12 @@
 #' @param bound lower bound to define total responder in simulation study
 #' @keywords internal
 #' @returns simulated data consisting of the responses at 6 and 12 months, treatment arm, for each subject.
-#' @importFrom mvtnorm rmvnorm
+#' @import mvtnorm 
 #' @importFrom stats model.matrix
 #' @export
 #' @details eWHORM simulations
-#' @author Marta Bofill Roig
+#' @author Marta Bofill Roig, Sonja Zehetmayer
 
-library(mvtnorm)
 
 sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rr,bound){
 
