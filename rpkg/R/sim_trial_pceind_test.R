@@ -7,7 +7,7 @@
 #' @param mu_0m Baseline value per arm (vector of length `n_arm`)
 #' @param mu_6m 6-month value per arm (vector of length `n_arm`)
 #' @param mu_12m 12-month value per arm (vector of length `n_arm`)
-#' @param sigma covariance matrix between 6- and 12-month mean differences assumed equal across arms (matrix of dim 2x2)
+#' @param sg sigma covariance matrix between 6- and 12-month mean differences assumed equal across arms (matrix of dim 2x2)
 #' @param alpha1 significance level for dose selection (futility boundary)
 #' @param alpha significance level for selected dose vs control comparison
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
@@ -48,7 +48,7 @@
 
 
 
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T, test, dropout, rr, bound)
 {
   N1orig<-N1
   N1<-floor(N1*(1-dropout))

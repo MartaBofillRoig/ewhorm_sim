@@ -35,6 +35,8 @@ sim_trial_pceind_test(
 
 \item{mu_12m}{12-month value per arm (vector of length \code{n_arm})}
 
+\item{sg}{sigma covariance matrix between 6- and 12-month mean differences assumed equal across arms (matrix of dim 2x2)}
+
 \item{alpha1}{significance level for dose selection (futility boundary)}
 
 \item{alpha}{significance level for selected dose vs control comparison}
@@ -50,8 +52,6 @@ sim_trial_pceind_test(
 \item{rr}{responder rate for each dose (vector of length \code{n_arm}), which gives the proportion of patients with value 0 at follow-up}
 
 \item{bound}{lower bound to define total responder in simulation study}
-
-\item{sigma}{covariance matrix between 6- and 12-month mean differences assumed equal across arms (matrix of dim 2x2)}
 }
 \value{
 A list consisting of pvalues at stage 1, pvalues at stage 2, the decision at stages 1 and 2, the selected dose at stage 1, concordance values, corresponding bias and confidence limits and corresponding values on the multi-armed trials.

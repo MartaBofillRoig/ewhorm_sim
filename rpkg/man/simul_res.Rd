@@ -70,6 +70,10 @@ simul_res(
 
 \item{sel_scen}{choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses}
 
+\item{side1}{TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)}
+
+\item{test1}{defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values}
+
 \item{dropout}{dropoutrate with values between 0 and 1}
 
 \item{rr0}{total responder rate for control dose, which gives the proportion of patients with value 0 at follow-up}
@@ -81,10 +85,6 @@ simul_res(
 \item{rr3}{total responder rate for high dose, which gives the proportion of patients with value 0 at follow-up}
 
 \item{bound}{lower bound to define total responder in simulation study}
-
-\item{side}{TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)}
-
-\item{test}{defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values}
 }
 \value{
 A vector consisting of summary measures for data simulation with n_trials repetitions: frequency selected for stage 2, conditional power, power ,disjunctive power, power of MA1, power of MA2, power of ma1a, concordances

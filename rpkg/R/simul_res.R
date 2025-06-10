@@ -19,8 +19,8 @@
 #' @param alpha1 significance level for dose selection (futility boundary)
 #' @param alpha significance level for selected dose vs control comparison
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
-#' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
-#' @param test defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
+#' @param side1 TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
+#' @param test1 defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
 #' @param dropout dropoutrate with values between 0 and 1
 #' @param rr0 total responder rate for control dose, which gives the proportion of patients with value 0 at follow-up
 #' @param rr1 total responder rate for low dose, which gives the proportion of patients with value 0 at follow-up
@@ -50,7 +50,7 @@
 
 simul_res = function(mu_raw_0, sd_raw_0 , r0_6,r1_6,r2_6,r3_6, r0_12,r1_12,r2_12,r3_12,  rho ,
                      n_trials,n_arms = 4,N1 , N2, alpha1 , alpha ,
-                     sel_scen, side1,test1,dropout,rr0,rr1,rr2,rr3,bound)
+                     sel_scen, side1, test1, dropout, rr0, rr1, rr2, rr3, bound)
 {
   
   if (side1==1) side<-T
