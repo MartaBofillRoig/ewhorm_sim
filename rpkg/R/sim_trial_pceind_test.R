@@ -40,15 +40,8 @@
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig, Sonja Zehetmayer
 
-#library(lme4)
-#library(lmerTest)
-# library(multcomp)
-# library(gMCP)
-# 
 
-
-
-sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T, test, dropout, rr, bound)
+sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg, alpha1 , alpha = 0.025, sel_scen, side=T,test,dropout,rr,bound)
 {
   N1orig<-N1
   N1<-floor(N1*(1-dropout))
@@ -60,19 +53,30 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   db_stage1$diff12_0<-db_stage1$y_12m-db_stage1$y_0m
   
   
-  #interim anlysis
-
-  #Obtain one-sided p-value
-
-  plow <- t.test(db_stage1$y_6m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
-  pmed<-t.test(db_stage1$y_6m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+  if (test=="l"){    #hurdle model combining logistic regression for binary part and linear model for count part;
   
+  sub1 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[1:2]))  
+  sub1$pos<-sub1$y_6m>0
+  plow1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+  mod<-lm(log(y_6m) ~ treat, data = sub1, subset = (y_6m > 0))
+  res<-summary(mod)
+  plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+  plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) #Bonferroni adjusted p-values for low dose for selection
+  
+  sub2 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[c(1,3)]))
+  sub2$pos<-sub2$y_6m>0
+  pmed1<-pnorm(summary(glm(pos ~ treat, data = sub2, family = binomial))$coefficients[2,3])
+  mod<-lm(log(y_6m) ~ treat, data = sub2, subset = (y_6m > 0))
+  res<-summary(mod)
+  pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+  pmed<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) #Bonferroni adjusted p-values for medium dose for selection
+  }
   
   if (test=="w"){
     plow <- wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     pmed<-wilcox.test(db_stage1$diff6_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
     }
-  
+
   if (test=="w1"){
     plow <- wilcox.test(db_stage1$y_6m[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     pmed<-wilcox.test(db_stage1$y_6m[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
@@ -108,29 +112,35 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   pval1 <- c()  #12months p-value of first stage
   
-  if (test=="t"){
-    p12low <- t.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
-    p12med<-t.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
+
+    if (test=="l")
+    {
+    sub1 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[1:2]))  
+    sub1$pos<-sub1$y_12m>0
+    plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+    mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+    res<-summary(mod)
+    plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+    p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) #Bonferroni adjusted p-values for selection
+
+    sub2 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[c(1,3)]))
+    sub2$pos<-sub2$y_12m>0
+    pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
+    mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+    res<-summary(mod)
+    pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+    p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
     pval1<-cbind(p12low,p12med)
-  }
-  
-  if (test=="l"){  #two individual models, due to robustness in case of different variances
     
-    for(j in 1:(n_arms-2)){
-      
-      sub1 <- subset(db_stage1,(db_stage1$treat==levels(db_stage1$treat)[1])+ (db_stage1$treat==levels(db_stage1$treat)[j+1])==1)
-      mod1 <- lm(y_12m ~ treat+y_0m, sub1)
-      res1 <- summary(mod1)
-      pval1[j] <- pt(coef(res1)[2,3], mod1$df, lower.tail = side)
     }
-  }
-  
+    
+    
+    
   
   if (test=="w"){
     p12low <- wilcox.test(db_stage1$diff12_0[db_stage1$treat!="Medium"]~db_stage1$treat[db_stage1$treat!="Medium"],alternative="greater")$p.value
     p12med<-wilcox.test(db_stage1$diff12_0[db_stage1$treat!="Low"]~db_stage1$treat[db_stage1$treat!="Low"],alternative="greater")$p.value
     pval1<-cbind(p12low,p12med)
-    #pval
   }
   
   conc1 <- vector(length=3)  
@@ -144,7 +154,6 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     conc1<-cbind(conc1low,conc1med,NA)
   }
   
- 
   z <- qnorm(1-pmax(pval1,1e-15))
   
   decision_s1 <- c()
@@ -157,13 +166,13 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   #preplanning adaptive conditional error
   #######################################
   N=N1+N2
-  graph_bh <- BonferroniHolm(3)
   
   v = c(N1/N,N1/N,0)
   # the package assumes that wj are equal for all j
   z1 <- c(z,0)
-  preplan <- doInterim(graph=graph_bh,z1=z1,v=v,alpha=alpha)
-
+  preplanAj <- doInterim_holm_closed_m3 (z1=z1, v=v, alpha=alpha)
+  
+  
   #######################################
   # stage2
   # sc=2 --> Arm A and B continue to stage 2
@@ -187,22 +196,27 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     
     if (test=="l"){
       
-      for(j in 1:2){
-        sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-        mod2 <- lm(y_12m~treat+y_0m, sub2) 
-        res2 <- summary(mod2)
-        pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-      }
+      sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
+      sub1$pos<-sub1$y_12m>0
+      plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      res<-summary(mod)
+      plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+      p12low<-min(p.adjust(c(plow1,plow2),"bonferroni"))
+      
+      sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
+      sub2$pos<-sub2$y_12m>0
+      pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
+      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+      res<-summary(mod)
+      pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+      p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
+      pval2<-cbind(p12low,p12med)
+      
     }
     
     
-    if (test=="t"){
-      p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
-      p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
-      pval2<-cbind(p12low2,p12med2)
-    }
     
-       
     if (test=="w"){
       p12low2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
       p12med2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
@@ -219,36 +233,28 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       conc2<-cbind(conc2low,conc2med,NA)
     }
     
-
-    #Avalues <- c(preplan@BJ[7], #H123
-    #             preplan@BJ[6], #H12
-    #             preplan@BJ[5], #H13
-    #             preplan@BJ[3], #H23
-    #             preplan@BJ[2], #H2
-    #             preplan@BJ[4]  #H1
-    #)
-    
-    #decision <- c()
-    #decision[1] <- ifelse(sum(pval2[1] <= Avalues[c(1,2,3,6)])==4, "Reject", "Accept")
-    #decision[2] <- ifelse(sum(pval2[2] <= Avalues[c(1,2,4,5)])==4, "Reject", "Accept")
     
     #############################
     
     #global Null H123
-    dec123<-max(pval2[1]<preplan@BJ[7]*preplan@Aj[7,1]/(preplan@Aj[7,1]+preplan@Aj[7,2]),
-                pval2[2]<preplan@BJ[7]*preplan@Aj[7,2]/(preplan@Aj[7,1]+preplan@Aj[7,2]),preplan@BJ[7]>1)
+    
+    dec123<-max(pval2[1]<preplanAj[7,4]*preplanAj[7,1]/(preplanAj[7,1]+preplanAj[7,2]),
+                pval2[2]<preplanAj[7,4]*preplanAj[7,2]/(preplanAj[7,1]+preplanAj[7,2]),preplanAj[7,4]>1)
     #H12
-    dec12<-max(pval2[1]<preplan@BJ[6]*preplan@Aj[6,1]/(preplan@Aj[6,1]+preplan@Aj[6,2]),
-               pval2[2]<preplan@BJ[6]*preplan@Aj[6,2]/(preplan@Aj[6,1]+preplan@Aj[6,2]),preplan@BJ[6]>1)
+    dec12<-max(pval2[1]<preplanAj[6,4]*preplanAj[6,1]/(preplanAj[6,1]+preplanAj[6,2]),
+               pval2[2]<preplanAj[6,4]*preplanAj[6,2]/(preplanAj[6,1]+preplanAj[6,2]),preplanAj[6,4]>1)
+    
+    
     #H13
-    dec13<-max(pval2[1]<preplan@BJ[5])
+    dec13<-max(pval2[1]<preplanAj[5,4])
     #H23
-    dec23<-max(pval2[2]<preplan@BJ[3])
+    dec23<-max(pval2[2]<preplanAj[3,4])
     #H1
-    dec1<-min(pval2[1]<preplan@BJ[4],dec123,dec12,dec13)
+    dec1<-min(pval2[1]<preplanAj[4,4],dec123,dec12,dec13)
     #H2
-    dec2<-min(pval2[2]<preplan@BJ[2],dec123,dec12,dec23)
+    dec2<-min(pval2[2]<preplanAj[2,4],dec123,dec12,dec23)
 
+   
     stage2_arms <- c(1,1,0)
     simdec_output <- c(dec1,dec2,NA)
     
@@ -271,15 +277,15 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       
       if (test=="l"){
         
-        mod2 <- lm(y_12m~treat+y_0m, db_stage2) 
-        res2 <- summary(mod2)
-        pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-      }
-      
-      
-      if (test=="t"){
-        pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
-      }
+        sub1 <- subset(db_stage2)
+        sub1$pos<-sub1$y_12m>0
+        plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+        res<-summary(mod)
+        plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+        plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
+        
+        }
       
       
       if (test=="w"){
@@ -291,16 +297,12 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         conc2<-  c(NA,NA,wilcox.test(db_stage2$y_12m~db_stage2$treat,alternative="greater")$statistic/(N2/2*N2/2))
       }      
       
-      
-      
-      dec123<-max(pval2[1]<preplan@BJ[7],preplan@BJ[7]>1)
-      #H12
-      dec13<-max(pval2[1]<preplan@BJ[5])
-      dec23<-max(pval2[1]<preplan@BJ[3])
-      #H1
-      dec3<-min(pval2[1]<preplan@BJ[1],dec123,dec13,dec23)
-      #
-      
+      dec123<-max(pval2[1]<preplanAj[7,4],preplanAj[7,4]>1)
+      dec13<-max(pval2[1]<preplanAj[5,4])
+      dec23<-max(pval2[1]<preplanAj[3,4])
+      dec3<-min(pval2[1]<preplanAj[1,4],dec123,dec13,dec23)
+     
+     
       stage2_arms <- c(0,0,1)
       simdec_output <- c(0,0,dec3)
       
@@ -322,22 +324,26 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       
       if (test=="l"){
         
-        for(j in 1:2){
-          
-          sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-          mod2 <- lm(y_12m~treat+y_0m, sub2) 
-          res2 <- summary(mod2)
-          pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-        }
+        sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
+        sub1$pos<-sub1$y_12m>0
+        plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+        res<-summary(mod)
+        plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+        p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
+        
+        sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
+        sub2$pos<-sub2$y_12m>0
+        pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
+        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+        res<-summary(mod)
+        pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+        p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
+        pval2<-cbind(p12low,p12med)
       }
       
       
-      if (test=="t"){
-        p12low2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
-        p12med2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
-        pval2<-cbind(p12low2,p12med2)
-      }
-      
+       
       if (test=="w"){
         p12low2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
         p12med2<-wilcox.test(db_stage2$diff12_0[db_stage2$treat!="Low"]~db_stage2$treat[db_stage2$treat!="Low"],alternative="greater")$p.value
@@ -355,20 +361,24 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       
       
       #global Null H123
-      dec123<-max(pval2[1]<preplan@BJ[7]*preplan@Aj[7,1]/(preplan@Aj[7,1]+preplan@Aj[7,2]),
-                  pval2[2]<preplan@BJ[7]*preplan@Aj[7,2]/(preplan@Aj[7,1]+preplan@Aj[7,2]),preplan@BJ[7]>1)
+      dec123<-max(pval2[1]<preplanAj[7,4]*preplanAj[7,1]/(preplanAj[7,1]+preplanAj[7,2]),
+                  pval2[2]<preplanAj[7,4]*preplanAj[7,2]/(preplanAj[7,1]+preplanAj[7,2]),preplanAj[7,4]>1)
       #H12
-      dec12<-max(pval2[1]<preplan@BJ[6]*preplan@Aj[6,1]/(preplan@Aj[6,1]+preplan@Aj[6,2]),
-                 pval2[2]<preplan@BJ[6]*preplan@Aj[6,2]/(preplan@Aj[6,1]+preplan@Aj[6,2]),preplan@BJ[6]>1)
+      dec12<-max(pval2[1]<preplanAj[6,4]*preplanAj[6,1]/(preplanAj[6,1]+preplanAj[6,2]),
+                 pval2[2]<preplanAj[6,4]*preplanAj[6,2]/(preplanAj[6,1]+preplanAj[6,2]),preplanAj[6,4]>1)
+      
+      
       #H13
-      dec13<-max(pval2[1]<preplan@BJ[5])
+      dec13<-max(pval2[1]<preplanAj[5,4])
       #H23
-      dec23<-max(pval2[2]<preplan@BJ[3])
+      dec23<-max(pval2[2]<preplanAj[3,4])
       #H1
-      dec1<-min(pval2[1]<preplan@BJ[4],dec123,dec12,dec13)
+      dec1<-min(pval2[1]<preplanAj[4,4],dec123,dec12,dec13)
       #H2
-      dec2<-min(pval2[2]<preplan@BJ[2],dec123,dec12,dec23)
-
+      dec2<-min(pval2[2]<preplanAj[2,4],dec123,dec12,dec23)
+      #global Null H123
+      
+      
       stage2_arms <- c(1,1,0)
       simdec_output <- c(dec1,dec2,NA)
       
@@ -392,21 +402,26 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     
     if (test=="l"){
       
-      for(j in 1:2){
-        
-        sub2 <- subset(db_stage2,(db_stage2$treat==levels(db_stage2$treat)[1])+(db_stage2$treat==levels(db_stage2$treat)[j+1])==1)
-        mod2 <- lm(y_12m~treat+y_0m, sub2) 
-        res2 <- summary(mod2)
-        pval2[j] <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-      }
+      sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
+      sub1$pos<-sub1$y_12m>0
+      plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      res<-summary(mod)
+      plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+      p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
+      
+      sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
+      sub2$pos<-sub2$y_12m>0
+      pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
+      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+      res<-summary(mod)
+      pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+      p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
+      pval2<-cbind(p12low,p12med)
+      
+      
     }
     
-    
-    if (test=="t"){
-      p12med2 <- t.test(db_stage2$diff12_0[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
-      p12hi2<-t.test(db_stage2$diff12_0[db_stage2$treat!="Medium"]~db_stage2$treat[db_stage2$treat!="Medium"],alternative="greater")$p.value
-      pval2<-cbind(p12med2,p12hi2)
-    }
     
     if (test=="w"){
       p12med2 <- wilcox.test(db_stage2$diff12_0[db_stage2$treat!="High"]~db_stage2$treat[db_stage2$treat!="High"],alternative="greater")$p.value
@@ -424,23 +439,21 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     }
     
     
-    
-    dec123<-max(pval2[1]<preplan@Aj[7,2],#preplan@BJ[7]*(preplan@Aj[7,2]/(preplan@Aj[7,2]+preplan@Aj[7,3]),
-                pval2[2]<(preplan@Aj[7,1]+preplan@Aj[7,3]),#preplan@BJ[7]*preplan@Aj[7,3]/(preplan@Aj[7,2]+preplan@Aj[7,3]),
-                preplan@BJ[7]>1)
+    dec123<-max(pval2[1]<preplanAj[7,2],
+                pval2[2]<(preplanAj[7,1]+preplanAj[7,3]),
+                preplanAj[7,4]>1)
     #H23
-    dec23<-max(pval2[1]<preplan@Aj[3,2],#preplan@BJ[3]*preplan@Aj[3,2]/(preplan@Aj[3,2]+preplan@Aj[3,3]),
-               pval2[2]<preplan@Aj[3,3])#,BJ[3]*preplan@Aj[3,3]/(preplan@Aj[3,2]+preplan@Aj[3,3]),preplan@BJ[6]>1)
+    dec23<-max(pval2[1]<preplanAj[3,2],#preplan@BJ[3]*preplan@Aj[3,2]/(preplan@Aj[3,2]+preplan@Aj[3,3]),
+               pval2[2]<preplanAj[3,3])#,BJ[3]*preplan@Aj[3,3]/(preplan@Aj[3,2]+preplan@Aj[3,3]),preplan@BJ[6]>1)
     #H12
-    dec12<-max(pval2[1]<preplan@BJ[6])
+    dec12<-max(pval2[1]<preplanAj[6,4])
     #H13
-    dec13<-max(pval2[2]<preplan@BJ[5])
+    dec13<-max(pval2[2]<preplanAj[5,4])
     
     #H2
-    dec2<-min(pval2[1]<preplan@BJ[2],dec123,dec23,dec12)
+    dec2<-min(pval2[1]<preplanAj[2,4],dec123,dec23,dec12)
     #H3
-    dec3<-min(pval2[2]<preplan@BJ[1],dec123,dec23,dec13)
-    #
+    dec3<-min(pval2[2]<preplanAj[1,4],dec123,dec23,dec13)
     
     
     stage2_arms <- c(0,1,1)
@@ -462,14 +475,14 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     
     
     if (test=="l"){
-      mod2 <- lm(y_12m~treat+y_0m, db_stage2) 
-      res2 <- summary(mod2)
-      pval2 <- pt(coef(res2)[2,3], mod2$df, lower.tail = side)
-    }
-    
-
-    if (test=="t"){
-      pval2 <- t.test(db_stage2$diff12_0~db_stage2$treat,alternative="greater")$p.value
+      sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
+      sub1$pos<-sub1$y_12m>0
+      plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
+      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      res<-summary(mod)
+      plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+      plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
+      pval2<-plow
     }
     
     if (test=="w"){
@@ -481,14 +494,12 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       conc2<-c(NA,NA,wilcox.test(db_stage2$y_12m~db_stage2$treat,alternative="greater")$statistic/(N2/2*N2/2))
     }
     
-    
-    dec123<-max(pval2[1]<preplan@BJ[7],preplan@BJ[7]>1)
-    #H12
-    dec13<-max(pval2[1]<preplan@BJ[5])
-    dec23<-max(pval2[1]<preplan@BJ[3])
-    #H1
-    dec3<-min(pval2[1]<preplan@BJ[1],dec123,dec13,dec23)
 
+    dec123<-max(pval2[1]<preplanAj[7,4],preplanAj[7,4]>1)
+    dec13<-max(pval2[1]<preplanAj[5,4])
+    dec23<-max(pval2[1]<preplanAj[3,4])
+    dec3<-min(pval2[1]<preplanAj[1,4],dec123,dec13,dec23)
+    
     stage2_arms <- c(0,0,1)
     simdec_output <- c(0,0,dec3)
     
@@ -612,31 +623,38 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
   if (test=="l")
   {
-  mod_ma1a <- aov(y_12m ~ treat+y_0m, db_stage_ma1a)
-  model_dunnett_ma1a = summary(glht(model = mod_ma1a, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnett_ma1a = model_dunnett_ma1a$test$pvalues
+  sub1 <- subset(db_stage_ma1a,(db_stage_ma1a$treat %in% levels(treat)[1:2]))  
+  sub1$pos<-sub1$y_12m>0
+  plow1ma1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+  mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+  res<-summary(mod)
+  plow2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+  plowma1<-min(p.adjust(c(plow1ma1,plow2ma1),"bonferroni")) 
   
-  #part2
-  mod_ma1b <- aov(y_12m ~ treat+y_0m, db_stage_ma1b)
-  model_dunnett_ma1b = summary(glht(model = mod_ma1b, linfct=mcp(treat="Dunnett"), alternative = "less"))
-  pval_dunnett_ma1b = model_dunnett_ma1b$test$pvalues
+  sub1 <- subset(db_stage_ma1a,(db_stage_ma1a$treat %in% levels(treat)[c(1,3)]))  
+  sub1$pos<-sub1$y_12m>0
+  pmed1ma1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+  mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+  res<-summary(mod)
+  pmed2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+  pmedma1<-min(p.adjust(c(pmed1ma1,pmed2ma1),"bonferroni")) 
   
-  decision_ma1<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(pval_dunnett_ma1b<=(alpha/3))*1)
+  pvalma1a<-cbind(plowma1,pmedma1)
   
-  decision_ma1a<-c((pval_dunnett_ma1a<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((pval_dunnett_ma1b<=(alpha/3))*1))
+  #Second part of model; 
+  sub2 <- subset(db_stage_ma1b)
+  sub2$pos<-sub2$y_12m>0
+  phi1ma1<-pnorm(summary(glm(pos ~ treat, data = sub2, family = binomial))$coefficients[2,3])
+  mod<-lm(log(y_12m) ~ treat, data = sub2, subset = (y_6m > 0))
+  res<-summary(mod)
+  phi2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+  pma1hi<-min(p.adjust(c(phi1ma1,phi2ma1),"bonferroni")) 
+  
+  decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
+  decision_ma1a<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((p.adjust(pma1hi,"holm")<=(alpha/3))*1))
+  
   }
   
-  if (test=="t"){
-    pma1loa<-t.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
-    pma1mea<-t.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Low"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Low"],alternative="greater")$p.value
-    pvalma1a<-cbind(pma1loa,pma1mea)
-    
-    pma1hi<-t.test(db_stage_ma1b$diff12_0~db_stage_ma1b$treat,alternative="greater")$p.value
-    decision_ma1<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(p.adjust(pma1hi,"holm")<=(alpha/3))*1)
-    
-    decision_ma1a<-c((p.adjust(pvalma1a,"holm")<=(alpha/3*2))*1,(1-max(decision_ma1[1:2]))*((p.adjust(pma1hi,"holm")<=(alpha/3))*1))
-    
-  }
   
   if (test=="w"){
     pma1loa<-wilcox.test(db_stage_ma1a$diff12_0[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
@@ -650,7 +668,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   }
   
   
-  if (test=="w1"){
+  if (test=="w1" || test=="j"){
     pma1loa<-wilcox.test(db_stage_ma1a$y_12m[db_stage_ma1a$treat!="Medium"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Medium"],alternative="greater")$p.value
     pma1mea<-wilcox.test(db_stage_ma1a$y_12m[db_stage_ma1a$treat!="Low"]~db_stage_ma1a$treat[db_stage_ma1a$treat!="Low"],alternative="greater")$p.value
     pvalma1a<-cbind(pma1loa,pma1mea)
@@ -680,21 +698,32 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   db_stage_ma2$diff12_0<-db_stage_ma2$y_12m-db_stage_ma2$y_0m
   
   if (test=="l"){
-    mod_ma2 <- aov(y_12m ~ treat+y_0m, db_stage_ma2)
-    model_dunnett_ma2 = summary(glht(model = mod_ma2, linfct=mcp(treat="Dunnett"), alternative = "less"))
-    pval_dunnett_ma2 = model_dunnett_ma2$test$pvalues
-  
-    decision_ma2<-(pval_dunnett_ma2<=alpha)*1
-  }
-  
-  if (test=="t"){
-    pma1loa<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("Low","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Low","Placebo")],alternative="greater")$p.value
-    pma1mea<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat%in% c("Medium","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("Medium","Placebo")],alternative="greater")$p.value
-    pma1hia<-t.test(db_stage_ma2$diff12_0[db_stage_ma2$treat %in% c("High","Placebo")]~db_stage_ma2$treat[db_stage_ma2$treat %in% c("High","Placebo")],alternative="greater")$p.value
-                                                                                                                                                                                                    
-    pvalma1a<-cbind(pma1loa,pma1mea)
-    pvalma1a
-    decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
+    sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("Low","Placebo")))  
+    sub1$pos<-sub1$y_12m>0
+    plow1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    res<-summary(mod)
+    plow2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+    pma1loa<-min(p.adjust(c(plow1ma2,plow2ma2),"bonferroni")) 
+    
+    sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("Medium","Placebo")))  
+    sub1$pos<-sub1$y_12m>0
+    pmed1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    res<-summary(mod)
+    pmed2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+    pma1mea<-min(p.adjust(c(pmed1ma2,pmed2ma2),"bonferroni")) 
+   
+    sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("High","Placebo")))  
+    sub1$pos<-sub1$y_12m>0
+    phi1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
+    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    res<-summary(mod)
+    phi2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
+    pma1hia<-min(p.adjust(c(phi1ma2,phi2ma2),"bonferroni")) 
+    
+       decision_ma2<-(p.adjust(c(pma1loa,pma1mea,pma1hia),"holm")<alpha)*1
+    
   }
   
   if (test=="w"){
@@ -742,4 +771,4 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   
 }
 
-
+#sim_trial_pceind_test(n_arms = 4,N1 = 120 , N2 = 80, mu_0m = mu_0m,   mu_6m = mu_6m, mu_12m = mu_12m,  sg = sg,  alpha1 = .1, alpha = .025,sel_scen=0, side=T,test="w1",dropout=.1,rr=rep(0,4),bound=0)

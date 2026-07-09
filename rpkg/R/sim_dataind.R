@@ -17,16 +17,27 @@
 #' @author Marta Bofill Roig, Sonja Zehetmayer
 
 
-sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rr,bound){
 
+
+sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rr,bound){
+  
   
   treatments <- factor(c(sample(rep(1:n_arms, floor(N/n_arms))), sample(1:n_arms, N-floor(N/n_arms)*n_arms, replace=T)),
-                      # sample(1:n_arms, N, replace = TRUE),
+                       # sample(1:n_arms, N, replace = TRUE),
                        levels = 1:n_arms,
                        labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
   X <- model.matrix(~ treatments - 1)
   y <- X %*% matrix(c(mu_0m, mu_6m, mu_12m), nrow=n_arms, byrow = F) + rmvnorm(n=N, mean = c(0,0,0), sigma = sg )
-
+  
+  #bivariate normal distribution for decision of zero-inflation
+  #can be changed to have correlation for zeros;
+  #Z <- rmvnorm( n = N,    mean = c(0, 0),    sigma = matrix(c(1, sg[1,2], sg[1,2], 1), 2, 2)   )
+  
+  #zero_thresh<-qnorm(rr[1:n_arms])
+  #I6  <- Z[, 1] < zero_thresh[treat]
+  #I12 <- Z[, 2] < zero_thresh[treat]
+  
+  
   
   
   # Treatment indicator for dataframe
@@ -41,11 +52,13 @@ sim_dataind <- function(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rr,bound){
   y[,1]<-pmax(bound,y[,1])
   y[,2]<-pmax(bound,y[,2])
   y[,3]<-pmax(bound,y[,3])
-
+  
   treat = factor(treat, levels = 1:n_arms,
-               labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
-
+                 labels = c("Placebo", "Low", "Medium", "High")[1:n_arms])
+  
   data = data.frame(y_0m=y[,1],y_6m=y[,2], y_12m=y[,3], treat=treat)
-
+  
   return(data)
 }
+
+#o1<-sim_dataind (n_arms = 4, N=120,  mu_0m=c(0,0,0,0), mu_6m=c(1,1,1,1), mu_12m=c(1,2,3,4), sg=matrix(c(1,0,0,0,1,0,0,0,1),3), rr=c(0,0.3,0.5,0.7),bound=-3)
