@@ -1,6 +1,6 @@
 #The following codes generates simulations for the eWHORM trial for onchocerciasis, mansonellosis, and loiasis for simulations S1-S5 as described in the manuscript.
 #Plots and tables can be found in function R_Sims_Paper_Bias_showresults.R
-
+#Simulates methods hurdle, wilcox und wilcox cc; 
 
 #define baseline-parameters for onchocerciasis, mansonellosis, loiasis.
 scen.d<-data.frame(disease=c("onchocerciasis","mansonellosis","loiasis"),mu_raw_0=c(19,1838,5000), sd_raw_0=c(30,2565,4000),bound=c(-2.05,0,0))
@@ -24,10 +24,10 @@ scen.eII<-data.frame(r0_6=c(0,0,0,0,0,0,0,0),
                      r1_6=c(0,0,0,0,0,0,.3,0.4),
                      r2_6=c(0,0,0,.1,.2,.3,.3,.4),
                      r3_6=c(0,.4,.5,.4,.4,.4,.3,.4),
-                    r0_12=c(0,0,0,0,0,0,0,0),
-                    r1_12=c(0,0,0,0,0,0,.5,0.6),
-                    r2_12=c(0,0,0,.3,.4,.5,.5,.6),
-                    r3_12=c(0,.6,.7,.6,.6,.6,.5,.6))
+                     r0_12=c(0,0,0,0,0,0,0,0),
+                     r1_12=c(0,0,0,0,0,0,.5,0.6),
+                     r2_12=c(0,0,0,.3,.4,.5,.5,.6),
+                     r3_12=c(0,.6,.7,.6,.6,.6,.5,.6))
 
 scen.eII<-scen.eII[c(-3,-4,-8),]
 
@@ -51,23 +51,23 @@ simulation.scenario<-function(d,i,n_trials,j,t,l,k,scen)
   N2<-200-N1.v[k]
   set.seed(2412)
   
-    res<-mapply(simul_res,scen.d$mu_raw_0[d], scen.d$sd_raw_0[d] , scen.e$r0_6[i],scen.e$r1_6[i],scen.e$r2_6[i],scen.e$r3_6[i], scen.e$r0_12[i],
-                                            scen.e$r1_12[i],scen.e$r2_12[i],scen.e$r3_12[i],  rho.v[l] ,
-                                            n_trials,4,N1.v[k] , N2, alpha1.v[j] , alpha,
-                                            sel_scen, side1,test.v[t],dropout,
-                                            f.rr(scen.e$r0_12[i]),f.rr(scen.e$r1_12[i]),f.rr(scen.e$r2_12[i]),f.rr(scen.e$r3_12[i]),scen.d$bound[d])
+  res<-mapply(simul_res,scen.d$mu_raw_0[d], scen.d$sd_raw_0[d] , scen.e$r0_6[i],scen.e$r1_6[i],scen.e$r2_6[i],scen.e$r3_6[i], scen.e$r0_12[i],
+              scen.e$r1_12[i],scen.e$r2_12[i],scen.e$r3_12[i],  rho.v[l] ,
+              n_trials,4,N1.v[k] , N2, alpha1.v[j] , alpha,
+              sel_scen, side1,test.v[t],dropout,
+              f.rr(scen.e$r0_12[i]),f.rr(scen.e$r1_12[i]),f.rr(scen.e$r2_12[i]),f.rr(scen.e$r3_12[i]),scen.d$bound[d])
   
-    unlist(c(d,i,scen.e[i,],alpha1.v[j],N1.v[k],rho.v[l],test.v[t],#round(
-             c(res[7],res[8],res[9],res[6],res[10],res[1],res[2],res[3],
-               res[c(19:22)],NA,res[(15:18)],NA,res[c(23:67)])#res[c(25:72)])#,2)*100
-             ))
+  unlist(c(d,i,scen.e[i,],alpha1.v[j],N1.v[k],rho.v[l],test.v[t],
+           c(res[7],res[8],res[9],res[6],res[10],res[1],res[2],res[3],
+             res[c(19:22)],NA,res[(15:18)],NA,res[c(23:67)])
+  ))
 }
-  
+
 
 wrap<-function(d,scen,n_trials=50000)
 {
-  d.1<-matrix(nrow=75,ncol=(77))#17+15+6+4+1+10+12+3+3+3+6))#(#))
-
+  d.1<-matrix(nrow=75,ncol=(77))
+  
   h<-0
   
   for (i in 1:(dim(scen)[1]))
@@ -75,12 +75,12 @@ wrap<-function(d,scen,n_trials=50000)
       for (k in 1:length(N1.v))
         for(l in 1:length(rho.v))
           for (t in 1:length(test.v))
-        {
-        h<-h+1
-        print(h)
-        d.1[h,]<-simulation.scenario(d,i,n_trials,j,t,l,k,scen)
-        }
-        
+          {
+            h<-h+1
+            print(h)
+            d.1[h,]<-simulation.scenario(d,i,n_trials,j,t,l,k,scen)
+          }
+  
   d.1<-as.data.frame(d.1)
   names(d.1)<-c("disease","scenario","r0_6","r1_6","r2_6","r3_6","r0_12","r1_12","r2_12","r3_12","alpha1","N1","rho","test",
                 "Pow.Low","Pow.Me","Pow.Hi","Pow.cond",
@@ -104,7 +104,13 @@ wrap<-function(d,scen,n_trials=50000)
 alpha1.v<-seq(0.1,0.5,.1)
 N1.v<-120
 rho.v<-.5
-test.v<-c(0,3,4)
+
+
+
+###################################
+
+test.v<-c(0,3,4) #Simulates methods hurdle, wilcox und wilcox cc; 
+
 
 
 #S1
@@ -129,9 +135,9 @@ w1II<-wrap(1,scen.eII) #disease 1
 w2II<-wrap(2,scen.eII) #disease 2
 w3II<-wrap(3,scen.eII) #disease 3
 
-save(w1I,file="w1II.RData")
-save(w2I,file="w2II.RData")
-save(w3I,file="w3II.RData")
+save(w1II,file="w1II.RData")
+save(w2II,file="w2II.RData")
+save(w3II,file="w3II.RData")
 load("w1II.RData")
 load("w2II.RData")
 load("w3II.RData")
@@ -197,4 +203,3 @@ load("w3I.worst.RData")
 
 #####Simulation End
 ##############################################################################################
-
