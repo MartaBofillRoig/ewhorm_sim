@@ -645,7 +645,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   sub2 <- subset(db_stage_ma1b)
   sub2$pos<-sub2$y_12m>0
   phi1ma1<-pnorm(summary(glm(pos ~ treat, data = sub2, family = binomial))$coefficients[2,3])
-  mod<-lm(log(y_12m) ~ treat, data = sub2, subset = (y_6m > 0))
+  mod<-lm(log(y_12m) ~ treat, data = sub2, subset = (y_12m > 0))
   res<-summary(mod)
   phi2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
   pma1hi<-min(p.adjust(c(phi1ma1,phi2ma1),"bonferroni")) 
