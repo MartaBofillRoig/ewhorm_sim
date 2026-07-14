@@ -58,7 +58,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   sub1 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[1:2]))  
   sub1$pos<-sub1$y_6m>0
   plow1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-  mod<-lm(log(y_6m) ~ treat, data = sub1, subset = (y_6m > 0))
+  mod<-lm(y_6m ~ treat, data = sub1, subset = (y_6m > 0))
   res<-summary(mod)
   plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
   plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) #Bonferroni adjusted p-values for low dose for selection
@@ -118,7 +118,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     sub1 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[1:2]))  
     sub1$pos<-sub1$y_12m>0
     plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-    mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+    mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
     res<-summary(mod)
     plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
     p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) #Bonferroni adjusted p-values for selection
@@ -126,7 +126,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     sub2 <- subset(db_stage1,(db_stage1$treat %in% levels(treat)[c(1,3)]))
     sub2$pos<-sub2$y_12m>0
     pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
-    mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+    mod<-lm(y_12m ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
     res<-summary(mod)
     pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
     p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
@@ -199,7 +199,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
       sub1$pos<-sub1$y_12m>0
       plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
       res<-summary(mod)
       plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
       p12low<-min(p.adjust(c(plow1,plow2),"bonferroni"))
@@ -207,7 +207,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
       sub2$pos<-sub2$y_12m>0
       pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
-      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+      mod<-lm(y_12m ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
       res<-summary(mod)
       pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
       p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
@@ -280,7 +280,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         sub1 <- subset(db_stage2)
         sub1$pos<-sub1$y_12m>0
         plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+        mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
         res<-summary(mod)
         plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
         plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
@@ -327,7 +327,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
         sub1$pos<-sub1$y_12m>0
         plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+        mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
         res<-summary(mod)
         plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
         p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
@@ -335,7 +335,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
         sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
         sub2$pos<-sub2$y_12m>0
         pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
-        mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+        mod<-lm(y_12m ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
         res<-summary(mod)
         pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
         p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
@@ -405,7 +405,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
       sub1$pos<-sub1$y_12m>0
       plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
       res<-summary(mod)
       plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
       p12low<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
@@ -413,7 +413,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       sub2 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[c(1,3)]))
       sub2$pos<-sub2$y_12m>0
       pmed1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub2, family = binomial))$coefficients[2,3])
-      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
+      mod<-lm(y_12m ~ treat+y_0m, data = sub2, subset = (y_12m > 0))
       res<-summary(mod)
       pmed2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
       p12med<-min(p.adjust(c(pmed1,pmed2),"bonferroni")) 
@@ -478,7 +478,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
       sub1 <- subset(db_stage2,(db_stage2$treat %in% levels(treat)[1:2]))  
       sub1$pos<-sub1$y_12m>0
       plow1<-pnorm(summary(glm(pos ~ treat+y_0m, data = sub1, family = binomial))$coefficients[2,3])
-      mod<-lm(log(y_12m) ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
+      mod<-lm(y_12m ~ treat+y_0m, data = sub1, subset = (y_12m > 0))
       res<-summary(mod)
       plow2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
       plow<-min(p.adjust(c(plow1,plow2),"bonferroni")) 
@@ -626,7 +626,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   sub1 <- subset(db_stage_ma1a,(db_stage_ma1a$treat %in% levels(treat)[1:2]))  
   sub1$pos<-sub1$y_12m>0
   plow1ma1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-  mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+  mod<-lm(y_12m ~ treat, data = sub1, subset = (y_12m>0))
   res<-summary(mod)
   plow2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
   plowma1<-min(p.adjust(c(plow1ma1,plow2ma1),"bonferroni")) 
@@ -634,7 +634,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   sub1 <- subset(db_stage_ma1a,(db_stage_ma1a$treat %in% levels(treat)[c(1,3)]))  
   sub1$pos<-sub1$y_12m>0
   pmed1ma1<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-  mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+  mod<-lm(y_12m ~ treat, data = sub1, subset = (y_12m>0))
   res<-summary(mod)
   pmed2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
   pmedma1<-min(p.adjust(c(pmed1ma1,pmed2ma1),"bonferroni")) 
@@ -645,7 +645,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
   sub2 <- subset(db_stage_ma1b)
   sub2$pos<-sub2$y_12m>0
   phi1ma1<-pnorm(summary(glm(pos ~ treat, data = sub2, family = binomial))$coefficients[2,3])
-  mod<-lm(log(y_12m) ~ treat, data = sub2, subset = (y_12m > 0))
+  mod<-lm(y_12m ~ treat, data = sub2, subset = (y_12m > 0))
   res<-summary(mod)
   phi2ma1<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
   pma1hi<-min(p.adjust(c(phi1ma1,phi2ma1),"bonferroni")) 
@@ -701,7 +701,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("Low","Placebo")))  
     sub1$pos<-sub1$y_12m>0
     plow1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    mod<-lm(y_12m ~ treat, data = sub1, subset = (y_12m>0))
     res<-summary(mod)
     plow2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
     pma1loa<-min(p.adjust(c(plow1ma2,plow2ma2),"bonferroni")) 
@@ -709,7 +709,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("Medium","Placebo")))  
     sub1$pos<-sub1$y_12m>0
     pmed1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    mod<-lm(y_12m ~ treat, data = sub1, subset = (y_12m>0))
     res<-summary(mod)
     pmed2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
     pma1mea<-min(p.adjust(c(pmed1ma2,pmed2ma2),"bonferroni")) 
@@ -717,7 +717,7 @@ sim_trial_pceind_test <- function(n_arms = 4, N1 , N2, mu_0m, mu_6m, mu_12m, sg,
     sub1 <- subset(db_stage_ma2,(db_stage_ma2$treat %in% c("High","Placebo")))  
     sub1$pos<-sub1$y_12m>0
     phi1ma2<-pnorm(summary(glm(pos ~ treat, data = sub1, family = binomial))$coefficients[2,3])
-    mod<-lm(log(y_12m) ~ treat, data = sub1, subset = (y_12m>0))
+    mod<-lm(y_12m ~ treat, data = sub1, subset = (y_12m>0))
     res<-summary(mod)
     phi2ma2<-pt(coef(res)[, 3], mod$df, lower = TRUE)[2]
     pma1hia<-min(p.adjust(c(phi1ma2,phi2ma2),"bonferroni")) 

@@ -1,5 +1,5 @@
 #' Simulate individual data from a multi-arm trial with shared control
-#' @description Function to simulate trial data (1-stage, multiple arms)
+#' @description Function to simulate trial data (1-stage, multiple arms) - normally distributed data on log scale;
 #'
 #' @param n_arms number of arms (including control)
 #' @param N total sample size
