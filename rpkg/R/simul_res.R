@@ -20,7 +20,7 @@
 #' @param alpha significance level for selected dose vs control comparison
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param side1 TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
-#' @param test1 defines type of analysis: "t" calculates a t-test, "l" a hurdle model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
+#' @param test1 defines type of analysis: "l" a hurdle model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
 #' @param dropout dropoutrate with values between 0 and 1
 #' @param rr0 total responder rate for control dose, which gives the proportion of patients with value 0 at follow-up
 #' @param rr1 total responder rate for low dose, which gives the proportion of patients with value 0 at follow-up

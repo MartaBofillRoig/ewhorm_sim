@@ -13,9 +13,9 @@
 #' @param alpha significance level for selected dose vs control comparison
 #' @param sel_scen choose between two different options in case that in interim analysis low dose is promising, but median dose not: 0: do not continue with low dose or median dose; 1: continue with low and median doses
 #' @param side TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)
-#' @param test defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
+#' @param test defines type of analysis: "l" a hurdle model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values
 #' @param dropout dropoutrate, between 0 and 1
-#' @param rr responder rate for each dose (vector of length `n_arm`), which gives the proportion of patients with value 0 at follow-up
+#' @param rr responder rate for each dose (vector of length n_arm), which gives the proportion of patients with value 0 at follow-up
 #' @param bound lower bound to define total responder in simulation study
 #' @keywords internal
 #' @returns A vector consisting of summary measures for data simulation with n_trials repetitions: frequency selected for stage 2, conditional power, power, disunctive power, power of MA1, power of MA2, power of ma1a, concordances
