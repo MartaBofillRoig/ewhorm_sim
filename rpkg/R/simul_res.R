@@ -33,8 +33,7 @@
 #' @import dplyr
 #' @import tidyr
 #' @import future
-#' @import furrr
-#' @import gMCP
+#' @import furrr 
 #' @import mvtnorm
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig, Sonja Zehetmayer

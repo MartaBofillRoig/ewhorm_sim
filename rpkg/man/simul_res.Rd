@@ -72,7 +72,7 @@ simul_res(
 
 \item{side1}{TRUE/FALSE referring to the side for 1-side testing (if TRUE then lower = side)}
 
-\item{test1}{defines type of analysis: "t" calculates a t-test, "l" a linear model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values}
+\item{test1}{defines type of analysis: "l" a hurdle model with baseline values as covariables, "w" Wilcoxon test of differences, and "w1" Wilcoxon test of follow-up values}
 
 \item{dropout}{dropoutrate with values between 0 and 1}
 

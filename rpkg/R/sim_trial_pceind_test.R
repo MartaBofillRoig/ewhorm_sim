@@ -33,9 +33,9 @@
 #' @importFrom stats wilcox.test
 #' @importFrom stats p.adjust
 #' @importFrom multcomp glht
-#' @importFrom multcomp mcp
-#' @importFrom gMCP doInterim
-#' @importFrom gMCP BonferroniHolm
+#' @importFrom multcomp mcp 
+#' @importFrom stats binomial
+#' @importFrom stats glm
 #' @export
 #' @details eWHORM simulations
 #' @author Marta Bofill Roig, Sonja Zehetmayer

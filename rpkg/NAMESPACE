@@ -3,10 +3,12 @@
 export(CI2_help)
 export(CI_help)
 export(CIinvn_help)
+export(doInterim_holm_closed_m3)
 export(do_pce_baseline)
 export(get_hyp_mat)
 export(get_max_col_index)
 export(get_mu_sigma)
+export(pcer_bonf_k)
 export(sim_dataind)
 export(sim_trial_pceind_test)
 export(simul_res)
@@ -14,27 +16,30 @@ export(var2)
 import(dplyr)
 import(furrr)
 import(future)
-import(gMCP)
 import(mvtnorm)
 import(tidyr)
-importFrom(gMCP,BonferroniHolm)
-importFrom(gMCP,doInterim)
 importFrom(gtools,combinations)
-importFrom(multcomp,glht)
-importFrom(multcomp,mcp)
+importFrom(multcomp,
+  glht,
+  mcp
+)
 importFrom(mvtnorm,rmvnorm)
-importFrom(stats,aov)
-importFrom(stats,coef)
-importFrom(stats,lm)
-importFrom(stats,model.matrix)
-importFrom(stats,p.adjust)
-importFrom(stats,pnorm)
-importFrom(stats,pt)
-importFrom(stats,qnorm)
-importFrom(stats,rbinom)
-importFrom(stats,relevel)
-importFrom(stats,runif)
-importFrom(stats,sd)
-importFrom(stats,t.test)
-importFrom(stats,uniroot)
-importFrom(stats,wilcox.test)
+importFrom(stats,
+  aov,
+  binomial,
+  coef,
+  glm,
+  lm,
+  model.matrix,
+  p.adjust,
+  pnorm,
+  pt,
+  qnorm,
+  rbinom,
+  relevel,
+  runif,
+  sd,
+  t.test,
+  uniroot,
+  wilcox.test
+)

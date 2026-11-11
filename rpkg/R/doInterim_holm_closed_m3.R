@@ -4,7 +4,8 @@
 #' @param z1 A numeric vector giving first stage z-values computed from first stage p-values.
 #' @param v A numeric vector giving the proportions of pre-planned measurements collected up to the interim analysis.
 #' @param alpha significance level
-#' @export A1 matrix of pCERs and CER  for intersections {1},{2},{3},{12},{13},{23},{123}; same as with gMCP doInterim;
+#' @return A1 matrix of pCERs and CER  for intersections {1},{2},{3},{12},{13},{23},{123}; same as with gMCP doInterim;
+#' @export 
 #' @details eWHORM simulations
 #' @author Sonja Zehetmayer
 #' 

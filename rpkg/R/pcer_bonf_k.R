@@ -3,6 +3,7 @@
 #'
 #' @param z1 A numeric vector giving first stage z-values computed from first stage p-values.
 #' @param v A numeric vector giving the proportions of pre-planned measurements collected up to the interim analysis.
+#' @param k is the size of the intersection hypothesis
 #' @param alpha significance level
 #' @export
 #' @details eWHORM simulations

@@ -25,7 +25,7 @@ sim_dataind(n_arms, N, mu_0m, mu_6m, mu_12m, sg, rr, bound)
 simulated data consisting of the responses at 6 and 12 months, treatment arm, for each subject.
 }
 \description{
-Function to simulate trial data (1-stage, multiple arms)
+Function to simulate trial data (1-stage, multiple arms) - normally distributed data on log scale;
 }
 \details{
 eWHORM simulations

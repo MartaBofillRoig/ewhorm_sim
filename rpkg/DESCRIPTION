@@ -1,6 +1,6 @@
 Package: ewhorm
 Title: Statistical Considerations for Designing e-WHORM Adaptive Trial
-Version: 1.1
+Version: 1.2
 Author: Marta Bofill Roig [aut, cre] (<https://orcid.org/0000-0002-4400-7541>), Martin Posch [aut], Sonja Zehetmayer [aut]
 Maintainer: Marta Bofill Roig <marta.bofill.roig@upc.edu>
 Authors@R: 
@@ -14,12 +14,11 @@ Encoding: UTF-8
 Imports: 
   mvtnorm,
   stats, 
-  multcomp,
-  gMCP,
+  multcomp, 
   gtools,
   dplyr,
   tidyr,
   future,
   furrr
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
+Config/roxygen2/version: 8.1.1
